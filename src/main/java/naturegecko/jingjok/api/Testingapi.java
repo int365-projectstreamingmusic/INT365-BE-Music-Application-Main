@@ -34,7 +34,7 @@ public class Testingapi {
 
 	@GetMapping("")
 	public String test() {
-		return NameGeneratorUtill.generateImageName() + "\n\n\n\n" + NameGeneratorUtill.generateUserUUID();
+		return NameGeneratorUtill.generateImageName();
 	}
 	
 	@PostMapping("")

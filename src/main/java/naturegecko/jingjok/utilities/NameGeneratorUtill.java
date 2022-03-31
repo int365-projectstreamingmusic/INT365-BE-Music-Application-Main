@@ -25,6 +25,11 @@ public class NameGeneratorUtill {
 		return dateTimeGatherer() + generateString(18);
 	}
 
+	// Generate Unique ID for playlist.
+	public static String generatePlaylistUUID() {
+		return dateTimeGatherer() + generateString(9);
+	}
+
 	private static String generateString(int textLength) {
 		Random randomString = new Random();
 		StringBuilder buffer = new StringBuilder(textLength);
