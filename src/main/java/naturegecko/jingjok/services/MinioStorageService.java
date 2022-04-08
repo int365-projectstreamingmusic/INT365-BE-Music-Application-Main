@@ -81,7 +81,7 @@ public class MinioStorageService {
 				return stream;
 			} catch (Exception ecc) {
 				throw new ExceptionFoundation(EXCEPTION_CODES.CORE_METHOD_FAILED,
-						"[ ERROR ] Method \'Ping Bucker\' failed. \n Reason : " + ecc.getMessage());
+						"[ ERROR ] Method \'Ping Bucket\' failed. \n Reason : " + ecc.getMessage());
 			}
 		} else {
 			throw new ExceptionFoundation(EXCEPTION_CODES.CORE_MINIO_NOT_FOUND,

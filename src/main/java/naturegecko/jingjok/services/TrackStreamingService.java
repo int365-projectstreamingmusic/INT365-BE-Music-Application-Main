@@ -6,6 +6,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.InputStreamResource;
+import org.springframework.core.io.Resource;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -25,13 +27,20 @@ public class TrackStreamingService {
 	@Autowired
 	private MinioStorageService minioStorageService;
 	
+	@GetMapping(value = "/music", produces = { MediaType.APPLICATION_OCTET_STREAM_VALUE })
+	public ResponseEntity<?> getMusic(HttpServletRequest request, HttpServletResponse response){
+		Resource inputStreamResource = new InputStreamResource(
+				minioStorageService.trackRetrivelService("testingsite/HEYYEYAAEYAAAEYAEYAA.mp3"));
+		return ResponseEntity.ok().body(inputStreamResource);
+	}
+	
 	
 	@GetMapping(value = "/lelel", produces = { MediaType.APPLICATION_OCTET_STREAM_VALUE })
 	@SneakyThrows
-	public InputStream playAutio(HttpServletRequest request, HttpServletResponse response) {
-		InputStream GetMusic = minioStorageService.trackRetrivelService("testingsite/testmusic112.mp3");
-		GetMusic.close();
-		return GetMusic;
+	public Resource playAutio(HttpServletRequest request, HttpServletResponse response) {
+		InputStream getTrack = minioStorageService.trackRetrivelService("testingsite/HEYYEYAAEYAAAEYAEYAA.mp3");
+		Resource sendThis = new InputStreamResource(getTrack);
+		return sendThis;
 	}
 
 	/*
