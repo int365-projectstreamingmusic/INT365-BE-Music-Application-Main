@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -20,9 +21,11 @@ import naturegecko.jingjok.configurations.EnumConfig;
 import naturegecko.jingjok.exceptions.ExceptionFoundation;
 import naturegecko.jingjok.exceptions.ExceptionResponseModel.EXCEPTION_CODES;
 import naturegecko.jingjok.services.MinioStorageService;
+import naturegecko.jingjok.services.TrackStreamingService;
 import naturegecko.jingjok.utilities.FIleExtentionCheckerUtill;
 import naturegecko.jingjok.utilities.ImageCompressionUtill;
 import naturegecko.jingjok.utilities.NameGeneratorUtill;
+import reactor.core.publisher.Mono;
 
 @RestController
 @RequestMapping("")
@@ -31,12 +34,21 @@ public class Testingapi {
 
 	@Autowired
 	private final MinioStorageService minioUtil;
+	@Autowired
+	private final TrackStreamingService trackStreamingService;
+
+	@GetMapping("/ctt")
+	public String testGetpartialContent(
+			@RequestHeader(value = "Content-Range", required = false) String contentRange) {
+		// bytes 15794176-72517964/72517965
+		return "The พ้าว : " + contentRange;
+	}
 
 	@GetMapping("")
 	public String test() {
 		return NameGeneratorUtill.generateImageName();
 	}
-	
+
 	@PostMapping("")
 	public String tetserser(MultipartFile file) {
 		return file.getContentType();
@@ -56,8 +68,9 @@ public class Testingapi {
 	@PostMapping("/u")
 	@SneakyThrows
 	public ResponseEntity<String> uploadBufferToMinio(MultipartFile file) {
-		if(!FIleExtentionCheckerUtill.fileMatchValidImage(file)) {
-			throw new ExceptionFoundation(EXCEPTION_CODES.SAVE_FILE_INVALID, "[ REJECTED ] Only accept PNG , GIF , and JPG");
+		if (!FIleExtentionCheckerUtill.fileMatchValidImage(file)) {
+			throw new ExceptionFoundation(EXCEPTION_CODES.SAVE_FILE_INVALID,
+					"[ REJECTED ] Only accept PNG , GIF , and JPG");
 		}
 		InputStream imgg = ImageCompressionUtill.imageResize(file,
 				EnumConfig.IMAGE_PROFILE_CODE.USER_PROFILE.getProfileWidth());

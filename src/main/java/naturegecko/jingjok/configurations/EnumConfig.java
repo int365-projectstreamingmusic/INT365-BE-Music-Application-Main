@@ -3,6 +3,8 @@ package naturegecko.jingjok.configurations;
 public class EnumConfig {
 
 	public enum MINIO_DIRECTORY {
+		
+		BUCKET("playmylist"),
 
 		USER_PROFILES("images/user_profiles/"), // User profiles will be kept in this directory.
 		USER_BACKGROUNDS("images/user_backgrounds/"), // When users have an abilities to change their cover profile.

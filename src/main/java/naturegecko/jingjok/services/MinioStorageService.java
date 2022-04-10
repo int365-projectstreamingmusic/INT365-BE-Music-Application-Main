@@ -3,10 +3,17 @@ package naturegecko.jingjok.services;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpRequest;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -68,16 +75,22 @@ public class MinioStorageService {
 	}
 
 	// Track retrieval.
-	public InputStream trackRetrivelService(String trackName) {
+	public InputStream trackRetrivelService(String trackName, String requestRange, HttpServletRequest request,
+			HttpServletResponse response) {
 		if (!pingBucket(bucketname)) {
-			throw new ExceptionFoundation(EXCEPTION_CODES.CORE_METHOD_FAILED,
+			throw new ExceptionFoundation(EXCEPTION_CODES.CORE_MINIO_NOT_FOUND,
 					"[ ERROR ] The bucket name " + bucketname + " is not reachable.");
 		}
 		StatObjectResponse statObject = getStatObject(bucketname, trackName);
 		if (statObject != null && statObject.size() > 0) {
+			Map<String, String> requestExtraHeader = new HashMap<String, String>();
+			requestExtraHeader.put("Range", requestRange);
 			try {
-				InputStream stream = minioClient
-						.getObject(GetObjectArgs.builder().bucket(bucketname).object(trackName).build());
+				InputStream stream = minioClient.getObject(GetObjectArgs.builder().bucket(bucketname)
+						.extraHeaders(requestExtraHeader).object(trackName).build());
+				response.addHeader("Content-Length", "72517965");
+				response.addHeader("Content-Range", "bytes 52396032-72517964/72517965");
+				response.addHeader("LEL", requestRange);
 				return stream;
 			} catch (Exception ecc) {
 				throw new ExceptionFoundation(EXCEPTION_CODES.CORE_METHOD_FAILED,
@@ -88,6 +101,30 @@ public class MinioStorageService {
 					"[ ERROR ] The track name " + trackName + " is not reachable.");
 		}
 	}
+
+	// Track retrieval by byte range.
+	public InputStream trackRetrivelByByteRangeService(String trackNameAndLocation, long start, long end) {
+		if (!pingBucket(bucketname)) {
+			throw new ExceptionFoundation(EXCEPTION_CODES.CORE_MINIO_NOT_FOUND,
+					"[ ERROR ] The bucket name " + bucketname + " is not reachable.");
+		}
+		StatObjectResponse statObject = getStatObject(bucketname, trackNameAndLocation);
+		if (statObject == null || statObject.size() <= 0) {
+			throw new ExceptionFoundation(EXCEPTION_CODES.CORE_MINIO_NOT_FOUND,
+					"[ ERROR ] The track name in location " + trackNameAndLocation + " is not reachable.");
+		}
+		Map<String, String> requestExtraHeader = new HashMap<String, String>();
+		requestExtraHeader.put("Range", "bytes=" + start + "-" + end);
+		try {
+			InputStream stream = minioClient
+					.getObject(GetObjectArgs.builder().bucket(bucketname).extraHeaders(requestExtraHeader).build());
+			return stream;
+		} catch (Exception ecc) {
+			throw new ExceptionFoundation(EXCEPTION_CODES.CORE_METHOD_FAILED,
+					"[ ERROR ] Method \'Ping Bucket\' failed. \n Reason : " + ecc.getMessage());
+		}
+	}
+
 	/*
 	 * 
 	 * 
