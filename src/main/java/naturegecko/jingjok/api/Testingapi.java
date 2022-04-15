@@ -4,9 +4,16 @@ import java.io.InputStream;
 import java.net.URI;
 import java.util.List;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.InputStreamResource;
+import org.springframework.core.io.Resource;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -21,7 +28,6 @@ import naturegecko.jingjok.configurations.EnumConfig;
 import naturegecko.jingjok.exceptions.ExceptionFoundation;
 import naturegecko.jingjok.exceptions.ExceptionResponseModel.EXCEPTION_CODES;
 import naturegecko.jingjok.services.MinioStorageService;
-import naturegecko.jingjok.services.TrackStreamingService;
 import naturegecko.jingjok.utilities.FIleExtentionCheckerUtill;
 import naturegecko.jingjok.utilities.ImageCompressionUtill;
 import naturegecko.jingjok.utilities.NameGeneratorUtill;
@@ -34,12 +40,21 @@ public class Testingapi {
 
 	@Autowired
 	private final MinioStorageService minioUtil;
-	@Autowired
-	private final TrackStreamingService trackStreamingService;
+
+	@GetMapping(value = "/testtest", produces = { MediaType.APPLICATION_OCTET_STREAM_VALUE })
+	@SneakyThrows
+	public Resource playAutio(@RequestHeader(value = "Range", required = false) String contentRange,
+			@RequestHeader(value = "If-Range", required = false) String ifRange, HttpServletRequest request,
+			HttpServletResponse response) {
+		System.out.println("/directFromSpringToMin | size : " + contentRange + " | " + ifRange);
+		InputStream getTrack = minioUtil.trackRetrivelByByteRangeService("testingsite/testmusic112.mp3", 0,
+				800000);
+		Resource sendThis = new InputStreamResource(getTrack);
+		return sendThis;
+	}
 
 	@GetMapping("/ctt")
-	public String testGetpartialContent(
-			@RequestHeader(value = "Content-Range", required = false) String contentRange) {
+	public String testGetpartialContent(@RequestHeader(value = "Content-Range", required = false) String contentRange) {
 		// bytes 15794176-72517964/72517965
 		return "The พ้าว : " + contentRange;
 	}

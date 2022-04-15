@@ -39,6 +39,7 @@ public class ExceptionResponseModel {
 		CORE_FILE_DUPLICATED(5003), // File duplicated.
 		CORE_COMPRESSION_FAILURE(5004),
 		CORE_MINIO_NOT_FOUND(5005),
+		CORE_NOT_IMPLEMENTED(5006),
 
 		// User application
 		SHOP_NOT_ON_STORE(6001), // Sorry! they don't want to sell this product!
