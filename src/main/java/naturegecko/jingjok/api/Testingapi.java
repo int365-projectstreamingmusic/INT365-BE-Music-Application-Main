@@ -2,7 +2,9 @@ package naturegecko.jingjok.api;
 
 import java.io.InputStream;
 import java.net.URI;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -40,6 +42,23 @@ public class Testingapi {
 
 	@Autowired
 	private final MinioStorageService minioUtil;
+	
+	@GetMapping("/first")
+	public ResponseEntity<Map<String,String>> testNameGeneration(){
+		String trackName = NameGeneratorUtill.generateTrackNameUUID();
+		String userName = NameGeneratorUtill.generateUserUUID();
+		String playlistUUID = NameGeneratorUtill.generatePlaylistUUID();
+		String imageName = NameGeneratorUtill.generateImageNameUUID();
+		
+		Map<String, String> result = new HashMap<String, String>();
+		result.put("Method", "testNameGeneration");
+		result.put("Track name generation", trackName + " | " + trackName.length());
+		result.put("UserID generation", userName + " | " + userName.length());
+		result.put("playlist generation", playlistUUID + " | " + playlistUUID.length());
+		result.put("image generation", imageName + " | " + imageName.length());
+		
+		return ResponseEntity.ok().body(result);
+	}
 
 	@GetMapping(value = "/testtest", produces = { MediaType.APPLICATION_OCTET_STREAM_VALUE })
 	@SneakyThrows
@@ -53,21 +72,6 @@ public class Testingapi {
 		return sendThis;
 	}
 
-	@GetMapping("/ctt")
-	public String testGetpartialContent(@RequestHeader(value = "Content-Range", required = false) String contentRange) {
-		// bytes 15794176-72517964/72517965
-		return "The พ้าว : " + contentRange;
-	}
-
-	@GetMapping("")
-	public String test() {
-		return NameGeneratorUtill.generateImageName();
-	}
-
-	@PostMapping("")
-	public String tetserser(MultipartFile file) {
-		return file.getContentType();
-	}
 
 	@GetMapping("/bucket")
 	public ResponseEntity<List<String>> listAllBucket() {

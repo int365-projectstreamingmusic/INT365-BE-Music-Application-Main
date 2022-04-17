@@ -157,7 +157,7 @@ public class MinioStorageService {
 	// Image upload
 	public String uploadImageToStorage(InputStream image, String destination) {
 		try {
-			String imageName = NameGeneratorUtill.generateImageName() + EXTENTION_IMAGE;
+			String imageName = NameGeneratorUtill.generateImageNameUUID() + EXTENTION_IMAGE;
 			minioClient.putObject(PutObjectArgs.builder().bucket(bucketname).object(destination + imageName)
 					.stream(image, -1, maximumFileSize).contentType("image/jpg").build());
 			return imageName;
@@ -170,7 +170,7 @@ public class MinioStorageService {
 	// Track upload
 	public String uploadMusicToStorage(InputStream trackFile, String destination) {
 		try {
-			String trackName = NameGeneratorUtill.generateTrackName() + EXTENTION_TRACKS;
+			String trackName = NameGeneratorUtill.generateTrackNameUUID() + EXTENTION_TRACKS;
 			minioClient.putObject(PutObjectArgs.builder().bucket(bucketname).object(destination + trackName)
 					.stream(trackFile, -1, maximumFileSize).contentType("audio/mpeg").build());
 			return trackName;

@@ -16,6 +16,11 @@ public class FileControllers {
 		return null;
 	}
 	
+	
+	public String uploadUserProfileImageToStorage(MultipartFile imageFIle, HttpRequest request) {
+		return "";
+	}
+	
 	/*
 	 * 
 	 *  /** *  Get a file object as a stream （ Breakpoint download ） * * @param bucketName  Bucket name  * @param objectName  The name of the object in the bucket  * @param offset  The position of the start byte  * @param length  Length to read  ( Optional , If there is no value, it means reading to the end of the file ) * @return
@@ -38,10 +43,7 @@ public class FileControllers {
         }
         return null;
     }*/
-	
-	public String uploadUserProfileImageToStorage(MultipartFile imageFIle, HttpRequest request) {
-		return "";
-	}
+
 	
 	
 	
