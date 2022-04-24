@@ -8,6 +8,8 @@ services:
       - MYSQL_DATABASE=212.80.213.186:3306/playmylist
       - MYSQL_USER=Applications
       - MYSQL_ROOT_PASSWORD=Sapling$410
+    ports:
+      - "8086:8086"
 #     volumes:
 #       - ~/imagestorage:/application/images/products
 #     networks:

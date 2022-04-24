@@ -21,19 +21,19 @@ jobs:
           push: true
           tags: ghcr.io/int365-projectstreamingmusic/int365-be-music-application-main:master
 
-  # deploy:
-  #   needs:
-  #     - build
-  #   runs-on: ubuntu-20.04
-  #   steps:
-  #   - uses: appleboy/ssh-action@master
-  #     with:
-  #       host: ${{ secrets.HOSTNAME }}
-  #       username: ${{ secrets.USERNAME }}
-  #       key: ${{ secrets.PRIVATEKEY }}
-  #       port: ${{ secrets.SERVERPORT }}
-  #       script: |
-  #         cd ./dev/backend
-  #         docker-compose down && docker-compose pull
-  #         docker-compose up -d
-  #         docker image prune -af
+  deploy:
+    needs:
+      - build
+    runs-on: ubuntu-20.04
+    steps:
+    - uses: appleboy/ssh-action@master
+      with:
+        host: ${{ secrets.HOSTNAME }}
+        username: ${{ secrets.USERNAME }}
+        key: ${{ secrets.PRIVATEKEY }}
+        port: ${{ secrets.SERVERPORT }}
+        script: |
+          cd ./dev/backend
+          docker-compose down && docker-compose pull
+          docker-compose up -d
+          docker image prune -af
