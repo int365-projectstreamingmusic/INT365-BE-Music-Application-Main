@@ -33,6 +33,9 @@ jobs:
         key: ${{ secrets.PRIVATEKEY }}
         port: ${{ secrets.SERVERPORT }}
         script: |
+          export TOKEN=${{ secrets.GITTOKEN }}
+          export GITHUB_USER=pimpony
+          echo $TOKEN | docker login ghcr.io --password-stdin --username $GITHUB_USER
           cd ./dev/back-end
           docker-compose down && docker-compose pull
           docker-compose up -d
