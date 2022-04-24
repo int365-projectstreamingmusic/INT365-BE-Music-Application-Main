@@ -1,0 +1,39 @@
+name: back-end
+on:
+  push:
+    branches:
+      - master
+jobs:
+  build:
+    runs-on: ubuntu-20.04
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v1
+        with:
+          registry: ghcr.io
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Build and push
+        uses: docker/build-push-action@v2
+        with:
+          push: true
+          tags: ghcr.io/int365-projectstreamingmusic/INT365-BE-Music-Application-Main:master
+
+  # deploy:
+  #   needs:
+  #     - build
+  #   runs-on: ubuntu-20.04
+  #   steps:
+  #   - uses: appleboy/ssh-action@master
+  #     with:
+  #       host: ${{ secrets.HOSTNAME }}
+  #       username: ${{ secrets.USERNAME }}
+  #       key: ${{ secrets.PRIVATEKEY }}
+  #       port: ${{ secrets.SERVERPORT }}
+  #       script: |
+  #         cd ./dev/backend
+  #         docker-compose down && docker-compose pull
+  #         docker-compose up -d
+  #         docker image prune -af
