@@ -19,7 +19,7 @@ jobs:
         uses: docker/build-push-action@v2
         with:
           push: true
-          tags: ghcr.io/int365-projectstreamingmusic/int365-be-music-application-main:master
+          tags: ghcr.io/int365-projectstreamingmusic/int365_backend:master
 
   deploy:
     needs:
