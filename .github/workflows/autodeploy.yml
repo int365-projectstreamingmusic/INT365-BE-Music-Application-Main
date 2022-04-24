@@ -33,7 +33,7 @@ jobs:
         key: ${{ secrets.PRIVATEKEY }}
         port: ${{ secrets.SERVERPORT }}
         script: |
-          cd ./dev/backend
+          cd ./dev/back-end
           docker-compose down && docker-compose pull
           docker-compose up -d
           docker image prune -af
