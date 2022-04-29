@@ -5,6 +5,7 @@ import java.net.URI;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -29,6 +30,13 @@ import lombok.SneakyThrows;
 import naturegecko.jingjok.configurations.EnumConfig;
 import naturegecko.jingjok.exceptions.ExceptionFoundation;
 import naturegecko.jingjok.exceptions.ExceptionResponseModel.EXCEPTION_CODES;
+import naturegecko.jingjok.models.entities.RolesModel;
+import naturegecko.jingjok.models.entities.UserAccountModel;
+import naturegecko.jingjok.models.entities.UserRoleModel;
+import naturegecko.jingjok.models.entities.compkeys.UserRolesID;
+import naturegecko.jingjok.repositories.RolesRepository;
+import naturegecko.jingjok.repositories.UserAccountsRepository;
+import naturegecko.jingjok.repositories.UserRolesRepository;
 import naturegecko.jingjok.services.MinioStorageService;
 import naturegecko.jingjok.utilities.FIleExtentionCheckerUtill;
 import naturegecko.jingjok.utilities.ImageCompressionUtill;
@@ -42,21 +50,100 @@ public class Testingapi {
 
 	@Autowired
 	private final MinioStorageService minioUtil;
-	
+	@Autowired
+	private RolesRepository roleRepository;
+	@Autowired
+	private UserAccountsRepository userAccountsRepository;
+	@Autowired
+	private UserRolesRepository userRoleRepository;
+
+	@GetMapping("/roles")
+	public ResponseEntity<List<RolesModel>> getAllROles() {
+		return ResponseEntity.ok().body(roleRepository.findAll());
+	}
+
+	@GetMapping("/addRole/{userId}/{role}")
+	public ResponseEntity<Optional<UserAccountModel>> addRole(@PathVariable("userId") String user,
+			@PathVariable("role") String role) {
+
+		int userId = 1;
+		int roleId = Integer.parseInt(role);
+		System.out.println(userId + " | " + roleId);
+
+		Optional<UserAccountModel> currentUs = userAccountsRepository.findById(userId);
+		List<UserRoleModel> roleList = currentUs.get().getUserRoles();
+
+		UserRoleModel newRole = new UserRoleModel();
+		newRole.setRoles(roleRepository.findById(roleId).orElseThrow());
+
+		UserRolesID currentId = new UserRolesID(userId, roleId);
+		// System.out.println(currentId.toString());
+
+		newRole.setUserRoleId(currentId);
+
+		roleList.add(newRole);
+		currentUs.get().setUserRoles(roleList);
+
+		userAccountsRepository.save(currentUs.get());
+
+		return ResponseEntity.ok().body(currentUs);
+	}
+
+	@GetMapping("/deRole/{userId}/{role}")
+	public ResponseEntity<Optional<UserAccountModel>> deRole(@PathVariable("userId") String user,
+			@PathVariable("role") String role) {
+
+		int userId = 1;
+		int roleId = Integer.parseInt(role);
+
+		Optional<UserAccountModel> currentUs = userAccountsRepository.findById(userId);
+		List<UserRoleModel> roleList = currentUs.get().getUserRoles();
+		
+		//userRoleRepository.deleteById(null);
+
+		int currentI = -1;
+
+		for (int i = 0; i < roleList.size(); i++) {
+			
+			System.out.println(roleList.get(i).getRoles().getRoles_id());
+			
+		}
+		if (currentI >= 0) {
+			System.out.println(roleList.get(currentI).toString());
+			roleList.remove(currentI);
+		}
+		;
+		currentUs.get().setUserRoles(roleList);
+
+		userAccountsRepository.save(currentUs.get());
+
+		return ResponseEntity.ok().body(currentUs);
+	}
+
+	@GetMapping("/userroles")
+	public ResponseEntity<List<UserRoleModel>> getAllROlesss() {
+		return ResponseEntity.ok().body(userRoleRepository.findAll());
+	}
+
+	@GetMapping("/accounts")
+	public ResponseEntity<List<UserAccountModel>> getAllAccount() {
+		return ResponseEntity.ok().body(userAccountsRepository.findAll());
+	}
+
 	@GetMapping("/first")
-	public ResponseEntity<Map<String,String>> testNameGeneration(){
+	public ResponseEntity<Map<String, String>> testNameGeneration() {
 		String trackName = NameGeneratorUtill.generateTrackNameUUID();
 		String userName = NameGeneratorUtill.generateUserUUID();
 		String playlistUUID = NameGeneratorUtill.generatePlaylistUUID();
 		String imageName = NameGeneratorUtill.generateImageNameUUID();
-		
+
 		Map<String, String> result = new HashMap<String, String>();
 		result.put("Method", "testNameGeneration");
 		result.put("Track name generation", trackName + " | " + trackName.length());
 		result.put("UserID generation", userName + " | " + userName.length());
 		result.put("playlist generation", playlistUUID + " | " + playlistUUID.length());
 		result.put("image generation", imageName + " | " + imageName.length());
-		
+
 		return ResponseEntity.ok().body(result);
 	}
 
@@ -66,12 +153,10 @@ public class Testingapi {
 			@RequestHeader(value = "If-Range", required = false) String ifRange, HttpServletRequest request,
 			HttpServletResponse response) {
 		System.out.println("/directFromSpringToMin | size : " + contentRange + " | " + ifRange);
-		InputStream getTrack = minioUtil.trackRetrivelByByteRangeService("testingsite/testmusic112.mp3", 0,
-				800000);
+		InputStream getTrack = minioUtil.trackRetrivelByByteRangeService("testingsite/testmusic112.mp3", 0, 800000);
 		Resource sendThis = new InputStreamResource(getTrack);
 		return sendThis;
 	}
-
 
 	@GetMapping("/bucket")
 	public ResponseEntity<List<String>> listAllBucket() {
