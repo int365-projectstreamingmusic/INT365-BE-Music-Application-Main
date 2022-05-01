@@ -12,8 +12,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpRequest;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -58,47 +56,25 @@ public class MinioStorageService {
 			return minioClient.bucketExists(BucketExistsArgs.builder().bucket(bucketName).build());
 		} catch (Exception ecc) {
 			throw new ExceptionFoundation(EXCEPTION_CODES.CORE_METHOD_FAILED,
-					"[ ERROR ] Method \'Ping Bucker\' failed. \n Reason : " + ecc.getMessage());
+					"[ ERROR ] Method \'Ping Bucket\' failed. \n Reason : " + ecc.getMessage());
 		}
 	}
 
 	// Ping if the target object is exist.
-	@SneakyThrows
-	public StatObjectResponse getStatObject(String bucketName, String objectName) {
-		if (!pingBucket(bucketName)) {
-			throw new ExceptionFoundation(EXCEPTION_CODES.CORE_METHOD_FAILED,
-					"[ ERROR ] The bucket name " + bucketname + " is not reachable.");
-		}
-		StatObjectResponse stat = minioClient
-				.statObject(StatObjectArgs.builder().bucket(bucketName).object(objectName).build());
-		return stat;
-	}
 
-	// Track retrieval.
-	public InputStream trackRetrivelService(String trackName, String requestRange, HttpServletRequest request,
-			HttpServletResponse response) {
+	public StatObjectResponse getStatObject(String objectName) {
 		if (!pingBucket(bucketname)) {
 			throw new ExceptionFoundation(EXCEPTION_CODES.CORE_MINIO_NOT_FOUND,
 					"[ ERROR ] The bucket name " + bucketname + " is not reachable.");
 		}
-		StatObjectResponse statObject = getStatObject(bucketname, trackName);
-		if (statObject != null && statObject.size() > 0) {
-			Map<String, String> requestExtraHeader = new HashMap<String, String>();
-			requestExtraHeader.put("Range", requestRange);
-			try {
-				InputStream stream = minioClient.getObject(GetObjectArgs.builder().bucket(bucketname)
-						.extraHeaders(requestExtraHeader).object(trackName).build());
-				response.addHeader("Content-Length", "72517965");
-				response.addHeader("Content-Range", "bytes 52396032-72517964/72517965");
-				response.addHeader("LEL", requestRange);
-				return stream;
-			} catch (Exception ecc) {
-				throw new ExceptionFoundation(EXCEPTION_CODES.CORE_METHOD_FAILED,
-						"[ ERROR ] Method \'Ping Bucket\' failed. \n Reason : " + ecc.getMessage());
-			}
-		} else {
-			throw new ExceptionFoundation(EXCEPTION_CODES.CORE_MINIO_NOT_FOUND,
-					"[ ERROR ] The track name " + trackName + " is not reachable.");
+		StatObjectResponse statObject;
+		try {
+			statObject = minioClient.statObject(StatObjectArgs.builder().bucket(bucketname).object(objectName).build());
+			return statObject;
+		} catch (Exception ecc) {
+			throw new ExceptionFoundation(EXCEPTION_CODES.CORE_METHOD_FAILED,
+					"[ FAILED ] The method \' getStatObject\' at \'MinioStorageService\' failed :  "
+							+ ecc.getMessage());
 		}
 	}
 
@@ -108,7 +84,7 @@ public class MinioStorageService {
 			throw new ExceptionFoundation(EXCEPTION_CODES.CORE_MINIO_NOT_FOUND,
 					"[ ERROR ] The bucket name " + bucketname + " is not reachable.");
 		}
-		StatObjectResponse statObject = getStatObject(bucketname, trackNameAndLocation);
+		StatObjectResponse statObject = getStatObject(trackNameAndLocation);
 		if (statObject == null || statObject.size() <= 0) {
 			throw new ExceptionFoundation(EXCEPTION_CODES.CORE_MINIO_NOT_FOUND,
 					"[ ERROR ] The track name in location " + trackNameAndLocation + " is not reachable.");
@@ -116,8 +92,8 @@ public class MinioStorageService {
 		Map<String, String> requestExtraHeader = new HashMap<String, String>();
 		requestExtraHeader.put("Range", "bytes=" + start + "-" + end);
 		try {
-			InputStream stream = minioClient
-					.getObject(GetObjectArgs.builder().bucket(bucketname).extraHeaders(requestExtraHeader).build());
+			InputStream stream = minioClient.getObject(GetObjectArgs.builder().bucket(bucketname)
+					.extraHeaders(requestExtraHeader).object(trackNameAndLocation).build());
 			return stream;
 		} catch (Exception ecc) {
 			throw new ExceptionFoundation(EXCEPTION_CODES.CORE_METHOD_FAILED,
@@ -149,10 +125,39 @@ public class MinioStorageService {
 	 * 
 	 * 
 	 */
+
+	// Track retrieval.
+	public InputStream trackRetrivelService(String trackName, String requestRange, HttpServletRequest request,
+			HttpServletResponse response) {
+		if (!pingBucket(bucketname)) {
+			throw new ExceptionFoundation(EXCEPTION_CODES.CORE_MINIO_NOT_FOUND,
+					"[ ERROR ] The bucket name " + bucketname + " is not reachable.");
+		}
+		StatObjectResponse statObject = getStatObject(trackName);
+		if (statObject != null && statObject.size() > 0) {
+			Map<String, String> requestExtraHeader = new HashMap<String, String>();
+			requestExtraHeader.put("Range", requestRange);
+			try {
+				InputStream stream = minioClient.getObject(GetObjectArgs.builder().bucket(bucketname)
+						.extraHeaders(requestExtraHeader).object(trackName).build());
+				response.addHeader("Content-Length", "72517965");
+				response.addHeader("Content-Range", "bytes 52396032-72517964/72517965");
+				response.addHeader("LEL", requestRange);
+				return stream;
+			} catch (Exception ecc) {
+				throw new ExceptionFoundation(EXCEPTION_CODES.CORE_METHOD_FAILED,
+						"[ ERROR ] Method \'Ping Bucket\' failed. \n Reason : " + ecc.getMessage());
+			}
+		} else {
+			throw new ExceptionFoundation(EXCEPTION_CODES.CORE_MINIO_NOT_FOUND,
+					"[ ERROR ] The track name " + trackName + " is not reachable.");
+		}
+	}
+
 	// Image upload
 	public String uploadImageToStorage(InputStream image, String destination) {
 		try {
-			String imageName = NameGeneratorUtill.generateImageName() + EXTENTION_IMAGE;
+			String imageName = NameGeneratorUtill.generateImageNameUUID() + EXTENTION_IMAGE;
 			minioClient.putObject(PutObjectArgs.builder().bucket(bucketname).object(destination + imageName)
 					.stream(image, -1, maximumFileSize).contentType("image/jpg").build());
 			return imageName;
@@ -165,7 +170,7 @@ public class MinioStorageService {
 	// Track upload
 	public String uploadMusicToStorage(InputStream trackFile, String destination) {
 		try {
-			String trackName = NameGeneratorUtill.generateTrackName() + EXTENTION_TRACKS;
+			String trackName = NameGeneratorUtill.generateTrackNameUUID() + EXTENTION_TRACKS;
 			minioClient.putObject(PutObjectArgs.builder().bucket(bucketname).object(destination + trackName)
 					.stream(trackFile, -1, maximumFileSize).contentType("audio/mpeg").build());
 			return trackName;
