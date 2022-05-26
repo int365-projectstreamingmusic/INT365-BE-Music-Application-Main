@@ -2,6 +2,7 @@ package naturegecko.jingjok.api;
 
 import java.io.InputStream;
 import java.net.URI;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -56,10 +57,21 @@ public class Testingapi {
 	private UserAccountsRepository userAccountsRepository;
 	@Autowired
 	private UserRolesRepository userRoleRepository;
+	
+	@GetMapping("/uuidplease")
+	public ResponseEntity<String> generateTrackUUID(){
+		return ResponseEntity.ok().body(NameGeneratorUtill.generatePlaylistUUID());
+	}
 
 	@GetMapping("/roles")
-	public ResponseEntity<List<RolesModel>> getAllROles() {
-		return ResponseEntity.ok().body(roleRepository.findAll());
+	public ResponseEntity<HashMap<String,Object>> getAllROles(HttpServletResponse response) {
+		//List<UserRoleModel> resultList = userRoleRepository.findAll();	
+		
+		HashMap<String, Object> resultMap = new HashMap<String, Object>();
+		resultMap.put("resoinseObject", roleRepository.findAll());
+		resultMap.put("Method", "/roles");
+		
+		return ResponseEntity.ok().body(resultMap);
 	}
 
 	@GetMapping("/addRole/{userId}/{role}")
@@ -99,23 +111,24 @@ public class Testingapi {
 		Optional<UserAccountModel> currentUs = userAccountsRepository.findById(userId);
 		List<UserRoleModel> roleList = currentUs.get().getUserRoles();
 		
-		//userRoleRepository.deleteById(null);
-
-		int currentI = -1;
+		UserRolesID getId = new UserRolesID(userId,roleId);
+		
+		userRoleRepository.deleteById(getId);
+		//int currentI = -1;
 
 		for (int i = 0; i < roleList.size(); i++) {
 			
 			System.out.println(roleList.get(i).getRoles().getRoles_id());
 			
 		}
-		if (currentI >= 0) {
+		/*if (currentI >= 0) {
 			System.out.println(roleList.get(currentI).toString());
 			roleList.remove(currentI);
-		}
+		}*/
 		;
-		currentUs.get().setUserRoles(roleList);
+		//currentUs.get().setUserRoles(roleList);
 
-		userAccountsRepository.save(currentUs.get());
+		//userAccountsRepository.save(currentUs.get());
 
 		return ResponseEntity.ok().body(currentUs);
 	}
@@ -169,7 +182,7 @@ public class Testingapi {
 		}
 	}
 
-	@PostMapping("/u")
+	@PostMapping("/uploadeProfile")
 	@SneakyThrows
 	public ResponseEntity<String> uploadBufferToMinio(MultipartFile file) {
 		if (!FIleExtentionCheckerUtill.fileMatchValidImage(file)) {
@@ -179,7 +192,7 @@ public class Testingapi {
 		InputStream imgg = ImageCompressionUtill.imageResize(file,
 				EnumConfig.IMAGE_PROFILE_CODE.USER_PROFILE.getProfileWidth());
 		minioUtil.uploadImageToStorage(imgg, EnumConfig.MINIO_DIRECTORY.USER_PROFILES.getDestinationDirectory());
-		URI uri = URI.create(ServletUriComponentsBuilder.fromCurrentContextPath().path("/u").toString());
+		URI uri = URI.create(ServletUriComponentsBuilder.fromCurrentContextPath().path("/uploadeProfile").toString());
 		return ResponseEntity.created(uri).body("OK");
 	}
 

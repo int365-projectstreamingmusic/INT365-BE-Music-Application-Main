@@ -11,11 +11,13 @@ import io.minio.StatObjectResponse;
 @Service
 public class FileControllers {
 	
-	public Resource loadImageFromStorage(String imageName, String destination) {
-	
+	public String uploadTrackToMinIO() {
 		return null;
 	}
 	
+	public Resource loadImageFromStorage(String imageName, String destination) {
+		return null;
+	}
 	
 	public String uploadUserProfileImageToStorage(MultipartFile imageFIle, HttpRequest request) {
 		return "";

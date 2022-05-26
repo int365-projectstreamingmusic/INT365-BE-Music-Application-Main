@@ -61,7 +61,6 @@ public class MinioStorageService {
 	}
 
 	// Ping if the target object is exist.
-
 	public StatObjectResponse getStatObject(String objectName) {
 		if (!pingBucket(bucketname)) {
 			throw new ExceptionFoundation(EXCEPTION_CODES.CORE_MINIO_NOT_FOUND,

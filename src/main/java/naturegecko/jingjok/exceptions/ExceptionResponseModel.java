@@ -47,7 +47,11 @@ public class ExceptionResponseModel {
 		SHOP_NOT_ALLOW_TO_CANCLE(6003), // You paid for your product but want to cancle.
 		SHOP_NOT_ALLOW_TO_CHANGE_STATUS(6004), // You paid for your product but want to cancle.
 		SHOP_THIS_IS_YOUR_PRODUCT(6005), // What is the reason you buy an item that you are currently selling.
-
+		
+		// MINIO SERVER
+		MINIO_BUCKER_UNREACHABLE(7001), // Minio bucket is not reachable.
+		MINIO_OBJECT_UNREACHABLE(7002),
+		
 		// Others
 		DEAD(9999); // Just stupidly died with an unknown reason.
 
