@@ -4,8 +4,6 @@ import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Table;
 
-import org.springframework.lang.Nullable;
-
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -20,8 +18,6 @@ public class RolesModel {
 	@Id
 	private int roles_id;
 
-	private String roles_name;
+	private String roles;
 
-	@Nullable
-	private String role_desc;
 }

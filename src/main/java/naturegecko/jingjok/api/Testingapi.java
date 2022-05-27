@@ -57,21 +57,40 @@ public class Testingapi {
 	private UserAccountsRepository userAccountsRepository;
 	@Autowired
 	private UserRolesRepository userRoleRepository;
-	
+
 	@GetMapping("/uuidplease")
-	public ResponseEntity<String> generateTrackUUID(){
+	public ResponseEntity<String> generateTrackUUID() {
 		return ResponseEntity.ok().body(NameGeneratorUtill.generatePlaylistUUID());
 	}
 
 	@GetMapping("/roles")
-	public ResponseEntity<HashMap<String,Object>> getAllROles(HttpServletResponse response) {
-		//List<UserRoleModel> resultList = userRoleRepository.findAll();	
-		
+	public ResponseEntity<HashMap<String, Object>> getAllROles(HttpServletResponse response) {
+		// List<UserRoleModel> resultList = userRoleRepository.findAll();
+
 		HashMap<String, Object> resultMap = new HashMap<String, Object>();
 		resultMap.put("resoinseObject", roleRepository.findAll());
 		resultMap.put("Method", "/roles");
-		
+
 		return ResponseEntity.ok().body(resultMap);
+	}
+
+	@GetMapping("/nukeUser/{userId}")
+	public ResponseEntity<String> nukeUser(@PathVariable int userId) {
+
+		userAccountsRepository.deleteById(userId);
+
+		// userAccountsRepository.deleteById(1);
+		return ResponseEntity.ok().body("NUKED | ID: " + userId);
+	}
+
+	@GetMapping("/getUser/{userId}")
+	public ResponseEntity<UserAccountModel> getUser(@PathVariable int userId) {
+
+		UserAccountModel newMode = userAccountsRepository.findById(userId)
+				.orElseThrow(() -> new ExceptionFoundation(EXCEPTION_CODES.SEARCH_NOT_FOUND,"NOPE"));
+
+		// userAccountsRepository.deleteById(1);
+		return ResponseEntity.ok().body(newMode);
 	}
 
 	@GetMapping("/addRole/{userId}/{role}")
@@ -110,25 +129,25 @@ public class Testingapi {
 
 		Optional<UserAccountModel> currentUs = userAccountsRepository.findById(userId);
 		List<UserRoleModel> roleList = currentUs.get().getUserRoles();
-		
-		UserRolesID getId = new UserRolesID(userId,roleId);
-		
+
+		UserRolesID getId = new UserRolesID(userId, roleId);
+
 		userRoleRepository.deleteById(getId);
-		//int currentI = -1;
+		// int currentI = -1;
 
 		for (int i = 0; i < roleList.size(); i++) {
-			
-			System.out.println(roleList.get(i).getRoles().getRoles_id());
-			
-		}
-		/*if (currentI >= 0) {
-			System.out.println(roleList.get(currentI).toString());
-			roleList.remove(currentI);
-		}*/
-		;
-		//currentUs.get().setUserRoles(roleList);
 
-		//userAccountsRepository.save(currentUs.get());
+			System.out.println(roleList.get(i).getRoles().getRoles_id());
+
+		}
+		/*
+		 * if (currentI >= 0) { System.out.println(roleList.get(currentI).toString());
+		 * roleList.remove(currentI); }
+		 */
+		;
+		// currentUs.get().setUserRoles(roleList);
+
+		// userAccountsRepository.save(currentUs.get());
 
 		return ResponseEntity.ok().body(currentUs);
 	}

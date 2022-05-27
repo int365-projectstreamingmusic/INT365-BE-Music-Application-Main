@@ -1,5 +1,6 @@
 package naturegecko.jingjok.services;
 
+import java.io.BufferedInputStream;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -99,6 +100,22 @@ public class MinioStorageService {
 					"[ ERROR ] Method \'Ping Bucket\' failed. \n Reason : " + ecc.getMessage());
 		}
 	}
+	
+	// Track upload to MinIO
+	public String uploadMusicToStorage(MultipartFile trackFile, String destination) {
+		String fileNameExtention = trackFile.getOriginalFilename().substring(trackFile.getOriginalFilename().lastIndexOf(".")+1);
+		
+		try {
+			InputStream trackFileStream = new BufferedInputStream(trackFile.getInputStream());
+			String trackName = NameGeneratorUtill.generateTrackNameUUID() + EXTENTION_TRACKS;
+			minioClient.putObject(PutObjectArgs.builder().bucket(bucketname).object(destination + trackName)
+					.stream(trackFileStream, -1, maximumFileSize).contentType("audio/mpeg").build());
+			return trackName;
+		} catch (Exception ex) {
+			throw new ExceptionFoundation(EXCEPTION_CODES.SAVE_FILE_FAILED,
+					"[ ERROR ] File save failed with known reason : " + ex.getMessage());
+		}
+	}
 
 	/*
 	 * 
@@ -167,7 +184,7 @@ public class MinioStorageService {
 	}
 
 	// Track upload
-	public String uploadMusicToStorage(InputStream trackFile, String destination) {
+	/*public String uploadMusicToStorage(InputStream trackFile, String destination) {
 		try {
 			String trackName = NameGeneratorUtill.generateTrackNameUUID() + EXTENTION_TRACKS;
 			minioClient.putObject(PutObjectArgs.builder().bucket(bucketname).object(destination + trackName)
@@ -177,7 +194,7 @@ public class MinioStorageService {
 			throw new ExceptionFoundation(EXCEPTION_CODES.SAVE_FILE_FAILED,
 					"[ ERROR ] File save failed with known reason : " + ex.getMessage());
 		}
-	}
+	}*/
 
 	public List<String> listAllBuckets() {
 		try {
