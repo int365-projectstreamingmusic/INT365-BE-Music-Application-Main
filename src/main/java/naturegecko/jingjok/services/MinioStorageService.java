@@ -1,5 +1,6 @@
 package naturegecko.jingjok.services;
 
+import java.io.BufferedInputStream;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -42,7 +43,7 @@ public class MinioStorageService {
 	@Value("${minio.buckek-name}")
 	private String bucketname;
 
-	@Value("${minio.maximunfilesize}")
+	@Value("${minio.maximumfilesize}")
 	private long maximumFileSize;
 
 	public MinioStorageService(MinioClient minioClient, MinioConfig minioConfig) {
@@ -61,7 +62,6 @@ public class MinioStorageService {
 	}
 
 	// Ping if the target object is exist.
-
 	public StatObjectResponse getStatObject(String objectName) {
 		if (!pingBucket(bucketname)) {
 			throw new ExceptionFoundation(EXCEPTION_CODES.CORE_MINIO_NOT_FOUND,
@@ -98,6 +98,22 @@ public class MinioStorageService {
 		} catch (Exception ecc) {
 			throw new ExceptionFoundation(EXCEPTION_CODES.CORE_METHOD_FAILED,
 					"[ ERROR ] Method \'Ping Bucket\' failed. \n Reason : " + ecc.getMessage());
+		}
+	}
+	
+	// Track upload to MinIO
+	public String uploadMusicToStorage(MultipartFile trackFile, String destination) {
+		String fileNameExtention = trackFile.getOriginalFilename().substring(trackFile.getOriginalFilename().lastIndexOf(".")+1);
+		
+		try {
+			InputStream trackFileStream = new BufferedInputStream(trackFile.getInputStream());
+			String trackName = NameGeneratorUtill.generateTrackNameUUID() + EXTENTION_TRACKS;
+			minioClient.putObject(PutObjectArgs.builder().bucket(bucketname).object(destination + trackName)
+					.stream(trackFileStream, trackFileStream.available(), -1).contentType("audio/mpeg").build());
+			return trackName;
+		} catch (Exception ex) {
+			throw new ExceptionFoundation(EXCEPTION_CODES.SAVE_FILE_FAILED,
+					"[ ERROR ] File save failed with known reason : " + ex.getMessage());
 		}
 	}
 
@@ -168,7 +184,7 @@ public class MinioStorageService {
 	}
 
 	// Track upload
-	public String uploadMusicToStorage(InputStream trackFile, String destination) {
+	/*public String uploadMusicToStorage(InputStream trackFile, String destination) {
 		try {
 			String trackName = NameGeneratorUtill.generateTrackNameUUID() + EXTENTION_TRACKS;
 			minioClient.putObject(PutObjectArgs.builder().bucket(bucketname).object(destination + trackName)
@@ -178,7 +194,7 @@ public class MinioStorageService {
 			throw new ExceptionFoundation(EXCEPTION_CODES.SAVE_FILE_FAILED,
 					"[ ERROR ] File save failed with known reason : " + ex.getMessage());
 		}
-	}
+	}*/
 
 	public List<String> listAllBuckets() {
 		try {
@@ -195,11 +211,12 @@ public class MinioStorageService {
 	}
 
 	// Upload to MINIO
-	public void uploadToStorage(MultipartFile file, String destination, String fileName) {
+	public boolean uploadToStorage(MultipartFile file, String destination, String fileName) {
 		try {
 			InputStream inputStream = new ByteArrayInputStream(file.getBytes());
 			minioClient.putObject(PutObjectArgs.builder().bucket(this.bucketname).object(destination + fileName)
-					.stream(inputStream, -1, maximumFileSize).contentType("image/jpg").build());
+					.stream(inputStream, inputStream.available(), -1).contentType("image/jpg").build());
+			return true;
 		} catch (Exception e) {
 			throw new ExceptionFoundation(EXCEPTION_CODES.SAVE_FILE_FAILED, e.getMessage());
 		}

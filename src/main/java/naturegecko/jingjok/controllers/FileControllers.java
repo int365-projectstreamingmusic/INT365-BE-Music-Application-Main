@@ -11,11 +11,17 @@ import io.minio.StatObjectResponse;
 @Service
 public class FileControllers {
 	
-	public Resource loadImageFromStorage(String imageName, String destination) {
-	
+	public String uploadTrackToMinIO() {
 		return null;
 	}
 	
+	public String deleteTrackFromMinIO() {
+		return null;
+	}
+	
+	public Resource loadImageFromStorage(String imageName, String destination) {
+		return null;
+	}
 	
 	public String uploadUserProfileImageToStorage(MultipartFile imageFIle, HttpRequest request) {
 		return "";
@@ -26,7 +32,7 @@ public class FileControllers {
 	 *  /** *  Get a file object as a stream （ Breakpoint download ） * * @param bucketName  Bucket name  * @param objectName  The name of the object in the bucket  * @param offset  The position of the start byte  * @param length  Length to read  ( Optional , If there is no value, it means reading to the end of the file ) * @return
     @SneakyThrows
     public InputStream getObject(String bucketName, String objectName, long offset, Long length) {
-        boolean flag = bucketExists(bucketName);
+        boolean flag = bucketExists(bucketName);i
         if (flag) {
             StatObjectResponse statObject = statObject(bucketName, objectName);
             if (statObject != null && statObject.size() > 0) {

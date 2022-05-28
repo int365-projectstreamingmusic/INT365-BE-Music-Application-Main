@@ -2,6 +2,10 @@ package naturegecko.jingjok.api;
 
 import java.io.InputStream;
 import java.net.URI;
+import java.sql.Timestamp;
+import java.time.Instant;
+import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -15,11 +19,15 @@ import org.springframework.core.io.InputStreamResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 
 import org.springframework.web.multipart.MultipartFile;
@@ -31,10 +39,12 @@ import naturegecko.jingjok.configurations.EnumConfig;
 import naturegecko.jingjok.exceptions.ExceptionFoundation;
 import naturegecko.jingjok.exceptions.ExceptionResponseModel.EXCEPTION_CODES;
 import naturegecko.jingjok.models.entities.RolesModel;
+import naturegecko.jingjok.models.entities.TracksModel;
 import naturegecko.jingjok.models.entities.UserAccountModel;
 import naturegecko.jingjok.models.entities.UserRoleModel;
 import naturegecko.jingjok.models.entities.compkeys.UserRolesID;
 import naturegecko.jingjok.repositories.RolesRepository;
+import naturegecko.jingjok.repositories.TracksRepository;
 import naturegecko.jingjok.repositories.UserAccountsRepository;
 import naturegecko.jingjok.repositories.UserRolesRepository;
 import naturegecko.jingjok.services.MinioStorageService;
@@ -56,67 +66,143 @@ public class Testingapi {
 	private UserAccountsRepository userAccountsRepository;
 	@Autowired
 	private UserRolesRepository userRoleRepository;
+	@Autowired
+	private TracksRepository tracksRepository;
 
-	@GetMapping("/roles")
-	public ResponseEntity<List<RolesModel>> getAllROles() {
-		return ResponseEntity.ok().body(roleRepository.findAll());
+	@PostMapping(value = "/tracks/new", produces = { MediaType.APPLICATION_JSON_VALUE,
+			MediaType.APPLICATION_OCTET_STREAM_VALUE })
+	public ResponseEntity<TracksModel> addTrack(@RequestPart("newTrack") TracksModel newTrack,
+			@RequestPart("tracks") MultipartFile trackFile) {
+		String autoTrackName = "";
+		String originamFileName = trackFile.getOriginalFilename();
+
+		if (trackFile.getOriginalFilename().length() > 43) {
+			autoTrackName = trackFile.getOriginalFilename().substring(0, 43);
+		} else {
+			autoTrackName = trackFile.getOriginalFilename();
+		}
+
+		TracksModel createNewTrack = new TracksModel();
+		createNewTrack.setTrack_name(autoTrackName);
+		createNewTrack.setTimestamp(Timestamp.from(Instant.now()));
+		try {
+			createNewTrack.setTrack_file(minioUtil.uploadMusicToStorage(trackFile, "/tracks/musics/")
+					+ originamFileName.substring(originamFileName.lastIndexOf(".")));
+			createNewTrack.setDuration(9999);
+			createNewTrack.setAccount_id(1);
+			createNewTrack.setTrack_desc(trackFile.getOriginalFilename() + " | " + trackFile.getSize());
+			TracksModel resultTrack = tracksRepository.save(createNewTrack);
+			return ResponseEntity.ok().body(resultTrack);
+		} catch (Exception e) {
+			throw new ExceptionFoundation(EXCEPTION_CODES.SAVE_FILE_FAILED, "AHHHHHHHH!!!!!");
+		}
+
 	}
 
-	@GetMapping("/addRole/{userId}/{role}")
-	public ResponseEntity<Optional<UserAccountModel>> addRole(@PathVariable("userId") String user,
+	@GetMapping("/tracks")
+	public ResponseEntity<List<TracksModel>> getAllTracks() {
+		List<TracksModel> result = tracksRepository.findAll();
+		if (result.size() <= 0) {
+			throw new ExceptionFoundation(EXCEPTION_CODES.SEARCH_NOT_FOUND, "There is nothing in this list");
+		}
+
+		return ResponseEntity.ok().body(tracksRepository.findAll());
+	}
+
+	@GetMapping("/uuidplease")
+	public ResponseEntity<String> generateTrackUUID() {
+		return ResponseEntity.ok().body(NameGeneratorUtill.generateTrackNameUUID());
+	}
+
+	@GetMapping("/roles")
+	public ResponseEntity<HashMap<String, Object>> getAllROles(HttpServletResponse response) {
+		// List<UserRoleModel> resultList = userRoleRepository.findAll();
+
+		HashMap<String, Object> resultMap = new HashMap<String, Object>();
+		resultMap.put("resoinseObject", roleRepository.findAll());
+		resultMap.put("Method", "/roles");
+
+		return ResponseEntity.ok().body(resultMap);
+	}
+
+	@DeleteMapping("/nukeUser/{userId}")
+	public ResponseEntity<String> nukeUser(@PathVariable int userId) {
+		try {
+			userAccountsRepository.deleteById(userId);
+			return ResponseEntity.ok().body("NUKED | ID: " + userId);
+		} catch (Exception e) {
+			throw new ExceptionFoundation(EXCEPTION_CODES.CORE_METHOD_FAILED, "Died");
+		}
+	}
+
+	@GetMapping("/getUser/{userId}")
+	public ResponseEntity<UserAccountModel> getUser(@PathVariable int userId) {
+
+		UserAccountModel newMode = userAccountsRepository.findById(userId).orElseThrow(
+				() -> new ExceptionFoundation(EXCEPTION_CODES.SEARCH_NOT_FOUND, "NOPE | Don't know this person. :V"));
+
+		// userAccountsRepository.deleteById(1);
+		return ResponseEntity.ok().body(newMode);
+	}
+
+	@PutMapping("/addRole/{userId}/{role}")
+	public ResponseEntity<UserAccountModel> addRole(@PathVariable("userId") int user,
 			@PathVariable("role") String role) {
 
-		int userId = 1;
+		int userId = user;
 		int roleId = Integer.parseInt(role);
 		System.out.println(userId + " | " + roleId);
 
-		Optional<UserAccountModel> currentUs = userAccountsRepository.findById(userId);
-		List<UserRoleModel> roleList = currentUs.get().getUserRoles();
+		UserAccountModel currentUs = userAccountsRepository.findById(userId)
+				.orElseThrow(() -> new ExceptionFoundation(EXCEPTION_CODES.SEARCH_NOT_FOUND,
+						"NOPE | User with id " + user + " is not exist."));
+		;
+		List<UserRoleModel> roleList = currentUs.getUserRoles();
 
 		UserRoleModel newRole = new UserRoleModel();
-		newRole.setRoles(roleRepository.findById(roleId).orElseThrow());
+		newRole.setRoles(roleRepository.findById(roleId)
+				.orElseThrow(() -> new ExceptionFoundation(EXCEPTION_CODES.SEARCH_NOT_FOUND,
+						"NOPE | User with id " + user + " is not exist.")));
 
 		UserRolesID currentId = new UserRolesID(userId, roleId);
-		// System.out.println(currentId.toString());
+		if (userRoleRepository.existsById(currentId)) {
+			throw new ExceptionFoundation(EXCEPTION_CODES.SAVE_FILE_FAILED, "This user already has this role.");
+		}
 
 		newRole.setUserRoleId(currentId);
 
 		roleList.add(newRole);
-		currentUs.get().setUserRoles(roleList);
+		currentUs.setUserRoles(roleList);
 
-		userAccountsRepository.save(currentUs.get());
+		userAccountsRepository.save(currentUs);
 
 		return ResponseEntity.ok().body(currentUs);
 	}
 
-	@GetMapping("/deRole/{userId}/{role}")
-	public ResponseEntity<Optional<UserAccountModel>> deRole(@PathVariable("userId") String user,
+	@PutMapping("/deRole/{userId}/{role}")
+	public ResponseEntity<UserAccountModel> deRole(@PathVariable("userId") int user,
 			@PathVariable("role") String role) {
 
-		int userId = 1;
+		int userId = user;
 		int roleId = Integer.parseInt(role);
 
-		Optional<UserAccountModel> currentUs = userAccountsRepository.findById(userId);
-		List<UserRoleModel> roleList = currentUs.get().getUserRoles();
-		
-		//userRoleRepository.deleteById(null);
+		UserAccountModel currentUs = userAccountsRepository.findById(userId)
+				.orElseThrow(() -> new ExceptionFoundation(EXCEPTION_CODES.SEARCH_NOT_FOUND,
+						"NOPE | User with id " + user + " is not exist."));
 
-		int currentI = -1;
+		List<UserRoleModel> roleList = currentUs.getUserRoles();
+
+		UserRolesID getId = new UserRolesID(userId, roleId);
+		try {
+			userRoleRepository.deleteById(getId);
+		} catch (Exception e) {
+			throw new ExceptionFoundation(EXCEPTION_CODES.SEARCH_NOT_FOUND,
+					"NOPE | Role with id " + role + " is not exist.");
+		}
 
 		for (int i = 0; i < roleList.size(); i++) {
-			
 			System.out.println(roleList.get(i).getRoles().getRoles_id());
-			
 		}
-		if (currentI >= 0) {
-			System.out.println(roleList.get(currentI).toString());
-			roleList.remove(currentI);
-		}
-		;
-		currentUs.get().setUserRoles(roleList);
-
-		userAccountsRepository.save(currentUs.get());
-
 		return ResponseEntity.ok().body(currentUs);
 	}
 
@@ -169,7 +255,7 @@ public class Testingapi {
 		}
 	}
 
-	@PostMapping("/u")
+	@PostMapping("/uploadeProfile")
 	@SneakyThrows
 	public ResponseEntity<String> uploadBufferToMinio(MultipartFile file) {
 		if (!FIleExtentionCheckerUtill.fileMatchValidImage(file)) {
@@ -179,7 +265,7 @@ public class Testingapi {
 		InputStream imgg = ImageCompressionUtill.imageResize(file,
 				EnumConfig.IMAGE_PROFILE_CODE.USER_PROFILE.getProfileWidth());
 		minioUtil.uploadImageToStorage(imgg, EnumConfig.MINIO_DIRECTORY.USER_PROFILES.getDestinationDirectory());
-		URI uri = URI.create(ServletUriComponentsBuilder.fromCurrentContextPath().path("/u").toString());
+		URI uri = URI.create(ServletUriComponentsBuilder.fromCurrentContextPath().path("/uploadeProfile").toString());
 		return ResponseEntity.created(uri).body("OK");
 	}
 
