@@ -43,7 +43,7 @@ public class MinioStorageService {
 	@Value("${minio.buckek-name}")
 	private String bucketname;
 
-	@Value("${minio.maximunfilesize}")
+	@Value("${minio.maximumfilesize}")
 	private long maximumFileSize;
 
 	public MinioStorageService(MinioClient minioClient, MinioConfig minioConfig) {
@@ -109,7 +109,7 @@ public class MinioStorageService {
 			InputStream trackFileStream = new BufferedInputStream(trackFile.getInputStream());
 			String trackName = NameGeneratorUtill.generateTrackNameUUID() + EXTENTION_TRACKS;
 			minioClient.putObject(PutObjectArgs.builder().bucket(bucketname).object(destination + trackName)
-					.stream(trackFileStream, -1, maximumFileSize).contentType("audio/mpeg").build());
+					.stream(trackFileStream, trackFileStream.available(), -1).contentType("audio/mpeg").build());
 			return trackName;
 		} catch (Exception ex) {
 			throw new ExceptionFoundation(EXCEPTION_CODES.SAVE_FILE_FAILED,
@@ -211,11 +211,12 @@ public class MinioStorageService {
 	}
 
 	// Upload to MINIO
-	public void uploadToStorage(MultipartFile file, String destination, String fileName) {
+	public boolean uploadToStorage(MultipartFile file, String destination, String fileName) {
 		try {
 			InputStream inputStream = new ByteArrayInputStream(file.getBytes());
 			minioClient.putObject(PutObjectArgs.builder().bucket(this.bucketname).object(destination + fileName)
-					.stream(inputStream, -1, maximumFileSize).contentType("image/jpg").build());
+					.stream(inputStream, inputStream.available(), -1).contentType("image/jpg").build());
+			return true;
 		} catch (Exception e) {
 			throw new ExceptionFoundation(EXCEPTION_CODES.SAVE_FILE_FAILED, e.getMessage());
 		}

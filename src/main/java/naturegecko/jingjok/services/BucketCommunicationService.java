@@ -19,8 +19,8 @@ public class BucketCommunicationService {
 	@Value("${minio.buckek-name}")
 	private String bucketname;
 
-	@Value("${minio.maximunfilesize}")
-	private long maximumFileSize;
+	@Value("${minio.maximumfilesize}")
+	private long maximumfilesize;
 
 	public BucketCommunicationService(MinioClient minioClient, MinioConfig minioConfig) {
 		BucketCommunicationService.MINIO_CLIENT = minioClient;
