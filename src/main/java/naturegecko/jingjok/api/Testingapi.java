@@ -86,8 +86,7 @@ public class Testingapi {
 		createNewTrack.setTrack_name(autoTrackName);
 		createNewTrack.setTimestamp(Timestamp.from(Instant.now()));
 		try {
-			createNewTrack.setTrack_file(minioUtil.uploadMusicToStorage(trackFile, "/tracks/musics/")
-					+ originamFileName.substring(originamFileName.lastIndexOf(".")));
+			createNewTrack.setTrack_file(minioUtil.uploadMusicToStorage(trackFile, "/tracks/musics/"));
 			createNewTrack.setDuration(9999);
 			createNewTrack.setAccount_id(1);
 			createNewTrack.setTrack_desc(trackFile.getOriginalFilename() + " | " + trackFile.getSize());
