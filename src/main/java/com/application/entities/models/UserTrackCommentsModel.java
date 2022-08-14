@@ -21,7 +21,7 @@ public class UserTrackCommentsModel {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	private int playlist_comment_id;
+	private int track_comment_id;
 
 	@JsonFormat(pattern = "yyyy/mm/dd")
 	private String timestamp;

@@ -24,6 +24,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class UserAccountModel {
+
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private int account_id;
@@ -34,7 +35,9 @@ public class UserAccountModel {
 	private String first_name;
 	private String last_name;
 	private String user_bios;
-	
+
+	private String profile_name;
+
 	@JsonFormat(pattern = "yyy/mm/dd")
 	private String registered_date;
 	@JsonFormat(pattern = "yyy/mm/dd")

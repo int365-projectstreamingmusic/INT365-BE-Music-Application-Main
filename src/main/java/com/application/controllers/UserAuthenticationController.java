@@ -1,5 +1,8 @@
 package com.application.controllers;
 
+import java.sql.Timestamp;
+import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -9,6 +12,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.PropertySource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -16,6 +21,7 @@ import org.springframework.security.crypto.bcrypt.BCrypt;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import com.application.entities.copmskeys.UserRolesCompKey;
 import com.application.entities.models.UserAccountModel;
 import com.application.entities.models.UserRolesModel;
 import com.application.entities.submittionforms.ChangePasswordForm;
@@ -25,10 +31,12 @@ import com.application.exceptons.ExceptionFoundation;
 import com.application.exceptons.ExceptionResponseModel.EXCEPTION_CODES;
 import com.application.repositories.RolesModelRepository;
 import com.application.repositories.UserAccountModelRepository;
+import com.application.repositories.UserRoleModelRepository;
 import com.application.utilities.EmailServiceUtility;
 import com.application.utilities.JwtTokenUtills;
 
 @Service
+@PropertySource("generalsetting.properties")
 public class UserAuthenticationController {
 
 	@Autowired
@@ -40,13 +48,23 @@ public class UserAuthenticationController {
 	private UserAccountModelRepository userAccountModelRepository;
 	@Autowired
 	private RolesModelRepository rolesModelRepository;
+	@Autowired
+	private UserRoleModelRepository userRoleModelRepository;
 
+	@Value("${general.role.user}")
+	private int userRoleMemberId;
+	@Value("${general.role.unverified}")
+	private int userRoleUnverfiedId;
+	@Value("${general.role.suspended}")
+	private int userRoleSuspendedId;
+
+	// OK!
 	// userRegistration
 	public Map<String, Object> userRegistration(UserRegiserationForm incomingRegisteration) {
 		UserAccountModel registeration = new UserAccountModel();
 
-		if (userAccountModelRepository.existsByFirst_NameIgnoreCaseAndExistsByLast_NameIgnoreCase(
-				incomingRegisteration.getFirst_name(), incomingRegisteration.getLast_name())) {
+		if (userAccountModelRepository.existByFirstnameOrLastname(incomingRegisteration.getFirst_name(),
+				incomingRegisteration.getLast_name())) {
 			throw new ExceptionFoundation(EXCEPTION_CODES.AUTHEN_USERNAME_ALREADY_EXISTED, HttpStatus.NOT_ACCEPTABLE,
 					"[ userRegistration ] This firstname and lastname is in use. You can have the same first name or last name but not both!");
 		}
@@ -61,18 +79,49 @@ public class UserAuthenticationController {
 					"[ userRegistration ] This email is in use by another account.");
 		}
 
+		List<UserRolesModel> userFirstRolesGroup = new ArrayList<>();
+
+		// Create new user
 		registeration.setUser_passcode(passwordEncoder.encode(incomingRegisteration.getUser_passcode()));
 		registeration.setEmail(incomingRegisteration.getEmail());
 		registeration.setFirst_name(incomingRegisteration.getFirst_name());
 		registeration.setLast_name(incomingRegisteration.getLast_name());
 		registeration.setUsername(incomingRegisteration.getUsername());
+		registeration.setProfile_name(incomingRegisteration.getUsername());
+		String getRegisterationTimeStamp = new Timestamp(System.currentTimeMillis()).toString();
+		registeration.setRegistered_date(getRegisterationTimeStamp);
 		registeration.setUser_bios("");
 
-		Map<String, Object> resultMap = new HashMap<>();
-		resultMap.put("registeration", registeration);
-		resultMap.put("status", "Success");
+		registeration = userAccountModelRepository.save(registeration);
 
-		userAccountModelRepository.save(registeration);
+		// Assign role number [ 1002 ] and [ 2001 ] to the newly created user.
+		// Assign 1
+		UserRolesModel assignUserRole1 = new UserRolesModel();
+		assignUserRole1.setRoles(rolesModelRepository.findById(userRoleMemberId)
+				.orElseThrow(() -> new ExceptionFoundation(EXCEPTION_CODES.SEARCH_NOT_FOUND, HttpStatus.NOT_FOUND,
+						"[ userRegistration ] This role does not exist.")));
+
+		assignUserRole1.setUserRolesID(
+				new UserRolesCompKey(registeration.getAccount_id(), assignUserRole1.getRoles().getRoles_id()));
+
+		userFirstRolesGroup.add(assignUserRole1);
+
+		// Assign 2
+		UserRolesModel assignUserRole2 = new UserRolesModel();
+		assignUserRole2.setRoles(rolesModelRepository.findById(userRoleUnverfiedId)
+				.orElseThrow(() -> new ExceptionFoundation(EXCEPTION_CODES.SEARCH_NOT_FOUND, HttpStatus.NOT_FOUND,
+						"[ userRegistration ] This role does not exist.")));
+
+		assignUserRole2.setUserRolesID(
+				new UserRolesCompKey(registeration.getAccount_id(), assignUserRole2.getRoles().getRoles_id()));
+		userFirstRolesGroup.add(assignUserRole2);
+
+		userRoleModelRepository.saveAll(userFirstRolesGroup);
+
+		// Send result when success.
+		Map<String, Object> resultMap = new HashMap<>();
+		resultMap.put("registeration", userAccountModelRepository.findById(registeration.getAccount_id()));
+		resultMap.put("status", "Success");
 
 		return resultMap;
 
@@ -89,16 +138,16 @@ public class UserAuthenticationController {
 		}
 
 		if (requestedUser.getUserRoles()
-				.contains(rolesModelRepository.findById(3001).orElseThrow(() -> new ExceptionFoundation(
-						EXCEPTION_CODES.SEARCH_NOT_FOUND, HttpStatus.NOT_FOUND,
-						"[ userAuthentication ] The role ID " + 3001 + " or \" suspended user \" does not exit")))) {
+				.contains(rolesModelRepository.findById(userRoleSuspendedId).orElseThrow(
+						() -> new ExceptionFoundation(EXCEPTION_CODES.SEARCH_NOT_FOUND, HttpStatus.NOT_FOUND,
+								"[ userAuthentication ] CAnnot find suspended role in the database.")))) {
 			throw new ExceptionFoundation(EXCEPTION_CODES.AUTHEN_NOT_ALLOWED, HttpStatus.FORBIDDEN,
 					"This account is suspended");
 		}
 
-		String[] roleList = { "" };
+		String[] roleList = new String[requestedUser.getUserRoles().size()];
 
-		for (int i = 0; i < requestedUser.getUserRoles().size(); i++) {
+		for (int i = 0; i <= requestedUser.getUserRoles().size() -1; i++) {
 			roleList[i] = requestedUser.getUserRoles().get(i).getRoles().getRoles();
 		}
 
@@ -106,7 +155,7 @@ public class UserAuthenticationController {
 		response.addHeader(HttpHeaders.AUTHORIZATION, "Bearer " + token);
 
 		Map<String, Object> result = new HashMap<String, Object>();
-		result.put("UserName", result);
+		result.put("UserName", userLoginModel.getUserName());
 		result.put("token", token);
 		result.put("roles", roleList);
 
@@ -114,8 +163,7 @@ public class UserAuthenticationController {
 	}
 
 	// userChangePassword
-	public void userChangePassword(ChangePasswordForm passwordform,
-			HttpServletRequest request) {
+	public void userChangePassword(ChangePasswordForm passwordform, HttpServletRequest request) {
 		UserAccountModel requestedUser = userAccountModelRepository
 				.findByUsername(JwtTokenUtills.getUserNameFromToken(request));
 
@@ -131,7 +179,7 @@ public class UserAuthenticationController {
 
 		if (passwordform.getNewPassword().equals(passwordform.getConfirmationPassword())) {
 			String newPasswordForRequestedUser = passwordEncoder.encode(passwordform.getNewPassword());
-			//ajfow;afnwaoif
+			// ajfow;afnwaoif
 		} else {
 			throw new ExceptionFoundation(EXCEPTION_CODES.AUTHEN_PASSWORD_MISSMATCH, null,
 					"[ userChangePassword ] Confirmation password is not the same with new password.");
@@ -149,7 +197,7 @@ public class UserAuthenticationController {
 	public void sendUserEmailValidation(String recieverEmail) throws MessagingException {
 		emailServiceUtility.sendHtmlRmail(recieverEmail);
 	}
-	
+
 	// userVerifyAccount
 	public void userVerifyAccount(String verificationCode) {
 
