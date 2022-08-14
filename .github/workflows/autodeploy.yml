@@ -36,7 +36,7 @@ jobs:
           export TOKEN=${{ secrets.GITTOKEN_PRO }}
           export GITHUB_USER=pimpony
           echo $TOKEN | docker login ghcr.io --password-stdin --username $GITHUB_USER
-          cd ./dev/back-end
+          cd ./backend-pro
           docker-compose down && docker-compose pull
           docker-compose up -d
           docker image prune -af
