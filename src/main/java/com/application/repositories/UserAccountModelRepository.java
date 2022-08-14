@@ -30,6 +30,6 @@ public interface UserAccountModelRepository extends JpaRepository<UserAccountMod
 	@Query(value = "UPDATE UserAccountModel u SET u.user_passcode = :newPassword WHERE u.account_id = :accountId")
 	@Transactional
 	@Modifying
-	UserAccountModel updateUserPassword(String newPassword, int accountId);
+	int updateUserPassword(String newPassword, int accountId);
 
 }

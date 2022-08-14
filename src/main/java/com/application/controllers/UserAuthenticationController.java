@@ -65,17 +65,17 @@ public class UserAuthenticationController {
 
 		if (userAccountModelRepository.existByFirstnameOrLastname(incomingRegisteration.getFirst_name(),
 				incomingRegisteration.getLast_name())) {
-			throw new ExceptionFoundation(EXCEPTION_CODES.AUTHEN_USERNAME_ALREADY_EXISTED, HttpStatus.NOT_ACCEPTABLE,
+			throw new ExceptionFoundation(EXCEPTION_CODES.AUTHEN_USERNAME_ALREADY_EXISTED, HttpStatus.I_AM_A_TEAPOT,
 					"[ userRegistration ] This firstname and lastname is in use. You can have the same first name or last name but not both!");
 		}
 
 		if (userAccountModelRepository.existsByUsernameIgnoreCase(incomingRegisteration.getUsername())) {
-			throw new ExceptionFoundation(EXCEPTION_CODES.AUTHEN_USERNAME_ALREADY_EXISTED, HttpStatus.NOT_ACCEPTABLE,
+			throw new ExceptionFoundation(EXCEPTION_CODES.AUTHEN_USERNAME_ALREADY_EXISTED, HttpStatus.I_AM_A_TEAPOT,
 					"[ userRegistration ] This usename is in use.");
 		}
 
 		if (userAccountModelRepository.existsByEmailIgnoreCase(incomingRegisteration.getEmail())) {
-			throw new ExceptionFoundation(EXCEPTION_CODES.AUTHEN_EMAIL_ALREADY_EXIST, HttpStatus.NOT_ACCEPTABLE,
+			throw new ExceptionFoundation(EXCEPTION_CODES.AUTHEN_EMAIL_ALREADY_EXIST, HttpStatus.I_AM_A_TEAPOT,
 					"[ userRegistration ] This email is in use by another account.");
 		}
 
@@ -127,13 +127,14 @@ public class UserAuthenticationController {
 
 	}
 
+	// OK!
 	// userAuthentication
 	@SuppressWarnings("unlikely-arg-type")
 	public Map<String, Object> userAuthentication(UserLoginForm userLoginModel, HttpServletResponse response) {
 		UserAccountModel requestedUser = userAccountModelRepository.findByUsername(userLoginModel.getUserName());
 		if (requestedUser == null
 				|| !passwordEncoder.matches(userLoginModel.getPassword(), requestedUser.getUser_passcode())) {
-			throw new ExceptionFoundation(EXCEPTION_CODES.AUTHEN_BAD_CREDENTIALS, HttpStatus.NOT_ACCEPTABLE,
+			throw new ExceptionFoundation(EXCEPTION_CODES.AUTHEN_BAD_CREDENTIALS, HttpStatus.I_AM_A_TEAPOT,
 					"[ AUTHEN FAILED ] Username or password doesn't match.");
 		}
 
@@ -147,7 +148,7 @@ public class UserAuthenticationController {
 
 		String[] roleList = new String[requestedUser.getUserRoles().size()];
 
-		for (int i = 0; i <= requestedUser.getUserRoles().size() -1; i++) {
+		for (int i = 0; i <= requestedUser.getUserRoles().size() - 1; i++) {
 			roleList[i] = requestedUser.getUserRoles().get(i).getRoles().getRoles();
 		}
 
@@ -162,26 +163,31 @@ public class UserAuthenticationController {
 		return result;
 	}
 
+	// OK!
 	// userChangePassword
 	public void userChangePassword(ChangePasswordForm passwordform, HttpServletRequest request) {
 		UserAccountModel requestedUser = userAccountModelRepository
 				.findByUsername(JwtTokenUtills.getUserNameFromToken(request));
 
+		System.out.println("At password ole and ole");
 		if (requestedUser == null) {
-			throw new ExceptionFoundation(EXCEPTION_CODES.AUTHEN_NOT_ALLOWED, HttpStatus.BAD_REQUEST,
+			throw new ExceptionFoundation(EXCEPTION_CODES.AUTHEN_NOT_ALLOWED, HttpStatus.UNAUTHORIZED,
 					"[ userChangePassword ] This user does not exist... seriously...?");
 		}
 
-		if (passwordEncoder.matches(passwordform.getOldPassword(), requestedUser.getUser_passcode())) {
+		System.out.println("At password compare");
+		if (!passwordEncoder.matches(passwordform.getOldPassword(), requestedUser.getUser_passcode())) {
 			throw new ExceptionFoundation(EXCEPTION_CODES.AUTHEN_BAD_CREDENTIALS, HttpStatus.UNAUTHORIZED,
 					"[ userChangePassword ] User is not allowed to change a passwotd because an old password doesn't match.");
 		}
 
+		System.out.println("At save password");
 		if (passwordform.getNewPassword().equals(passwordform.getConfirmationPassword())) {
 			String newPasswordForRequestedUser = passwordEncoder.encode(passwordform.getNewPassword());
-			// ajfow;afnwaoif
+			userAccountModelRepository.updateUserPassword(newPasswordForRequestedUser, requestedUser.getAccount_id());
+			System.out.println("At password completed");
 		} else {
-			throw new ExceptionFoundation(EXCEPTION_CODES.AUTHEN_PASSWORD_MISSMATCH, null,
+			throw new ExceptionFoundation(EXCEPTION_CODES.AUTHEN_PASSWORD_MISSMATCH, HttpStatus.I_AM_A_TEAPOT,
 					"[ userChangePassword ] Confirmation password is not the same with new password.");
 		}
 
