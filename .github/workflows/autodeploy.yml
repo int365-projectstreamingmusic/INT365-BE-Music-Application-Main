@@ -2,7 +2,7 @@ name: back-end
 on:
   push:
     branches:
-      - master
+      - prod
 jobs:
   build:
     runs-on: ubuntu-20.04
@@ -28,12 +28,12 @@ jobs:
     steps:
     - uses: appleboy/ssh-action@master
       with:
-        host: ${{ secrets.HOSTNAME }}
-        username: ${{ secrets.USERNAME }}
-        key: ${{ secrets.PRIVATEKEY }}
+        host: ${{ secrets.HOSTNAME_PRO }}
+        username: ${{ secrets.USERNAME_PRO }}
+        key: ${{ secrets.PRIVATEKEY_PRO }}
         port: ${{ secrets.SERVERPORT }}
         script: |
-          export TOKEN=${{ secrets.GITTOKEN }}
+          export TOKEN=${{ secrets.GITTOKEN_PRO }}
           export GITHUB_USER=pimpony
           echo $TOKEN | docker login ghcr.io --password-stdin --username $GITHUB_USER
           cd ./dev/back-end
