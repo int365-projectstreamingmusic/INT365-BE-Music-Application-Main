@@ -29,6 +29,7 @@ public class AuthenticationAPIs {
 	@Autowired
 	UserAuthenticationController userAuthenticationController;
 
+	// --------------------- OK! ---------------------
 	@PostMapping("singup")
 	public ResponseEntity<Map<String, Object>> userRegistration(@RequestPart UserRegiserationForm registNewUser) {
 		Map<String, Object> newUser = userAuthenticationController.userRegistration(registNewUser);
@@ -43,17 +44,7 @@ public class AuthenticationAPIs {
 		return ResponseEntity.ok().body(result);
 	}
 
-	@GetMapping("verify")
-	public ResponseEntity<String> userVerifyAccount() {
-		return null;
-	}
-
-	@GetMapping("resetPassword")
-	public ResponseEntity<String> userPasswordReset() {
-		return null;
-	}
-
-	@GetMapping("logoff")
+	@GetMapping("logout")
 	public ResponseEntity<HttpStatus> userLogOut(HttpServletResponse response) {
 		return userAuthenticationController.userLogOut(response);
 	}
@@ -65,6 +56,17 @@ public class AuthenticationAPIs {
 		URI uri = URI.create(
 				ServletUriComponentsBuilder.fromCurrentContextPath().path("api/authen/changepassword").toString());
 		return ResponseEntity.created(uri).body(HttpStatus.CREATED);
+	}
+
+	// --------------------- WIP ---------------------
+	@GetMapping("verify")
+	public ResponseEntity<String> userVerifyAccount() {
+		return null;
+	}
+
+	@GetMapping("resetPassword")
+	public ResponseEntity<String> userPasswordReset() {
+		return null;
 	}
 
 }

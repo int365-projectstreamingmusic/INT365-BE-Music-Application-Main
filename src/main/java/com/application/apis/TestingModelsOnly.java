@@ -15,7 +15,6 @@ import com.application.entities.models.TrackMarkingModel;
 import com.application.entities.models.TracksModel;
 import com.application.entities.models.UserAccountModel;
 import com.application.repositories.ArtistsRepository;
-import com.application.repositories.ArtistsTracksRepository;
 import com.application.repositories.GenreRepository;
 import com.application.repositories.PlaylistRepository;
 import com.application.repositories.TrackMarkingRepository;

@@ -2,7 +2,6 @@ package com.application.controllers;
 
 import java.sql.Timestamp;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -17,7 +16,6 @@ import org.springframework.context.annotation.PropertySource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.crypto.bcrypt.BCrypt;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -63,12 +61,6 @@ public class UserAuthenticationController {
 	public Map<String, Object> userRegistration(UserRegiserationForm incomingRegisteration) {
 		UserAccountModel registeration = new UserAccountModel();
 
-		if (userAccountModelRepository.existByFirstnameOrLastname(incomingRegisteration.getFirst_name(),
-				incomingRegisteration.getLast_name())) {
-			throw new ExceptionFoundation(EXCEPTION_CODES.AUTHEN_USERNAME_ALREADY_EXISTED, HttpStatus.I_AM_A_TEAPOT,
-					"[ userRegistration ] This firstname and lastname is in use. You can have the same first name or last name but not both!");
-		}
-
 		if (userAccountModelRepository.existsByUsernameIgnoreCase(incomingRegisteration.getUsername())) {
 			throw new ExceptionFoundation(EXCEPTION_CODES.AUTHEN_USERNAME_ALREADY_EXISTED, HttpStatus.I_AM_A_TEAPOT,
 					"[ userRegistration ] This usename is in use.");
@@ -84,8 +76,8 @@ public class UserAuthenticationController {
 		// Create new user
 		registeration.setUser_passcode(passwordEncoder.encode(incomingRegisteration.getUser_passcode()));
 		registeration.setEmail(incomingRegisteration.getEmail());
-		registeration.setFirst_name(incomingRegisteration.getFirst_name());
-		registeration.setLast_name(incomingRegisteration.getLast_name());
+		registeration.setFirst_name("");
+		registeration.setLast_name("");
 		registeration.setUsername(incomingRegisteration.getUsername());
 		registeration.setProfile_name(incomingRegisteration.getUsername());
 		String getRegisterationTimeStamp = new Timestamp(System.currentTimeMillis()).toString();
@@ -169,19 +161,16 @@ public class UserAuthenticationController {
 		UserAccountModel requestedUser = userAccountModelRepository
 				.findByUsername(JwtTokenUtills.getUserNameFromToken(request));
 
-		System.out.println("At password ole and ole");
 		if (requestedUser == null) {
 			throw new ExceptionFoundation(EXCEPTION_CODES.AUTHEN_NOT_ALLOWED, HttpStatus.UNAUTHORIZED,
 					"[ userChangePassword ] This user does not exist... seriously...?");
 		}
 
-		System.out.println("At password compare");
 		if (!passwordEncoder.matches(passwordform.getOldPassword(), requestedUser.getUser_passcode())) {
 			throw new ExceptionFoundation(EXCEPTION_CODES.AUTHEN_BAD_CREDENTIALS, HttpStatus.UNAUTHORIZED,
 					"[ userChangePassword ] User is not allowed to change a passwotd because an old password doesn't match.");
 		}
 
-		System.out.println("At save password");
 		if (passwordform.getNewPassword().equals(passwordform.getConfirmationPassword())) {
 			String newPasswordForRequestedUser = passwordEncoder.encode(passwordform.getNewPassword());
 			userAccountModelRepository.updateUserPassword(newPasswordForRequestedUser, requestedUser.getAccount_id());
@@ -193,6 +182,7 @@ public class UserAuthenticationController {
 
 	}
 
+	// OK!
 	// userLogOut
 	public ResponseEntity<HttpStatus> userLogOut(HttpServletResponse response) {
 		response.setHeader(HttpHeaders.AUTHORIZATION, "");
