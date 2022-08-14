@@ -1,0 +1,19 @@
+version: "3"
+services:
+  backend:
+    container_name: backend
+    image: ghcr.io/int365-projectstreamingmusic/int365-be-music-application-main:master
+    ports:
+      - "8086:8086"
+#     volumes:
+#       - ~/imagestorage:/application/images/products
+#     networks:
+#        int222:
+#           ipv4_address: 172.10.0.3
+
+# networks:
+#   default:
+#     external:
+#        name: int222
+#   int222:
+#     external: true
