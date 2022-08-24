@@ -1,7 +1,22 @@
 package com.application.utilities;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.InputStream;
 import java.time.LocalDate;
+import java.util.Map;
 import java.util.Random;
+
+import javax.sound.sampled.AudioFileFormat;
+import javax.sound.sampled.AudioFormat;
+import javax.sound.sampled.AudioInputStream;
+import javax.sound.sampled.AudioSystem;
+
+import org.springframework.http.HttpStatus;
+import org.springframework.web.multipart.MultipartFile;
+
+import com.application.exceptons.ExceptionFoundation;
+import com.application.exceptons.ExceptionResponseModel.EXCEPTION_CODES;
 
 public class StringGenerateService {
 
@@ -10,12 +25,12 @@ public class StringGenerateService {
 
 	// Generate name for tracks and music.
 	public static String generateTrackNameUUID() {
-		return generateString(12);
+		return dateTimeGatherer() + generateString(12);
 	}
 
 	// Generate name for all image uploaded to the storage.
 	public static String generateImageNameUUID() {
-		return generateString(12);
+		return dateTimeGatherer() + generateString(12);
 	}
 
 	// Generate user unique ID to be used as primary key.
@@ -56,5 +71,6 @@ public class StringGenerateService {
 		String currentDate = LocalDate.now().toString();
 		return currentDate.substring(0, 4) + currentDate.substring(5, 7) + currentDate.substring(8);
 	}
+
 
 }

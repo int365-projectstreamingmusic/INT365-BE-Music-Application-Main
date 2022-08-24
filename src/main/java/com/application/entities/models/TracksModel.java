@@ -2,6 +2,8 @@ package com.application.entities.models;
 
 import java.util.List;
 
+import javax.persistence.Basic;
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -15,6 +17,7 @@ import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -29,26 +32,38 @@ public class TracksModel {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	private int track_id;
+	@Column(name = "track_id")
+	private int id;
 
-	private String track_file;
-	private String track_name;
+	@Column(name = "track_file")
+	private String trackFile;
+
+	@Column(name = "track_name")
+	private String trackName;
 
 	@JsonFormat(pattern = "yyyy/mm/dd")
 	private String timestamp;
 
 	private int duration;
 
-	private String track_desc;
+	@Column(name = "track_desc")
+	private String trackDesc;
 	private String thumbnail;
-	private int view_count;
+	
+	@Column(name = "view_count")
+	private int viewCount;
 
 	@ManyToOne
 	@JoinColumn(name = "account_id", insertable = false, updatable = false)
 	private UserAccountModel userAccountModel;
+	
+	@JsonIgnore
+	@Basic(optional = false)
+	@Column(name = "account_id")
+	private int accountId;
 
 	@OneToMany
-	@JoinColumn(name = "track_id")
+	@JoinColumn(name = "track_id", referencedColumnName = "track_id")
 	@OnDelete(action = OnDeleteAction.CASCADE)
 	private List<GenresTracksModel> genreTrack;
 

@@ -1,5 +1,6 @@
 package com.application.entities.models;
 
+import javax.persistence.Basic;
 import javax.persistence.EmbeddedId;
 import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
@@ -26,5 +27,6 @@ public class GenresTracksModel {
 
 	@ManyToOne
 	@JoinColumn(name = "genre_id", insertable = false, updatable = false)
+	@Basic(optional = true)
 	private GenreModel genre;
 }
