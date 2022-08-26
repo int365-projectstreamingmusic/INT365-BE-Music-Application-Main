@@ -7,6 +7,7 @@ import java.util.Map;
 
 import org.hibernate.hql.internal.NameGenerator;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.web.ServerProperties.Tomcat.Resource;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -151,6 +152,14 @@ public class MinioStorageService {
 			throw new ExceptionFoundation(EXCEPTION_CODES.CORE_INTERNAL_SERVER_ERROR, HttpStatus.INTERNAL_SERVER_ERROR,
 					"[ DeleteObjectFromMinIoByName ] Can't delete this object because : " + exc.getLocalizedMessage());
 		}
+	}
+
+	// GetImageFromMinIoByName
+	public Resource getImageFromMinIoByName(String destination, String name) {
+		String target = destination + name;
+		
+		
+		return null;
 	}
 
 }

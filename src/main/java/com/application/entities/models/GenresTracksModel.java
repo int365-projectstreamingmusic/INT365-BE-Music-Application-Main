@@ -27,6 +27,6 @@ public class GenresTracksModel {
 
 	@ManyToOne
 	@JoinColumn(name = "genre_id", insertable = false, updatable = false)
-	@Basic(optional = true)
+	@Basic(optional = true)	
 	private GenreModel genre;
 }

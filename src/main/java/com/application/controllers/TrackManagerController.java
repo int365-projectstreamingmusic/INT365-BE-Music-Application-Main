@@ -1,7 +1,7 @@
 package com.application.controllers;
 
 import java.sql.Timestamp;
-import java.util.Date;
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
@@ -13,17 +13,20 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.application.entities.copmskeys.GenreTracksCompkey;
+import com.application.entities.models.GenreModel;
 import com.application.entities.models.GenresTracksModel;
 import com.application.entities.models.TracksModel;
 import com.application.entities.models.UserAccountModel;
 import com.application.entities.submittionforms.AddNewTrackForm;
 import com.application.exceptons.ExceptionFoundation;
 import com.application.exceptons.ExceptionResponseModel.EXCEPTION_CODES;
+import com.application.repositories.GenreRepository;
+import com.application.repositories.GenresTracksRepository;
 import com.application.repositories.TracksModelRepository;
 import com.application.repositories.UserAccountModelRepository;
 import com.application.utilities.JwtTokenUtills;
 import com.application.utilities.MinioStorageService;
-import com.application.utilities.StringGenerateService;
 
 @Service
 @PropertySource("generalsetting.properties")
@@ -33,6 +36,11 @@ public class TrackManagerController {
 	private UserAccountModelRepository userAccountModelRepository;
 	@Autowired
 	private TracksModelRepository tracksModelRepository;
+	@Autowired
+	private GenreRepository genreRepository;
+	@Autowired
+	private GenresTracksRepository genresTracksRepository;
+
 	@Autowired
 	private MinioStorageService minioStorageService;
 
@@ -60,22 +68,40 @@ public class TrackManagerController {
 		newTrack.setDuration((int) trackFile.getSize());
 		newTrack.setTimestamp(new Timestamp(System.currentTimeMillis()).toString());
 		newTrack.setViewCount(0);
-		
+
 		newTrack.setAccountId(requestedBy.getAccount_id());
 
 		newTrack.setTrackDesc(newTrackForm.getTrackDesc());
 		newTrack.setTrackName(newTrackForm.getTrackName());
 
 		newTrack.setGenreTrack(null);
-		
+
 		String uploadedTrack = minioStorageService.uploadTrackToStorage(trackFile, minioTrackLocation);
 		String uploadedImage = minioStorageService.uploadImageToStorage(imageFile, minioTrackThumbnailLocation);
-			
+
 		newTrack.setTrackFile(uploadedTrack);
 		newTrack.setThumbnail(uploadedImage);
-		
-		tracksModelRepository.save(newTrack);
-		return newTrack;
+
+		newTrack = tracksModelRepository.save(newTrack);
+
+		// Adding genre to the track
+		List<GenresTracksModel> addingGenreTrack = new ArrayList<GenresTracksModel>();
+		List<GenreModel> targetGenres = newTrackForm.getGenreList();
+
+		if (targetGenres != null && targetGenres.size() > 0) {
+			for (int i = 0; i < newTrackForm.getGenreList().size(); i++) {
+				addingGenreTrack.add(new GenresTracksModel(
+						new GenreTracksCompkey(newTrack.getId(), targetGenres.get(i).getGenre_id()),
+						genreRepository.findById(targetGenres.get(i).getGenre_id())
+								.orElseThrow(() -> new ExceptionFoundation(EXCEPTION_CODES.SEARCH_NOT_FOUND,
+										HttpStatus.NOT_FOUND, "[ addNewTrack ] Genre not found."))));
+			}
+			genresTracksRepository.saveAll(addingGenreTrack);
+		}
+		TracksModel result = tracksModelRepository.findById(newTrack.getId())
+				.orElseThrow(() -> new ExceptionFoundation(EXCEPTION_CODES.SEARCH_NOT_FOUND, HttpStatus.NOT_FOUND,
+						"[ addNewTrack ] Track not found."));
+		return result;
 	}
 
 	// RemoveTrack
