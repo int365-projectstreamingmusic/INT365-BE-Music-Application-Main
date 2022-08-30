@@ -17,8 +17,8 @@ import lombok.NoArgsConstructor;
 public class GenreTracksCompkey implements Serializable {
 
 	@Column(name = "track_id")
-	private int track_id;
+	private int trackId;
 
 	@Column(name = "genre_id")
-	private int genre_id;
+	private int genreId;
 }

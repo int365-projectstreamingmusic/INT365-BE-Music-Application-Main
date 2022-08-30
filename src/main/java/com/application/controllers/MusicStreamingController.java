@@ -45,6 +45,7 @@ public class MusicStreamingController {
 			statObjectResult.put("LastModified", statObject.lastModified().toString());
 			statObjectResult.put("Object", statObject.object());
 			statObjectResult.put("Size", statObject.size());
+			statObjectResult.put("medisType", statObject.contentType());
 			return statObjectResult;
 		} catch (Exception exc) {
 			throw new ExceptionFoundation(EXCEPTION_CODES.SEARCH_NOT_FOUND, HttpStatus.NOT_FOUND,

@@ -1,5 +1,6 @@
 package com.application.entities.models;
 
+import javax.persistence.Column;
 import javax.persistence.EmbeddedId;
 import javax.persistence.Entity;
 import javax.persistence.Table;
@@ -18,6 +19,9 @@ public class PlaylistTrackListModel {
 	@EmbeddedId
 	private PlaylistTrackListCompkey id;
 
-	private int place_in_list;
-	private int is_skipped;
+	@Column(name = "place_in_list")
+	private int placeInList;
+
+	@Column(name = "is_skipped")
+	private int isSkipped;
 }
