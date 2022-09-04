@@ -27,7 +27,7 @@ import com.application.entities.submittionforms.UserLoginForm;
 import com.application.entities.submittionforms.UserRegiserationForm;
 import com.application.exceptons.ExceptionFoundation;
 import com.application.exceptons.ExceptionResponseModel.EXCEPTION_CODES;
-import com.application.repositories.RolesModelRepository;
+import com.application.repositories.RolesRepository;
 import com.application.repositories.UserAccountModelRepository;
 import com.application.repositories.UserRoleModelRepository;
 import com.application.utilities.EmailServiceUtility;
@@ -45,7 +45,7 @@ public class UserAuthenticationController {
 	@Autowired
 	private UserAccountModelRepository userAccountModelRepository;
 	@Autowired
-	private RolesModelRepository rolesModelRepository;
+	private RolesRepository rolesModelRepository;
 	@Autowired
 	private UserRoleModelRepository userRoleModelRepository;
 
@@ -79,7 +79,7 @@ public class UserAuthenticationController {
 		registeration.setFirst_name("");
 		registeration.setLast_name("");
 		registeration.setUsername(incomingRegisteration.getUsername());
-		registeration.setProfile_name(incomingRegisteration.getUsername());
+		//registeration.setProfile_name(incomingRegisteration.getUsername());
 		String getRegisterationTimeStamp = new Timestamp(System.currentTimeMillis()).toString();
 		registeration.setRegistered_date(getRegisterationTimeStamp);
 		registeration.setUser_bios("");

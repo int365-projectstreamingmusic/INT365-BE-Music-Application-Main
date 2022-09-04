@@ -7,7 +7,7 @@ import org.springframework.stereotype.Repository;
 import com.application.entities.models.TracksModel;
 
 @Repository
-public interface TracksModelRepository extends JpaRepository<TracksModel, Integer> {
+public interface TracksRepository extends JpaRepository<TracksModel, Integer> {
 	
 	@Query(value = "UPDATE TracksModel t SET t.viewCount = :newViewCount WHERE t.id = :id")
 	int updateNewVIewCount(int newViewCount, int id);

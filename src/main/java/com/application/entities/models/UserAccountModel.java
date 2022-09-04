@@ -36,7 +36,6 @@ public class UserAccountModel {
 	private String last_name;
 	private String user_bios;
 
-	private String profile_name;
 
 	@JsonFormat(pattern = "yyy/mm/dd")
 	private String registered_date;

@@ -48,7 +48,6 @@ public class TracksModel {
 
 	@Column(name = "track_desc")
 	private String trackDesc;
-	private String thumbnail;
 
 	@Column(name = "view_count")
 	private int viewCount;

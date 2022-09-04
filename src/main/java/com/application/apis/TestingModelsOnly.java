@@ -1,10 +1,13 @@
 package com.application.apis;
 
+import java.io.InputStream;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.PropertySource;
+import org.springframework.core.io.Resource;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -15,17 +18,20 @@ import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.application.controllers.FileLinkRelController;
 import com.application.entities.models.ArtistsModel;
+import com.application.entities.models.FileLinkRefModel;
 import com.application.entities.models.GenreModel;
 import com.application.entities.models.PlaylistModel;
 import com.application.entities.models.TrackMarkingModel;
 import com.application.entities.models.TracksModel;
 import com.application.entities.models.UserAccountModel;
 import com.application.repositories.ArtistsRepository;
+import com.application.repositories.FileLinkRefRepository;
 import com.application.repositories.GenreRepository;
 import com.application.repositories.PlaylistRepository;
 import com.application.repositories.TrackMarkingRepository;
-import com.application.repositories.TracksModelRepository;
+import com.application.repositories.TracksRepository;
 import com.application.repositories.UserAccountModelRepository;
 import com.application.utilities.MinioStorageService;
 
@@ -45,9 +51,11 @@ public class TestingModelsOnly {
 	@Autowired
 	private PlaylistRepository playlistRepository;
 	@Autowired
-	private TracksModelRepository tracksModelRepository;
+	private TracksRepository tracksModelRepository;
 	@Autowired
 	private MinioStorageService minioStorageService;
+	@Autowired
+	private FileLinkRelController fileLinkRelController;
 
 	@Value("${minio.storage.track.music}")
 	String minioTrackLocation;
@@ -57,7 +65,7 @@ public class TestingModelsOnly {
 
 	@DeleteMapping("3")
 	public ResponseEntity<String> do3(@RequestParam String name) {
-		return ResponseEntity.ok().body(minioStorageService.deleteObjectFromMinioByName(minioThumbmailLocation, name));
+		return ResponseEntity.ok().body(minioStorageService.deleteObjectFromMinioByName(minioThumbmailLocation + name));
 	}
 
 	@PostMapping("2")
@@ -68,6 +76,30 @@ public class TestingModelsOnly {
 	@PostMapping("1")
 	public ResponseEntity<String> do1(MultipartFile file) {
 		return ResponseEntity.ok().body(minioStorageService.uploadTrackToStorage(file, minioTrackLocation));
+	}
+
+	@GetMapping("5")
+	public ResponseEntity<String> do5() {
+		fileLinkRelController.deleteTargetFileByName("20220826i0Z4k2m8h4M8.png");
+		return ResponseEntity.ok().body("dwa");
+	}
+
+	@GetMapping("6")
+	public ResponseEntity<Resource> do6() {
+		return ResponseEntity.ok().body(fileLinkRelController.retriveImageByName("20220826i0Z4k2m8h4M8.png"));
+	}
+
+	@PostMapping("7")
+	public ResponseEntity<FileLinkRefModel> do7(@RequestPart MultipartFile multipartFile, @RequestParam int typeId,
+			@RequestParam int recordRel) {
+
+		return ResponseEntity.ok().body(fileLinkRelController.insertNewLinkRel(multipartFile, typeId, recordRel));
+	}
+
+	// images/music_thumbnails/20220826i0Z4k2m8h4M8.png
+	@GetMapping(value = "4", produces = { MediaType.IMAGE_JPEG_VALUE, MediaType.IMAGE_PNG_VALUE })
+	public ResponseEntity<Resource> do4() {
+		return ResponseEntity.ok().body(fileLinkRelController.retriveImageByTargetRef(1, 201));
 	}
 
 	@GetMapping("getUser")

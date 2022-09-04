@@ -7,8 +7,6 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Table;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -21,9 +19,10 @@ import lombok.NoArgsConstructor;
 public class GenreModel {
 
 	@Id
+	@Column(name = "genre_Id")
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private int genreId;
-	
+
 	@Column(name = "genre_name")
 	private String genreName;
 	@Column(name = "genre_desc")

@@ -23,7 +23,7 @@ import com.application.exceptons.ExceptionFoundation;
 import com.application.exceptons.ExceptionResponseModel.EXCEPTION_CODES;
 import com.application.repositories.GenreRepository;
 import com.application.repositories.GenresTracksRepository;
-import com.application.repositories.TracksModelRepository;
+import com.application.repositories.TracksRepository;
 import com.application.repositories.UserAccountModelRepository;
 import com.application.utilities.JwtTokenUtills;
 import com.application.utilities.MinioStorageService;
@@ -35,7 +35,7 @@ public class TrackManagerController {
 	@Autowired
 	private UserAccountModelRepository userAccountModelRepository;
 	@Autowired
-	private TracksModelRepository tracksModelRepository;
+	private TracksRepository tracksModelRepository;
 	@Autowired
 	private GenreRepository genreRepository;
 	@Autowired
@@ -80,7 +80,7 @@ public class TrackManagerController {
 		String uploadedImage = minioStorageService.uploadImageToStorage(imageFile, minioTrackThumbnailLocation);
 
 		newTrack.setTrackFile(uploadedTrack);
-		newTrack.setThumbnail(uploadedImage);
+		//newTrack.setThumbnail(uploadedImage);
 
 		newTrack = tracksModelRepository.save(newTrack);
 
