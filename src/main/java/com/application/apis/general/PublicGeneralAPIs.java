@@ -1,5 +1,7 @@
 package com.application.apis.general;
 
+import java.util.Map;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
@@ -12,11 +14,16 @@ import com.application.controllers.GenreController;
 import com.application.entities.models.GenreModel;
 
 @RestController
-@RequestMapping("api/public/genre/")
-public class PublicGenreAPIs {
+@RequestMapping("api/public/general/")
+public class PublicGeneralAPIs {
 
 	@Autowired
 	private GenreController genreController;
+
+	@GetMapping("welcome")
+	public ResponseEntity<Map<String, Object>> getWelcomePageObject() {
+		return null;
+	}
 
 	// ListGenreByPage
 	@GetMapping("getGere")
@@ -25,5 +32,15 @@ public class PublicGenreAPIs {
 			@RequestParam(defaultValue = "", required = false) String searchContent) {
 		return ResponseEntity.ok().body(genreController.listGenreListByPage(page, size, searchContent));
 	}
+	
+	//ListTopArtists
+	
+	//ListTopTrack
+	
+	//ListNewTrack
+	
+	//ListNewArtist
+	
+	//ListTrackOfTheWeek
 
 }

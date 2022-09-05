@@ -70,7 +70,7 @@ public class TestingModelsOnly {
 
 	@PostMapping("2")
 	public ResponseEntity<String> do2(MultipartFile file) {
-		return ResponseEntity.ok().body(minioStorageService.uploadImageToStorage(file, minioThumbmailLocation));
+		return ResponseEntity.ok().body(minioStorageService.uploadImageToStorage(file,"", minioThumbmailLocation));
 	}
 
 	@PostMapping("1")
