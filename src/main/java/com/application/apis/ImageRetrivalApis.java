@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.RestController;
 @PropertySource("generalsetting.properties")
 @RestController
 @RequestMapping("api/general/")
-public class GeneralApis {
+public class ImageRetrivalApis {
 
 	@Value("${minio.storage.user-profile}")
 	String minioUserProfile;

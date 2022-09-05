@@ -151,12 +151,12 @@ public class MinioStorageService {
 
 	// OK!
 	// imageUploadToMinIo
-	public String uploadImageToStorage(MultipartFile imageFile, String imageFileLocation) {
+	public String uploadImageToStorage(MultipartFile imageFile, String prefix, String imageFileLocation) {
 		String imageFileExtention = imageFile.getOriginalFilename()
 				.substring(imageFile.getOriginalFilename().lastIndexOf("."));
 		try {
 			InputStream imageFileStream = new BufferedInputStream(imageFile.getInputStream());
-			String imageFileName = StringGenerateService.generateImageNameUUID() + imageFileExtention;
+			String imageFileName = prefix + StringGenerateService.generateImageNameUUID() + imageFileExtention;
 			minioClient.putObject(PutObjectArgs.builder().bucket(bucketname).object(imageFileLocation + imageFileName)
 					.stream(imageFileStream, imageFileStream.available(), -1).contentType(imageFile.getContentType())
 					.build());

@@ -77,7 +77,7 @@ public class TrackManagerController {
 		newTrack.setGenreTrack(null);
 
 		String uploadedTrack = minioStorageService.uploadTrackToStorage(trackFile, minioTrackLocation);
-		String uploadedImage = minioStorageService.uploadImageToStorage(imageFile, minioTrackThumbnailLocation);
+		String uploadedImage = minioStorageService.uploadImageToStorage(imageFile, "",minioTrackThumbnailLocation);
 
 		newTrack.setTrackFile(uploadedTrack);
 		//newTrack.setThumbnail(uploadedImage);
