@@ -7,6 +7,7 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
 import com.application.entities.copmskeys.UserRolesCompKey;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -19,6 +20,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class UserRolesModel {
 
+	@JsonIgnore
 	@EmbeddedId
 	private UserRolesCompKey userRolesID;
 	

@@ -16,6 +16,8 @@ public class ExceptionResponseModel {
 		// Saving
 		SAVE_FILE_FAILED(2001), // Can't save image or file.
 		SAVE_FILE_INVALID(2002), // Wrong format
+		SAVE_EXISTS(2003), // Already exist
+		SAVE_IS_NULL(2004),
 
 		// Authentication
 		AUTHEN_BAD_CREDENTIALS(3001), // Username or password is incorrect. Or both!
@@ -27,8 +29,7 @@ public class ExceptionResponseModel {
 		AUTHEN_NOT_ALLOWED(3007), // When the account is suspended.
 		AUTHEN_HORRIBLE_TOKEN(3008), // This token is invalid, nothing can be found here.
 		AUTHEN_EMAIL_ALREADY_EXIST(3009), // Email is taken
-		AUTHEN_IS_TAKEN(3010),
-		AUTHEN_PASSWORD_MISSMATCH(3011),
+		AUTHEN_IS_TAKEN(3010), AUTHEN_PASSWORD_MISSMATCH(3011),
 
 		// Unavailable, at least for now.
 		FEATURE_NOT_IMPLEMENTED(4001), // Not yet done.
@@ -40,7 +41,8 @@ public class ExceptionResponseModel {
 		// Application core infrastructure
 		CORE_INIT_FAILED(5001), // File initialization failed.
 		CORE_METHOD_FAILED(5002), CORE_FILE_DUPLICATED(5003), // File duplicated.
-		CORE_COMPRESSION_FAILURE(5004), CORE_MINIO_NOT_FOUND(5005), CORE_NOT_IMPLEMENTED(5006), CORE_INTERNAL_SERVER_ERROR(5007),
+		CORE_COMPRESSION_FAILURE(5004), CORE_MINIO_NOT_FOUND(5005), CORE_NOT_IMPLEMENTED(5006),
+		CORE_INTERNAL_SERVER_ERROR(5007),
 
 		// User application
 		SHOP_NOT_ON_STORE(6001), // Sorry! they don't want to sell this product!
@@ -53,8 +55,8 @@ public class ExceptionResponseModel {
 		MINIO_BUCKET_UNREACHABLE(7001), // Minio bucket is not reachable.
 		MINIO_OBJECT_UNREACHABLE(7002), // Minio object is unreachable.
 		MINIO_OBJECT_INVALID(7003), // What they have and what we need are not the same.
-		
-		//User
+
+		// User
 
 		// Others
 		DEAD(9999); // Just stupidly died with an unknown reason.

@@ -29,13 +29,17 @@ public class AuthenticationAPIs {
 	@Autowired
 	UserAuthenticationController userAuthenticationController;
 
-	@PostMapping("singup")
-	public ResponseEntity<Map<String, Object>> userRegistration(@RequestPart UserRegiserationForm registNewUser) {
-		Map<String, Object> newUser = userAuthenticationController.userRegistration(registNewUser);
-		URI uri = URI.create(ServletUriComponentsBuilder.fromCurrentContextPath().path("api/authen/singup").toString());
+//OK!
+	// UserRegistration
+	@PostMapping("signup")
+	public ResponseEntity<Map<String, Object>> userRegistration(@RequestPart UserRegiserationForm registerNewUser) {
+		Map<String, Object> newUser = userAuthenticationController.userRegistration(registerNewUser);
+		URI uri = URI.create(ServletUriComponentsBuilder.fromCurrentContextPath().path("api/authen/signup").toString());
 		return ResponseEntity.created(uri).body(newUser);
 	}
 
+	// OK!
+	// UserAuthentication
 	@GetMapping("login")
 	public ResponseEntity<Map<String, Object>> userAuthentication(@RequestPart UserLoginForm login,
 			HttpServletResponse response) {
@@ -43,28 +47,36 @@ public class AuthenticationAPIs {
 		return ResponseEntity.ok().body(result);
 	}
 
+	// OK!
+	// UserLogOut
+	@GetMapping("logout")
+	public ResponseEntity<HttpStatus> userLogOut(HttpServletResponse response) {
+		return userAuthenticationController.userLogOut(response);
+	}
+
+	// OK!
+	// UserChangePassword
+	@PutMapping("changepassword")
+	public ResponseEntity<HttpStatus> userChangePassword(@RequestPart ChangePasswordForm passwordForm,
+			HttpServletRequest request, HttpServletResponse response) {
+		userAuthenticationController.userChangePassword(passwordForm, request, response);
+		URI uri = URI.create(
+				ServletUriComponentsBuilder.fromCurrentContextPath().path("api/authen/changepassword").toString());
+		return ResponseEntity.created(uri).body(HttpStatus.CREATED);
+	}
+
+	// --------------------- WIP ---------------------
+
+	// UserVerifyAccount
 	@GetMapping("verify")
 	public ResponseEntity<String> userVerifyAccount() {
 		return null;
 	}
 
+	// UserPasswordReset
 	@GetMapping("resetPassword")
 	public ResponseEntity<String> userPasswordReset() {
 		return null;
-	}
-
-	@GetMapping("logoff")
-	public ResponseEntity<HttpStatus> userLogOut(HttpServletResponse response) {
-		return userAuthenticationController.userLogOut(response);
-	}
-
-	@PutMapping("changepassword")
-	public ResponseEntity<HttpStatus> changePassword(@RequestPart ChangePasswordForm passwordForm,
-			HttpServletRequest request) {
-		userAuthenticationController.userChangePassword(passwordForm, request);
-		URI uri = URI.create(
-				ServletUriComponentsBuilder.fromCurrentContextPath().path("api/authen/changepassword").toString());
-		return ResponseEntity.created(uri).body(HttpStatus.CREATED);
 	}
 
 }
