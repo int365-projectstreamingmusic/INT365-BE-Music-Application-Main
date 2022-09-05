@@ -112,7 +112,7 @@ public class UserAuthenticationController {
 
 		// Send result when success.
 		Map<String, Object> resultMap = new HashMap<>();
-		resultMap.put("registeration", userAccountModelRepository.findById(registeration.getAccount_id()));
+		resultMap.put("registration", userAccountModelRepository.findById(registeration.getAccount_id()));
 		resultMap.put("status", "Success");
 
 		return resultMap;

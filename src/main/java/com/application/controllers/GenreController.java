@@ -107,6 +107,13 @@ public class GenreController {
 	// RemoveGenreFromTrack
 	public void removeGenreFromTrack(int genreId, int trackId, HttpServletRequest request) {
 
+		GenresTracksModel target = genresTracksRepository.findById(new GenreTracksCompkey(trackId, genreId))
+				.orElseThrow(() -> new ExceptionFoundation(EXCEPTION_CODES.SEARCH_NOT_FOUND, HttpStatus.NOT_FOUND,
+						"[ GenreController ] The target with track id " + trackId + " and genre id " + genreId
+								+ " does not exist."));
+
+		genresTracksRepository.delete(target);
+
 	}
 
 }

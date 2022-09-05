@@ -32,10 +32,10 @@ public class AuthenticationAPIs {
 
 //OK!
 	// UserRegistration
-	@PostMapping("singup")
-	public ResponseEntity<Map<String, Object>> userRegistration(@RequestPart UserRegiserationForm registNewUser) {
-		Map<String, Object> newUser = userAuthenticationController.userRegistration(registNewUser);
-		URI uri = URI.create(ServletUriComponentsBuilder.fromCurrentContextPath().path("api/authen/singup").toString());
+	@PostMapping("signup")
+	public ResponseEntity<Map<String, Object>> userRegistration(@RequestPart UserRegiserationForm registerNewUser) {
+		Map<String, Object> newUser = userAuthenticationController.userRegistration(registerNewUser);
+		URI uri = URI.create(ServletUriComponentsBuilder.fromCurrentContextPath().path("api/authen/signup").toString());
 		return ResponseEntity.created(uri).body(newUser);
 	}
 
