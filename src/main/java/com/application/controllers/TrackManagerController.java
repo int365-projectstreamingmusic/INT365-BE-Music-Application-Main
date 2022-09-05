@@ -69,7 +69,7 @@ public class TrackManagerController {
 		newTrack.setTimestamp(new Timestamp(System.currentTimeMillis()).toString());
 		newTrack.setViewCount(0);
 
-		newTrack.setAccountId(requestedBy.getAccount_id());
+		newTrack.setAccountId(requestedBy.getAccountId());
 
 		newTrack.setTrackDesc(newTrackForm.getTrackDesc());
 		newTrack.setTrackName(newTrackForm.getTrackName());
@@ -113,7 +113,7 @@ public class TrackManagerController {
 				.orElseThrow(() -> new ExceptionFoundation(EXCEPTION_CODES.SEARCH_NOT_FOUND, HttpStatus.NOT_FOUND,
 						"[ RemoveTrack ] This track does not exist."));
 
-		if (requestedBy.getAccount_id() != targetTrack.getUserAccountModel().getAccount_id()) {
+		if (requestedBy.getAccountId() != targetTrack.getUserAccountModel().getAccountId()) {
 			throw new ExceptionFoundation(EXCEPTION_CODES.AUTHEN_NOT_ALLOWED, HttpStatus.UNAUTHORIZED,
 					"[ RemoveTrack ] This user is not the owner of this track.");
 		}

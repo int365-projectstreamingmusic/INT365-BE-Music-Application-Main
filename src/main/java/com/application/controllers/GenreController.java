@@ -94,7 +94,7 @@ public class GenreController {
 				.orElseThrow(() -> new ExceptionFoundation(EXCEPTION_CODES.SEARCH_NOT_FOUND, HttpStatus.NOT_FOUND,
 						"[ addGenreToTrack ] Genre with this ID does not exist."));
 
-		if (requestedBy.getAccount_id() != targetTrack.getAccountId()) {
+		if (requestedBy.getAccountId() != targetTrack.getAccountId()) {
 			throw new ExceptionFoundation(EXCEPTION_CODES.AUTHEN_NOT_ALLOWED, HttpStatus.UNAUTHORIZED,
 					"[ addGenreToTrack ] This user is not the owner of this track.");
 		}

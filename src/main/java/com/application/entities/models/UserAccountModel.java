@@ -3,6 +3,7 @@ package com.application.entities.models;
 import java.util.List;
 
 import javax.persistence.CascadeType;
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -27,15 +28,18 @@ public class UserAccountModel {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	private int account_id;
+	@Column(name = "account_id")
+	private int accountId;
 
 	private String username;
 	private String email;
 
-	private String first_name;
-	private String last_name;
-	private String user_bios;
-
+	@Column(name = "first_name")
+	private String firstName;
+	@Column(name = "last_name")
+	private String lastName;
+	@Column(name = "user_bios")
+	private String userBios;
 
 	@JsonFormat(pattern = "yyy/mm/dd")
 	private String registered_date;
@@ -43,7 +47,8 @@ public class UserAccountModel {
 	private String last_seen;
 
 	@JsonIgnore
-	private String user_passcode;
+	@Column(name = "user_passcode")
+	private String userPasscode;
 
 	@OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
 	@JoinColumn(name = "account_id")

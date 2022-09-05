@@ -1,4 +1,4 @@
-package com.application.apis;
+package com.application.apis.member;
 
 import javax.servlet.http.HttpServletRequest;
 

@@ -21,13 +21,13 @@ public interface UserAccountModelRepository extends JpaRepository<UserAccountMod
 
 	boolean existsByUsernameIgnoreCase(String username);
 
-	@Query(value = "SELECT CASE WHEN count(u) > 0 THEN true ELSE false END FROM UserAccountModel u WHERE LOWER(u.first_name) LIKE LOWER(concat('%',:first_name,'%')) AND LOWER(u.last_name) LIKE LOWER(CONCAT('%',:last_name,'%'))")
-	boolean existByFirstnameOrLastname(String first_name, String last_name);
+	@Query(value = "SELECT CASE WHEN count(u) > 0 THEN true ELSE false END FROM UserAccountModel u WHERE LOWER(u.firstName) LIKE LOWER(concat('%',:firstName,'%')) AND LOWER(u.lastName) LIKE LOWER(CONCAT('%',:lastName,'%'))")
+	boolean existByFirstnameOrLastname(String firstName, String lastName);
 
-	@Query(value = "SELECT u FROM UserAccountModel u WHERE u.username LIKE %?1% OR u.email LIKE %?1% ORDER BY u.account_id DESC")
+	@Query(value = "SELECT u FROM UserAccountModel u WHERE u.username LIKE %?1% OR u.email LIKE %?1% ORDER BY u.accountId DESC")
 	Page<UserAccountModel> findByUsernameContainingOrEmailContaining(String searchContent, Pageable pageable);
 
-	@Query(value = "UPDATE UserAccountModel u SET u.user_passcode = :newPassword WHERE u.account_id = :accountId")
+	@Query(value = "UPDATE UserAccountModel u SET u.userPasscode = :newPassword WHERE u.accountId = :accountId")
 	@Transactional
 	@Modifying
 	int updateUserPassword(String newPassword, int accountId);

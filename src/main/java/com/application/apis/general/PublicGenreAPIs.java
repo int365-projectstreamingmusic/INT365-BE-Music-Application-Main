@@ -1,4 +1,4 @@
-package com.application.apis;
+package com.application.apis.general;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;

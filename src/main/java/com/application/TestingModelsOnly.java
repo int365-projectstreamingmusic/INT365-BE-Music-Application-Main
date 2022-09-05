@@ -1,4 +1,4 @@
-package com.application.apis;
+package com.application;
 
 import java.io.InputStream;
 import java.util.List;

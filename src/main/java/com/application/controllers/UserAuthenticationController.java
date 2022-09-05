@@ -74,15 +74,15 @@ public class UserAuthenticationController {
 		List<UserRolesModel> userFirstRolesGroup = new ArrayList<>();
 
 		// Create new user
-		registeration.setUser_passcode(passwordEncoder.encode(incomingRegisteration.getUser_passcode()));
+		registeration.setUserPasscode(passwordEncoder.encode(incomingRegisteration.getUser_passcode()));
 		registeration.setEmail(incomingRegisteration.getEmail());
-		registeration.setFirst_name("");
-		registeration.setLast_name("");
+		registeration.setFirstName("");
+		registeration.setLastName("");
 		registeration.setUsername(incomingRegisteration.getUsername());
-		//registeration.setProfile_name(incomingRegisteration.getUsername());
+		// registeration.setProfile_name(incomingRegisteration.getUsername());
 		String getRegisterationTimeStamp = new Timestamp(System.currentTimeMillis()).toString();
 		registeration.setRegistered_date(getRegisterationTimeStamp);
-		registeration.setUser_bios("");
+		registeration.setUserBios("");
 
 		registeration = userAccountModelRepository.save(registeration);
 
@@ -94,7 +94,7 @@ public class UserAuthenticationController {
 						"[ userRegistration ] This role does not exist.")));
 
 		assignUserRole1.setUserRolesID(
-				new UserRolesCompKey(registeration.getAccount_id(), assignUserRole1.getRoles().getRoles_id()));
+				new UserRolesCompKey(registeration.getAccountId(), assignUserRole1.getRoles().getRoles_id()));
 
 		userFirstRolesGroup.add(assignUserRole1);
 
@@ -105,14 +105,14 @@ public class UserAuthenticationController {
 						"[ userRegistration ] This role does not exist.")));
 
 		assignUserRole2.setUserRolesID(
-				new UserRolesCompKey(registeration.getAccount_id(), assignUserRole2.getRoles().getRoles_id()));
+				new UserRolesCompKey(registeration.getAccountId(), assignUserRole2.getRoles().getRoles_id()));
 		userFirstRolesGroup.add(assignUserRole2);
 
 		userRoleModelRepository.saveAll(userFirstRolesGroup);
 
 		// Send result when success.
 		Map<String, Object> resultMap = new HashMap<>();
-		resultMap.put("registration", userAccountModelRepository.findById(registeration.getAccount_id()));
+		resultMap.put("registration", userAccountModelRepository.findById(registeration.getAccountId()));
 		resultMap.put("status", "Success");
 
 		return resultMap;
@@ -125,7 +125,7 @@ public class UserAuthenticationController {
 	public Map<String, Object> userAuthentication(UserLoginForm userLoginModel, HttpServletResponse response) {
 		UserAccountModel requestedUser = userAccountModelRepository.findByUsername(userLoginModel.getUserName());
 		if (requestedUser == null
-				|| !passwordEncoder.matches(userLoginModel.getPassword(), requestedUser.getUser_passcode())) {
+				|| !passwordEncoder.matches(userLoginModel.getPassword(), requestedUser.getUserPasscode())) {
 			throw new ExceptionFoundation(EXCEPTION_CODES.AUTHEN_BAD_CREDENTIALS, HttpStatus.I_AM_A_TEAPOT,
 					"[ AUTHEN FAILED ] Username or password doesn't match.");
 		}
@@ -157,7 +157,8 @@ public class UserAuthenticationController {
 
 	// OK!
 	// userChangePassword
-	public void userChangePassword(ChangePasswordForm passwordform, HttpServletRequest request) {
+	public void userChangePassword(ChangePasswordForm passwordform, HttpServletRequest request,
+			HttpServletResponse response) {
 		UserAccountModel requestedUser = userAccountModelRepository
 				.findByUsername(JwtTokenUtills.getUserNameFromToken(request));
 
@@ -166,15 +167,15 @@ public class UserAuthenticationController {
 					"[ userChangePassword ] This user does not exist... seriously...?");
 		}
 
-		if (!passwordEncoder.matches(passwordform.getOldPassword(), requestedUser.getUser_passcode())) {
+		if (!passwordEncoder.matches(passwordform.getOldPassword(), requestedUser.getUserPasscode())) {
 			throw new ExceptionFoundation(EXCEPTION_CODES.AUTHEN_BAD_CREDENTIALS, HttpStatus.UNAUTHORIZED,
 					"[ userChangePassword ] User is not allowed to change a passwotd because an old password doesn't match.");
 		}
 
 		if (passwordform.getNewPassword().equals(passwordform.getConfirmationPassword())) {
 			String newPasswordForRequestedUser = passwordEncoder.encode(passwordform.getNewPassword());
-			userAccountModelRepository.updateUserPassword(newPasswordForRequestedUser, requestedUser.getAccount_id());
-			System.out.println("At password completed");
+			userAccountModelRepository.updateUserPassword(newPasswordForRequestedUser, requestedUser.getAccountId());
+			response.setHeader(HttpHeaders.AUTHORIZATION, "");
 		} else {
 			throw new ExceptionFoundation(EXCEPTION_CODES.AUTHEN_PASSWORD_MISSMATCH, HttpStatus.I_AM_A_TEAPOT,
 					"[ userChangePassword ] Confirmation password is not the same with new password.");
@@ -188,6 +189,8 @@ public class UserAuthenticationController {
 		response.setHeader(HttpHeaders.AUTHORIZATION, "");
 		return ResponseEntity.ok().body(HttpStatus.OK);
 	}
+
+	// -------------------- WIP --------------------
 
 	// sendUserEmailValidation
 	public void sendUserEmailValidation(String recieverEmail) throws MessagingException {

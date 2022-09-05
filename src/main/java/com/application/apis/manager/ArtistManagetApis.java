@@ -47,7 +47,7 @@ public class ArtistManagetApis {
 			size = defaultArtistsPerPage;
 		}
 		Pageable pageRequest = PageRequest.of(page, size);
-		return artistRepository.getArtistByUserAccountModel(requestedBy.getAccount_id(), pageRequest);
+		return artistRepository.getArtistByUserAccountModel(requestedBy.getAccountId(), pageRequest);
 	}
 
 	// AddNewArtist
@@ -72,7 +72,7 @@ public class ArtistManagetApis {
 				.orElseThrow(() -> new ExceptionFoundation(EXCEPTION_CODES.SEARCH_NOT_FOUND, HttpStatus.NOT_FOUND,
 						"[ removeArtist ] Artist with this ID does not exist."));
 
-		if (requestedBy.getAccount_id() != targetArtist.getArtistId()) {
+		if (requestedBy.getAccountId() != targetArtist.getArtistId()) {
 			throw new ExceptionFoundation(EXCEPTION_CODES.AUTHEN_NOT_ALLOWED, HttpStatus.UNAUTHORIZED,
 					"[ removeArtist ] This user is not the owner of this record.");
 		}
@@ -107,7 +107,7 @@ public class ArtistManagetApis {
 				.orElseThrow(() -> new ExceptionFoundation(EXCEPTION_CODES.SEARCH_NOT_FOUND, HttpStatus.NOT_FOUND,
 						"[ updateArtistName ] Artists with this ID is not exist."));
 
-		if (requestedBy.getAccount_id() != targetArtist.getUserAccount().getAccount_id()) {
+		if (requestedBy.getAccountId() != targetArtist.getUserAccount().getAccountId()) {
 			throw new ExceptionFoundation(EXCEPTION_CODES.AUTHEN_NOT_ALLOWED, HttpStatus.UNAUTHORIZED,
 					"[ updateArtistName ] You are not the record owner of this artist.");
 		}
@@ -124,7 +124,7 @@ public class ArtistManagetApis {
 				.orElseThrow(() -> new ExceptionFoundation(EXCEPTION_CODES.SEARCH_NOT_FOUND, HttpStatus.NOT_FOUND,
 						"[ updateArtistBio ] Artists with this ID is not exist."));
 
-		if (requestedBy.getAccount_id() != targetArtist.getUserAccount().getAccount_id()) {
+		if (requestedBy.getAccountId() != targetArtist.getUserAccount().getAccountId()) {
 			throw new ExceptionFoundation(EXCEPTION_CODES.AUTHEN_NOT_ALLOWED, HttpStatus.UNAUTHORIZED,
 					"[ updateArtistBio ] You are not the record owner of this artist.");
 		}
