@@ -35,6 +35,7 @@ public class MusicStreamingController {
 		return getTrackContentByRange(getPathFromType(type) + track, range);
 	}
 
+	// OK!
 	// getStatObject
 	public Map<String, Object> getStatObject(String type, String trackName) {
 		String trackNameLocation = getPathFromType(type) + trackName;
@@ -70,6 +71,7 @@ public class MusicStreamingController {
 		}
 	}
 
+	// OK!
 	// getTrackContentByRange
 	private ResponseEntity<byte[]> getTrackContentByRange(String trackFileLocation, String range) {
 		StatObjectResponse statObject = minioStorageService.getStatObjectFromObject(trackFileLocation);

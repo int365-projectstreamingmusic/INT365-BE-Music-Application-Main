@@ -8,4 +8,5 @@ import com.application.entities.models.TrackMarkingModel;
 @Repository
 public interface TrackMarkingRepository extends JpaRepository<TrackMarkingModel, Integer>{
 
+
 }
