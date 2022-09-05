@@ -8,7 +8,7 @@ import org.springframework.stereotype.Service;
 
 @Service
 @PropertySource("generalsetting.properties")
-public class GeneralPageContentController {
+public class GeneralContentController {
 
 	// GenerateFrontPageForUser
 	public Map<?, ?> generateHomepageContents() {

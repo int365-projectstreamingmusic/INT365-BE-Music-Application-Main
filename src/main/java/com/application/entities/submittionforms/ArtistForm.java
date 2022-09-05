@@ -7,10 +7,9 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class UserRegiserationForm {
+public class ArtistForm {
 
-	private String username;
-	private String email;
-	private String user_passcode;
+	private String artistName;
+	private String artistBio;
 
 }

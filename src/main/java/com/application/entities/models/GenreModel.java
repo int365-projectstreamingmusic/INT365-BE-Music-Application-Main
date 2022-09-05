@@ -1,5 +1,6 @@
 package com.application.entities.models;
 
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -18,9 +19,12 @@ import lombok.NoArgsConstructor;
 public class GenreModel {
 
 	@Id
+	@Column(name = "genre_Id")
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	private int genre_id;
+	private int genreId;
 
-	private String genre_name;
-	private String genre_desc;
+	@Column(name = "genre_name")
+	private String genreName;
+	@Column(name = "genre_desc")
+	private String genreDesc;
 }

@@ -7,7 +7,7 @@ import org.springframework.stereotype.Service;
 import com.application.utilities.JwtTokenUtills;
 
 @Service
-public class VisitorTrackController {
+public class TrackController {
 
 	// Put track into playground.
 	public void addTrackToPlayground(int trackId, HttpServletRequest request) {
