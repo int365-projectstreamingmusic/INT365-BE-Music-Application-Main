@@ -49,9 +49,6 @@ public class TracksModel {
 	@Column(name = "track_desc")
 	private String trackDesc;
 
-	@Column(name = "view_count")
-	private int viewCount;
-
 	@ManyToOne
 	@JoinColumn(name = "account_id", insertable = false, updatable = false)
 	private UserAccountModel userAccountModel;
@@ -67,7 +64,7 @@ public class TracksModel {
 	private List<GenresTracksModel> genreTrack;
 
 	@OneToMany
-	@JoinColumn(name = "track_id", referencedColumnName = "track_id", insertable = false, updatable = false)
+	@JoinColumn(name = "track_id", referencedColumnName = "track_id")
 	@OnDelete(action = OnDeleteAction.CASCADE)
 	private List<ArtistsTrackModel> artistTracks;
 

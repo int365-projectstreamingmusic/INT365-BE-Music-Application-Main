@@ -41,9 +41,9 @@ public class UserAccountModel {
 	@Column(name = "user_bios")
 	private String userBios;
 
-	@JsonFormat(pattern = "yyy/mm/dd")
+	@JsonFormat(pattern = "yyyy/mm/dd")
 	private String registered_date;
-	@JsonFormat(pattern = "yyy/mm/dd")
+	@JsonFormat(pattern = "yyyy/mm/dd")
 	private String last_seen;
 
 	@JsonIgnore

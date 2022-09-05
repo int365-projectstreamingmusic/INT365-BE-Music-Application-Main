@@ -1,5 +1,6 @@
 package com.application.apis.general;
 
+import java.util.HashMap;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,11 +21,18 @@ public class PublicGeneralAPIs {
 	@Autowired
 	private GenreController genreController;
 
+	// GetWelcomePageObject
 	@GetMapping("welcome")
 	public ResponseEntity<Map<String, Object>> getWelcomePageObject() {
-		return null;
+		Map<String, Object> result = new HashMap<>();
+		result.put("newArrivals", "");
+		result.put("trackOfTheWeek", "");
+		result.put("RandomTrack", "");
+		result.put("GenreList", "");
+		return ResponseEntity.ok().body(result);
 	}
 
+	// OK!
 	// ListGenreByPage
 	@GetMapping("getGere")
 	public ResponseEntity<Page<GenreModel>> listGenreByPage(@RequestParam(defaultValue = "0") int page,
@@ -32,15 +40,15 @@ public class PublicGeneralAPIs {
 			@RequestParam(defaultValue = "", required = false) String searchContent) {
 		return ResponseEntity.ok().body(genreController.listGenreListByPage(page, size, searchContent));
 	}
-	
-	//ListTopArtists
-	
-	//ListTopTrack
-	
-	//ListNewTrack
-	
-	//ListNewArtist
-	
-	//ListTrackOfTheWeek
+
+	// ListTopArtists
+
+	// ListTopTrack
+
+	// ListNewTrack
+
+	// ListNewArtist
+
+	// ListTrackOfTheWeek
 
 }

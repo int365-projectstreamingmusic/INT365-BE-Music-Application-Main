@@ -30,7 +30,7 @@ public class AuthenticationAPIs {
 	@Autowired
 	UserAuthenticationController userAuthenticationController;
 
-//OK!
+	//OK!
 	// UserRegistration
 	@PostMapping("signup")
 	public ResponseEntity<Map<String, Object>> userRegistration(@RequestBody UserRegiserationForm registerNewUser) {
@@ -41,7 +41,7 @@ public class AuthenticationAPIs {
 
 	// OK!
 	// UserAuthentication
-	@GetMapping("login")
+	@PostMapping("login")
 	public ResponseEntity<Map<String, Object>> userAuthentication(@RequestBody UserLoginForm login,
 			HttpServletResponse response) {
 		Map<String, Object> result = userAuthenticationController.userAuthentication(login, response);
