@@ -13,6 +13,7 @@ import com.application.entities.models.UserAccountModel;
 
 @Repository
 public interface UserAccountModelRepository extends JpaRepository<UserAccountModel, Integer> {
+
 	UserAccountModel findByUsername(String username);
 
 	UserAccountModel findByEmail(String email);
@@ -31,5 +32,8 @@ public interface UserAccountModelRepository extends JpaRepository<UserAccountMod
 	@Transactional
 	@Modifying
 	int updateUserPassword(String newPassword, int accountId);
+
+	@Query(value = "SELECT u FROM UserAccountModel u WHERE u.accountId = :id AND u.username = :username ")
+	UserAccountModel findUserAccoutByNameAndId(int id, String username);
 
 }

@@ -93,8 +93,8 @@ public class UserAuthenticationController {
 				.orElseThrow(() -> new ExceptionFoundation(EXCEPTION_CODES.SEARCH_NOT_FOUND, HttpStatus.NOT_FOUND,
 						"[ userRegistration ] This role does not exist.")));
 
-		assignUserRole1.setUserRolesID(
-				new UserRolesCompKey(registeration.getAccountId(), assignUserRole1.getRoles().getRoles_id()));
+		assignUserRole1
+				.setId(new UserRolesCompKey(registeration.getAccountId(), assignUserRole1.getRoles().getRoles_id()));
 
 		userFirstRolesGroup.add(assignUserRole1);
 
@@ -104,8 +104,8 @@ public class UserAuthenticationController {
 				.orElseThrow(() -> new ExceptionFoundation(EXCEPTION_CODES.SEARCH_NOT_FOUND, HttpStatus.NOT_FOUND,
 						"[ userRegistration ] This role does not exist.")));
 
-		assignUserRole2.setUserRolesID(
-				new UserRolesCompKey(registeration.getAccountId(), assignUserRole2.getRoles().getRoles_id()));
+		assignUserRole2
+				.setId(new UserRolesCompKey(registeration.getAccountId(), assignUserRole2.getRoles().getRoles_id()));
 		userFirstRolesGroup.add(assignUserRole2);
 
 		userRoleModelRepository.saveAll(userFirstRolesGroup);
@@ -121,19 +121,15 @@ public class UserAuthenticationController {
 
 	// OK!
 	// userAuthentication
-	@SuppressWarnings("unlikely-arg-type")
 	public Map<String, Object> userAuthentication(UserLoginForm userLoginModel, HttpServletResponse response) {
 		UserAccountModel requestedUser = userAccountModelRepository.findByUsername(userLoginModel.getUserName());
+
 		if (requestedUser == null
 				|| !passwordEncoder.matches(userLoginModel.getPassword(), requestedUser.getUserPasscode())) {
 			throw new ExceptionFoundation(EXCEPTION_CODES.AUTHEN_BAD_CREDENTIALS, HttpStatus.I_AM_A_TEAPOT,
 					"[ AUTHEN FAILED ] Username or password doesn't match.");
-		}
-
-		if (requestedUser.getUserRoles()
-				.contains(rolesModelRepository.findById(userRoleSuspendedId).orElseThrow(
-						() -> new ExceptionFoundation(EXCEPTION_CODES.SEARCH_NOT_FOUND, HttpStatus.NOT_FOUND,
-								"[ userAuthentication ] CAnnot find suspended role in the database.")))) {
+		} else if (userRoleModelRepository
+				.existByUserIdAndRoleId(new UserRolesCompKey(requestedUser.getAccountId(), userRoleSuspendedId))) {
 			throw new ExceptionFoundation(EXCEPTION_CODES.AUTHEN_NOT_ALLOWED, HttpStatus.FORBIDDEN,
 					"This account is suspended");
 		}

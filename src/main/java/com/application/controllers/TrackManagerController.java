@@ -92,7 +92,7 @@ public class TrackManagerController {
 								.orElseThrow(() -> new ExceptionFoundation(EXCEPTION_CODES.SEARCH_NOT_FOUND,
 										HttpStatus.NOT_FOUND, "[ addNewTrack ] Genre not found."))));
 			}
-			genresTracksRepository.saveAll(addingGenreTrack);
+			// genresTracksRepository.saveAll(addingGenreTrack);
 		}
 		TracksModel result = tracksModelRepository.findById(newTrack.getId())
 				.orElseThrow(() -> new ExceptionFoundation(EXCEPTION_CODES.SEARCH_NOT_FOUND, HttpStatus.NOT_FOUND,
