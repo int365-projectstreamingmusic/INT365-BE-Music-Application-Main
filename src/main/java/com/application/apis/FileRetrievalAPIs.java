@@ -31,12 +31,11 @@ public class FileRetrievalAPIs {
 
 	// OK!
 	// streamContent
-	@GetMapping("getContent/{type}/{track}")
+	@GetMapping("getContent/{track}")
 	public Mono<ResponseEntity<byte[]>> getContent(
-			@RequestHeader(value = "Range", required = false) String httpByteRange, @PathVariable("type") String type,
-			@PathVariable("track") String track) {
+			@RequestHeader(value = "Range", required = false) String httpByteRange, @PathVariable("track") String track) {
 		try {
-			return Mono.just(musicStreamingController.getTrack(type, track, httpByteRange));
+			return Mono.just(musicStreamingController.getTrack(track, httpByteRange));
 		} catch (Exception exc) {
 			throw new ExceptionFoundation(EXCEPTION_CODES.FEATURE_MISS_USED, HttpStatus.BAD_REQUEST,
 					"[ getContent ] This function works as normal but you must call it on your media player, not directly called to an API like this. ");
@@ -53,7 +52,8 @@ public class FileRetrievalAPIs {
 
 	// OK!
 	// ImageRetrievalService
-	@GetMapping(value = "image/{imageName}", produces = { MediaType.IMAGE_JPEG_VALUE, MediaType.IMAGE_PNG_VALUE })
+	@GetMapping(value = "image/{imageName}", produces = { MediaType.IMAGE_JPEG_VALUE, MediaType.IMAGE_PNG_VALUE,
+			MediaType.IMAGE_GIF_VALUE })
 	public ResponseEntity<Resource> imageRetrievalService(@PathVariable String imageName) {
 		return ResponseEntity.ok().body(fileLinkRelController.retriveImageByName(imageName));
 	}

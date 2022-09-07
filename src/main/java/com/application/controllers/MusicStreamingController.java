@@ -31,8 +31,8 @@ public class MusicStreamingController {
 	@Value("${minio.storage.track.sound}")
 	private String trackSoundLocation;
 
-	public ResponseEntity<byte[]> getTrack(String type, String track, String range) {
-		return getTrackContentByRange(getPathFromType(type) + track, range);
+	public ResponseEntity<byte[]> getTrack(String track, String range) {
+		return getTrackContentByRange("tracks/musics/" + track, range);
 	}
 
 	// OK!
