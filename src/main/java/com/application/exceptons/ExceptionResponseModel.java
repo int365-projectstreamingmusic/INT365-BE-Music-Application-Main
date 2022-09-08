@@ -18,6 +18,7 @@ public class ExceptionResponseModel {
 		SAVE_FILE_INVALID(2002), // Wrong format
 		SAVE_EXISTS(2003), // Already exist
 		SAVE_IS_NULL(2004),
+		SAVE_FORBIDDEN(2005),
 
 		// Authentication
 		AUTHEN_BAD_CREDENTIALS(3001), // Username or password is incorrect. Or both!
