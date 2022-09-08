@@ -2,7 +2,7 @@ version: "3"
 services:
   backend:
     container_name: backend
-    image: ghcr.io/int365-projectstreamingmusic/int365-be-music-application-main:master
+    image: ghcr.io/int365-projectstreamingmusic/int365-be-music-application-main:latest
     ports:
       - "8086:8086"
 #     volumes:
