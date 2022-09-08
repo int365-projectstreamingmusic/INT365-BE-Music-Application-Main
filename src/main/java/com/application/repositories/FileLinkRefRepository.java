@@ -12,4 +12,6 @@ public interface FileLinkRefRepository extends JpaRepository<FileLinkRefModel, S
 
 	@Query(value = "SELECT f FROM FileLinkRefModel f WHERE f.targetRef = :targetRef AND f.fileType = :fileType ")
 	FileLinkRefModel findByTargetRefAndTypeId(int targetRef, FileTypeModel fileType);
+	
+	
 }

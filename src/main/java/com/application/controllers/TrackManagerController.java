@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.application.entities.copmskeys.GenreTracksCompkey;
+import com.application.entities.models.FileLinkRefModel;
 import com.application.entities.models.GenreModel;
 import com.application.entities.models.GenresTracksModel;
 import com.application.entities.models.TracksModel;
@@ -43,6 +44,8 @@ public class TrackManagerController {
 
 	@Autowired
 	private MinioStorageService minioStorageService;
+	@Autowired
+	private FileLinkRelController fileLinkRelController;
 
 	@Value("${minio.storage.track.music}")
 	String minioTrackLocation;
@@ -67,20 +70,13 @@ public class TrackManagerController {
 
 		newTrack.setDuration((int) trackFile.getSize());
 		newTrack.setTimestamp(new Timestamp(System.currentTimeMillis()).toString());
-		newTrack.setViewCount(0);
-
 		newTrack.setAccountId(requestedBy.getAccountId());
 
 		newTrack.setTrackDesc(newTrackForm.getTrackDesc());
 		newTrack.setTrackName(newTrackForm.getTrackName());
 
 		newTrack.setGenreTrack(null);
-
-		String uploadedTrack = minioStorageService.uploadTrackToStorage(trackFile, minioTrackLocation);
-		String uploadedImage = minioStorageService.uploadImageToStorage(imageFile, minioTrackThumbnailLocation);
-
-		newTrack.setTrackFile(uploadedTrack);
-		//newTrack.setThumbnail(uploadedImage);
+		newTrack.setTrackFile("-");
 
 		newTrack = tracksModelRepository.save(newTrack);
 
@@ -96,11 +92,19 @@ public class TrackManagerController {
 								.orElseThrow(() -> new ExceptionFoundation(EXCEPTION_CODES.SEARCH_NOT_FOUND,
 										HttpStatus.NOT_FOUND, "[ addNewTrack ] Genre not found."))));
 			}
-			genresTracksRepository.saveAll(addingGenreTrack);
+			// genresTracksRepository.saveAll(addingGenreTrack);
 		}
 		TracksModel result = tracksModelRepository.findById(newTrack.getId())
 				.orElseThrow(() -> new ExceptionFoundation(EXCEPTION_CODES.SEARCH_NOT_FOUND, HttpStatus.NOT_FOUND,
 						"[ addNewTrack ] Track not found."));
+
+		// Save image and track file.
+		if (imageFile != null) {
+			fileLinkRelController.insertNewLinkRel(imageFile, 201, result.getId());
+		}
+		String uploadedTrack = minioStorageService.uploadTrackToStorage(trackFile, minioTrackLocation);
+		result.setTrackFile(uploadedTrack);
+		tracksModelRepository.updateTrackFileName(uploadedTrack, result.getId());
 		return result;
 	}
 
@@ -140,7 +144,7 @@ public class TrackManagerController {
 
 	// AddGenreToTrack
 	public void addGenreToTrack(List<GenresTracksModel> genreTrack, int trackId, HttpServletRequest request) {
-		
+
 	}
 
 	// RemoveGreneFromTrack

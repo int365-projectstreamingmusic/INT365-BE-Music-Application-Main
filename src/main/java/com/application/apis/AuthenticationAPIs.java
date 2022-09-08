@@ -12,6 +12,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
@@ -29,10 +30,10 @@ public class AuthenticationAPIs {
 	@Autowired
 	UserAuthenticationController userAuthenticationController;
 
-//OK!
+	//OK!
 	// UserRegistration
 	@PostMapping("signup")
-	public ResponseEntity<Map<String, Object>> userRegistration(@RequestPart UserRegiserationForm registerNewUser) {
+	public ResponseEntity<Map<String, Object>> userRegistration(@RequestBody UserRegiserationForm registerNewUser) {
 		Map<String, Object> newUser = userAuthenticationController.userRegistration(registerNewUser);
 		URI uri = URI.create(ServletUriComponentsBuilder.fromCurrentContextPath().path("api/authen/signup").toString());
 		return ResponseEntity.created(uri).body(newUser);
@@ -40,8 +41,8 @@ public class AuthenticationAPIs {
 
 	// OK!
 	// UserAuthentication
-	@GetMapping("login")
-	public ResponseEntity<Map<String, Object>> userAuthentication(@RequestPart UserLoginForm login,
+	@PostMapping("login")
+	public ResponseEntity<Map<String, Object>> userAuthentication(@RequestBody UserLoginForm login,
 			HttpServletResponse response) {
 		Map<String, Object> result = userAuthenticationController.userAuthentication(login, response);
 		return ResponseEntity.ok().body(result);
@@ -57,7 +58,7 @@ public class AuthenticationAPIs {
 	// OK!
 	// UserChangePassword
 	@PutMapping("changepassword")
-	public ResponseEntity<HttpStatus> userChangePassword(@RequestPart ChangePasswordForm passwordForm,
+	public ResponseEntity<HttpStatus> userChangePassword(@RequestBody ChangePasswordForm passwordForm,
 			HttpServletRequest request, HttpServletResponse response) {
 		userAuthenticationController.userChangePassword(passwordForm, request, response);
 		URI uri = URI.create(

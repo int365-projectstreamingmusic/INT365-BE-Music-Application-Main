@@ -31,10 +31,11 @@ public class MusicStreamingController {
 	@Value("${minio.storage.track.sound}")
 	private String trackSoundLocation;
 
-	public ResponseEntity<byte[]> getTrack(String type, String track, String range) {
-		return getTrackContentByRange(getPathFromType(type) + track, range);
+	public ResponseEntity<byte[]> getTrack(String track, String range) {
+		return getTrackContentByRange("tracks/musics/" + track, range);
 	}
 
+	// OK!
 	// getStatObject
 	public Map<String, Object> getStatObject(String type, String trackName) {
 		String trackNameLocation = getPathFromType(type) + trackName;
@@ -70,6 +71,7 @@ public class MusicStreamingController {
 		}
 	}
 
+	// OK!
 	// getTrackContentByRange
 	private ResponseEntity<byte[]> getTrackContentByRange(String trackFileLocation, String range) {
 		StatObjectResponse statObject = minioStorageService.getStatObjectFromObject(trackFileLocation);

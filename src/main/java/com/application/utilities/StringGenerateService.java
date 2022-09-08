@@ -25,7 +25,7 @@ public class StringGenerateService {
 
 	// Generate name for tracks and music.
 	public static String generateTrackNameUUID() {
-		return dateTimeGatherer() + generateString(12);
+		return "t-" + dateTimeGatherer() + generateString(12);
 	}
 
 	// Generate name for all image uploaded to the storage.
@@ -71,6 +71,5 @@ public class StringGenerateService {
 		String currentDate = LocalDate.now().toString();
 		return currentDate.substring(0, 4) + currentDate.substring(5, 7) + currentDate.substring(8);
 	}
-
 
 }

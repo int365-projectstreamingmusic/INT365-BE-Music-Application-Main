@@ -22,7 +22,7 @@ public class UserRolesModel {
 
 	@JsonIgnore
 	@EmbeddedId
-	private UserRolesCompKey userRolesID;
+	private UserRolesCompKey id;
 	
 	@ManyToOne
 	@JoinColumn(name = "roles_id", insertable = false, updatable = false)
