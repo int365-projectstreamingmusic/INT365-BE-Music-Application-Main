@@ -31,7 +31,7 @@ public class FileLinkRelController {
 		newFileRecord.setFileType(fileTypeRepository.findById(typeId)
 				.orElseThrow(() -> new ExceptionFoundation(EXCEPTION_CODES.SEARCH_NOT_FOUND, HttpStatus.NOT_FOUND,
 						"[ FileLinkRelController ] A file type with this ID does not exists.")));
-		newFileRecord.setTargetRef(recordRel);
+		newFileRecord.setTargetTrackId(recordRel);
 		newFileRecord.setFileId(minioStorageService.uploadImageToStorage(multipartFile, typeId + "-",
 				newFileRecord.getFileType().getPathRel()));
 

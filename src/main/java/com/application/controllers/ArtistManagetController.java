@@ -1,4 +1,4 @@
-package com.application.apis.manager;
+package com.application.controllers;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -24,7 +24,7 @@ import com.application.utilities.JwtTokenUtills;
 
 @RestController
 @RequestMapping("api/manager/artist/")
-public class ArtistManagetApis {
+public class ArtistManagetController {
 
 	public static int defaultArtistsPerPage = 50;
 	public static int maxArtistsPerPage = 250;
@@ -36,6 +36,7 @@ public class ArtistManagetApis {
 	@Autowired
 	private ArtistsTracksRepository artistTracksRepository;
 
+	// OK!
 	// GetArtistsAddedByMe
 	public Page<ArtistsModel> getArtistsAddedMyMe(int page, int size, HttpServletRequest request) {
 		UserAccountModel requestedBy = userAccountModelRepository

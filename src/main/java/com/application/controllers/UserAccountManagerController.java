@@ -5,6 +5,11 @@ import java.sql.Timestamp;
 import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.PropertySource;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
@@ -24,6 +29,7 @@ import com.application.utilities.JwtTokenUtills;
 import com.application.utilities.StringGenerateService;
 
 @Service
+@PropertySource("generalsetting.properties")
 public class UserAccountManagerController {
 
 	@Autowired
@@ -43,9 +49,15 @@ public class UserAccountManagerController {
 
 	private int reportRypeDeleteAction = 8002;
 
+	@Value("${general.useraccount.default-page-size}")
+	private int defaultPageSize;
+
+	@Value("${general.useraccount.max-page-size}")
+	private int maxPageSize;
+
 	// OK!
-	// Get user profile from Token
-	public UserAccountModel getProfile(HttpServletRequest request) {
+	// getProfileFromToken
+	public UserAccountModel getProfileFromToken(HttpServletRequest request) {
 		UserAccountModel userProfile = userAccountModelRepository
 				.findByUsername(JwtTokenUtills.getUserNameFromToken(request));
 		return userProfile;
@@ -176,8 +188,29 @@ public class UserAccountManagerController {
 	// --------------- WIP ---------------
 
 	// SearchUserByNameOrEmail
-	public void searchUserByNameOrEmail(String searchContent, int pageNumber, int pageSize) {
+	public Page<UserAccountModel> searchUserByNameOrEmail(String searchContent, int pageNumber, int pageSize) {
+		if (pageNumber < 0) {
+			pageNumber = 0;
+		}
+		if (pageSize < 1 || pageSize > maxPageSize) {
+			pageSize = defaultPageSize;
+		}
 
+		Pageable sendPageRequest = PageRequest.of(pageNumber, pageSize);
+		Page<UserAccountModel> result;
+
+		if (searchContent == "") {
+			result = userAccountModelRepository.findAll(sendPageRequest);
+		} else {
+			result = userAccountModelRepository.findByUsernameContainingOrEmailContaining(searchContent,
+					sendPageRequest);
+			if (result.getTotalPages() < pageNumber + 1) {
+				throw new ExceptionFoundation(EXCEPTION_CODES.SEARCH_NOT_FOUND, HttpStatus.NOT_FOUND,
+						"[ UserAccountManagerController ]  Found nothing here.");
+			}
+		}
+
+		return result;
 	}
 
 	// ListUserByNameOrEmail

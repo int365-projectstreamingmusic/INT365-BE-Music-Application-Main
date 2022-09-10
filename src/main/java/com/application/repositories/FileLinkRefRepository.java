@@ -10,7 +10,8 @@ import com.application.entities.models.FileTypeModel;
 @Repository
 public interface FileLinkRefRepository extends JpaRepository<FileLinkRefModel, String> {
 
-	@Query(value = "SELECT f FROM FileLinkRefModel f WHERE f.targetRef = :targetRef AND f.fileType = :fileType ")
+	//findByTargetRefAndTypeId
+	@Query(value = "SELECT f FROM FileLinkRefModel f WHERE (f.targetAccountId = :targetRef OR f.targetTrackId = :targetRef) AND f.fileType = :fileType ")
 	FileLinkRefModel findByTargetRefAndTypeId(int targetRef, FileTypeModel fileType);
 	
 	
