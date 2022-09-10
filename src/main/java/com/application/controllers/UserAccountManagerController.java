@@ -169,8 +169,8 @@ public class UserAccountManagerController {
 
 		ReportsModel newReport = new ReportsModel();
 		newReport.setIsSolved(1);
-		newReport.setReportedBy(targetUser.getAccountId());
-		newReport.setReportedToUser(targetUser.getAccountId());
+		newReport.setReportedBy(targetUser);
+		newReport.setReportedToUser(targetUser);
 
 		newReport.setType(reportTypeRepository.findById(reportRypeDeleteAction)
 				.orElseThrow(() -> new ExceptionFoundation(EXCEPTION_CODES.SEARCH_NOT_FOUND, HttpStatus.NOT_FOUND,

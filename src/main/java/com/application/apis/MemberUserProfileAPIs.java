@@ -31,14 +31,27 @@ public class MemberUserProfileAPIs {
 	}
 
 	// editMyBios
-	@PutMapping("first-name")
-	public ResponseEntity<String> editMyBio(@RequestBody String newFirstName, HttpServletRequest request) {
+	@PutMapping("bio")
+	public ResponseEntity<String> editMyBio(@RequestBody String NewBio, HttpServletRequest request) {
 		URI uri = URI
 				.create(ServletUriComponentsBuilder.fromCurrentContextPath().path("api/profile/first-name").toString());
 		return ResponseEntity.created(uri).body("");
 	}
-	// EditFirstName
 
+	// EditFirstName
+	@PutMapping("first-name")
+	public ResponseEntity<String> editMyFirstName(@RequestBody String newFirstName, HttpServletRequest request) {
+		URI uri = URI
+				.create(ServletUriComponentsBuilder.fromCurrentContextPath().path("api/profile/first-name").toString());
+		return ResponseEntity.created(uri).body("");
+	}
+	
 	// EditLastName
+	@PutMapping("last-name")
+	public ResponseEntity<String> editMyLastName(@RequestBody String newFirstName, HttpServletRequest request) {
+		URI uri = URI
+				.create(ServletUriComponentsBuilder.fromCurrentContextPath().path("api/profile/first-name").toString());
+		return ResponseEntity.created(uri).body("");
+	}
 
 }

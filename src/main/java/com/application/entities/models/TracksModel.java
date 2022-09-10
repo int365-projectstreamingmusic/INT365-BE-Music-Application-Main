@@ -68,9 +68,4 @@ public class TracksModel {
 	@OnDelete(action = OnDeleteAction.CASCADE)
 	private List<ArtistsTrackModel> artistTracks;
 
-	@OneToMany
-	@OnDelete(action = OnDeleteAction.CASCADE)
-	@JoinColumn(name = "target_track_id")
-	List<FileLinkRefModel> imageList;
-
 }

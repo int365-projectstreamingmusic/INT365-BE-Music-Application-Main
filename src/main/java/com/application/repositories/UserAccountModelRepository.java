@@ -36,4 +36,13 @@ public interface UserAccountModelRepository extends JpaRepository<UserAccountMod
 	@Query(value = "SELECT u FROM UserAccountModel u WHERE u.accountId = :id AND u.username = :username ")
 	UserAccountModel findUserAccoutByNameAndId(int id, String username);
 
+/*	@Query(value = "SELECT u FROM UserAccountModel u")
+	@Transactional
+	@Modifying
+	int updateUserFirstName(String newFirstName, int id);
+
+	@Query(value = "")
+	@Transactional
+	@Modifying
+	int updateUserLastName(String newLastName, int id);*/
 }

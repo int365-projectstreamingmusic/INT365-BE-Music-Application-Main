@@ -57,8 +57,4 @@ public class UserAccountModel {
 	@JoinColumn(name = "account_id")
 	private List<UserRolesModel> userRoles;
 	
-	@OneToMany
-	@OnDelete(action = OnDeleteAction.CASCADE)
-	@JoinColumn(name = "target_account_id")
-	private List<FileLinkRefModel> userProfileImage;
 }
