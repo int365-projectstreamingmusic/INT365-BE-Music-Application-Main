@@ -25,7 +25,7 @@ public class FileLinkRelController {
 
 	// OK!
 	// insertNewTrackObjectLinkRel
-	public FileLinkRefModel insertNewTrackObjectLinkRel(MultipartFile multipartFile, int typeId, int recordRel) {
+	public String insertNewTrackObjectLinkRel(MultipartFile multipartFile, int typeId, int recordRel) {
 		FileLinkRefModel newFileRecord = new FileLinkRefModel();
 
 		newFileRecord.setFileType(fileTypeRepository.findById(typeId)
@@ -34,8 +34,8 @@ public class FileLinkRelController {
 		newFileRecord.setFileId(minioStorageService.uploadImageToStorage(multipartFile, typeId + "-",
 				newFileRecord.getFileType().getPathRel()));
 		newFileRecord.setTargetRef(recordRel);
-		fileLinkRefRepository.save(newFileRecord);//insertNewRecordForTrack(newFileRecord.getFileId(),typeId,recordRel);
-		return newFileRecord;
+		fileLinkRefRepository.save(newFileRecord);
+		return newFileRecord.getFileId();
 	}
 
 	// OK!
