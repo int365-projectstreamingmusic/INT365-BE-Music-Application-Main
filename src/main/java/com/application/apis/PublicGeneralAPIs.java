@@ -1,4 +1,4 @@
-package com.application.apis.general;
+package com.application.apis;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -76,5 +76,8 @@ public class PublicGeneralAPIs {
 	// ListNewArtist
 
 	// ListTrackOfTheWeek
+	
+	//--TEST--
+	
 
 }

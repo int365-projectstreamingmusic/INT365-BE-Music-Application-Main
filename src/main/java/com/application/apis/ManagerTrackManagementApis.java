@@ -1,4 +1,4 @@
-package com.application.apis.manager;
+package com.application.apis;
 
 import java.net.URI;
 
@@ -21,7 +21,7 @@ import com.application.entities.submittionforms.AddNewTrackForm;
 
 @RestController
 @RequestMapping("api/manager/track/")
-public class TrackManagementApis {
+public class ManagerTrackManagementApis {
 
 	@Autowired
 	private TrackManagerController trackManagerController;

@@ -25,6 +25,13 @@ public interface ViewCountRepository extends JpaRepository<ViewCountModel, ViewC
 	// OK!
 	@Query(nativeQuery = true, value = "SELECT CASE WHEN COUNT(v.view_count_date) > 0 THEN SUM(v.view_count) ELSE 0 END FROM view_count v WHERE v.track_id = :trackId")
 	int getAllViewCountFromTrackId(int trackId);
+
+	// ListTopNViewCountOfTheWeek
+	// int listTopNViewCountOfTheWeek(String week, int viewCount);
+
+	// insertNewWeekRecord
+	// void insertNewWeekRecord(int viewCount,String date);
+
 	/*
 	 * @Query(value =
 	 * "SELECT v FROM ViewCountModel v WHERE v.id.countDate = :currentWeek ORDER BY v.viewCount LIMIT :topN"
