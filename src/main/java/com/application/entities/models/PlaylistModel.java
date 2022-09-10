@@ -45,10 +45,4 @@ public class PlaylistModel {
 	@JoinColumn(name = "account_id", updatable = false, insertable = false)
 	private UserAccountModel userAccountModel;
 	
-	@OneToMany
-	@OnDelete(action = OnDeleteAction.CASCADE)
-	@JoinColumn(name = "target_playlist_id")
-	@Basic(optional = true)
-	private List<FileLinkRefModel> fileLinkRef;
-
 }

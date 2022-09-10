@@ -100,7 +100,7 @@ public class TrackManagerController {
 
 		// Save image and track file.
 		if (imageFile != null) {
-			fileLinkRelController.insertNewLinkRel(imageFile, 201, result.getId());
+			fileLinkRelController.insertNewTrackObjectLinkRel(imageFile, 201, result.getId());
 		}
 		String uploadedTrack = minioStorageService.uploadTrackToStorage(trackFile, minioTrackLocation);
 		result.setTrackFile(uploadedTrack);

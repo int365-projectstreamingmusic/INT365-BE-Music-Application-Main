@@ -24,18 +24,17 @@ public class FileLinkRelController {
 	private MinioStorageService minioStorageService;
 
 	// OK!
-	// InsertNewLinkRel
-	public FileLinkRefModel insertNewLinkRel(MultipartFile multipartFile, int typeId, int recordRel) {
+	// insertNewTrackObjectLinkRel
+	public FileLinkRefModel insertNewTrackObjectLinkRel(MultipartFile multipartFile, int typeId, int recordRel) {
 		FileLinkRefModel newFileRecord = new FileLinkRefModel();
 
 		newFileRecord.setFileType(fileTypeRepository.findById(typeId)
 				.orElseThrow(() -> new ExceptionFoundation(EXCEPTION_CODES.SEARCH_NOT_FOUND, HttpStatus.NOT_FOUND,
 						"[ FileLinkRelController ] A file type with this ID does not exists.")));
-		newFileRecord.setTargetTrackId(recordRel);
 		newFileRecord.setFileId(minioStorageService.uploadImageToStorage(multipartFile, typeId + "-",
 				newFileRecord.getFileType().getPathRel()));
-
-		fileLinkRefRepository.save(newFileRecord);
+		newFileRecord.setTargetRef(recordRel);
+		fileLinkRefRepository.save(newFileRecord);//insertNewRecordForTrack(newFileRecord.getFileId(),typeId,recordRel);
 		return newFileRecord;
 	}
 

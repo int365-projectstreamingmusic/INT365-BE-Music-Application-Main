@@ -1,9 +1,12 @@
 package com.application.entities.models;
 
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
@@ -27,7 +30,13 @@ public class UserTrackCommentsModel {
 	private String timestamp;
 
 	private String comment;
-	private int account_id;
-	private int track_id;
+	
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "account_id")
+	private UserAccountModel account;
+	
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "track_id")
+	private TracksModel track;
 
 }

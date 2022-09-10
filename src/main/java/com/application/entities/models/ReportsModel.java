@@ -1,5 +1,6 @@
 package com.application.entities.models;
 
+import javax.persistence.Basic;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -8,6 +9,8 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
+
+import org.springframework.lang.Nullable;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 
@@ -27,11 +30,17 @@ public class ReportsModel {
 	@Column(name = "report_id")
 	private int id;
 
-	@Column(name = "reported_by")
-	private int reportedBy;
+	//@Column(name = "reported_by")
+	@ManyToOne
+	@JoinColumn(name = "reported_by", referencedColumnName = "account_id", insertable = false, updatable = false)
+	private UserAccountModel reportedBy;
 
-	@Column(name = "reported_user")
-	private int reportedToUser;
+	//@Column(name = "reported_user")
+	@Nullable
+	@Basic(optional = true)
+	@ManyToOne
+	@JoinColumn(name = "reported_user", referencedColumnName = "account_id", insertable = false, updatable = false)
+	private UserAccountModel reportedToUser;
 
 	@Column(name = "is_solved")
 	private int isSolved;
