@@ -15,6 +15,7 @@ import javax.persistence.Table;
 
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
+import org.springframework.lang.Nullable;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -57,6 +58,10 @@ public class TracksModel {
 	@Basic(optional = false)
 	@Column(name = "account_id")
 	private int accountId;
+
+	@Column(name = "track_thumbnail")
+	@Basic(optional = true)
+	private String trackThumbnail;
 
 	@OneToMany
 	@JoinColumn(name = "track_id", referencedColumnName = "track_id")

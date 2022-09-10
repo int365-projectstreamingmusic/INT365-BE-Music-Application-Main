@@ -17,6 +17,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class FileLinkRefModel {
+	
 	@Id
 	@Column(name = "file_id")
 	String fileId;
