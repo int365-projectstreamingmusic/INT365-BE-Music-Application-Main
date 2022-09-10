@@ -12,6 +12,9 @@ import javax.persistence.JoinColumn;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
+
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
@@ -53,4 +56,9 @@ public class UserAccountModel {
 	@OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
 	@JoinColumn(name = "account_id")
 	private List<UserRolesModel> userRoles;
+	
+	@OneToMany
+	@OnDelete(action = OnDeleteAction.CASCADE)
+	@JoinColumn(name = "target_account_id")
+	private List<FileLinkRefModel> userProfileImage;
 }
