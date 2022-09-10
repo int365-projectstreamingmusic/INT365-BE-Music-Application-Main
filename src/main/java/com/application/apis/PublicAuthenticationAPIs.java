@@ -14,7 +14,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
@@ -22,15 +21,17 @@ import com.application.controllers.UserAuthenticationController;
 import com.application.entities.submittionforms.ChangePasswordForm;
 import com.application.entities.submittionforms.UserLoginForm;
 import com.application.entities.submittionforms.UserRegiserationForm;
+import com.application.exceptons.ExceptionFoundation;
+import com.application.exceptons.ExceptionResponseModel.EXCEPTION_CODES;
 
 @RestController
 @RequestMapping("api/authen/")
-public class AuthenticationAPIs {
+public class PublicAuthenticationAPIs {
 
 	@Autowired
 	UserAuthenticationController userAuthenticationController;
 
-	//OK!
+	// OK!
 	// UserRegistration
 	@PostMapping("signup")
 	public ResponseEntity<Map<String, Object>> userRegistration(@RequestBody UserRegiserationForm registerNewUser) {
@@ -71,13 +72,15 @@ public class AuthenticationAPIs {
 	// UserVerifyAccount
 	@GetMapping("verify")
 	public ResponseEntity<String> userVerifyAccount() {
-		return null;
+		throw new ExceptionFoundation(EXCEPTION_CODES.FEATURE_NOT_IMPLEMENTED, HttpStatus.NOT_IMPLEMENTED,
+				"This feature is not implemented.");
 	}
 
-	// UserPasswordReset
+	// UserPasswordResetRequest
 	@GetMapping("resetPassword")
-	public ResponseEntity<String> userPasswordReset() {
-		return null;
+	public ResponseEntity<String> userPasswordResetRequest() {
+		throw new ExceptionFoundation(EXCEPTION_CODES.FEATURE_NOT_IMPLEMENTED, HttpStatus.NOT_IMPLEMENTED,
+				"This feature is not implemented.");
 	}
 
 }

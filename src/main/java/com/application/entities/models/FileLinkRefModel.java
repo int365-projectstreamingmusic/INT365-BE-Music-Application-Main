@@ -1,5 +1,6 @@
 package com.application.entities.models;
 
+import javax.persistence.Basic;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
@@ -9,6 +10,7 @@ import javax.persistence.Table;
 
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
+import org.springframework.lang.Nullable;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -26,8 +28,15 @@ public class FileLinkRefModel {
 
 	// The target ref is an ID of an existing tracks or user account records to
 	// point who is the owner of this file.
-	@Column(name = "target_ref")
-	int targetRef;
+	@Column(name = "target_account_id")
+	@Nullable
+	@Basic(optional = true)
+	int targetAccountId;
+
+	@Column(name = "target_track_id")
+	@Nullable
+	@Basic(optional = true)
+	int targetTrackId;
 
 	@ManyToOne
 	@OnDelete(action = OnDeleteAction.NO_ACTION)
