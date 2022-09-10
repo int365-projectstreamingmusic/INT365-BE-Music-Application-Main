@@ -38,6 +38,11 @@ public class FileLinkRefModel {
 	@Basic(optional = true)
 	int targetTrackId;
 
+	@Column(name = "target_playlist_id")
+	@Nullable
+	@Basic(optional = true)
+	int targetPlaylistId;
+
 	@ManyToOne
 	@OnDelete(action = OnDeleteAction.NO_ACTION)
 	@JoinColumn(name = "type_id", referencedColumnName = "type_id")
