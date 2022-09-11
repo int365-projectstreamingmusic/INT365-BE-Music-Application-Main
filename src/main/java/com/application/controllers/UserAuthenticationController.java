@@ -83,6 +83,8 @@ public class UserAuthenticationController {
 		String getRegisterationTimeStamp = new Timestamp(System.currentTimeMillis()).toString();
 		registeration.setRegistered_date(getRegisterationTimeStamp);
 		registeration.setUserBios("");
+		registeration.setProfileName(incomingRegisteration.getUsername());
+		registeration.setProfileIamge("default-user-profile.png");
 
 		registeration = userAccountModelRepository.save(registeration);
 

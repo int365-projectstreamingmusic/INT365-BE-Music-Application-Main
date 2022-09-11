@@ -44,13 +44,14 @@ public class WebSecurityConfiguration extends WebSecurityConfigurerAdapter {
 		http.cors();
 		http.csrf().disable();
 		http.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
-		http.authorizeRequests().antMatchers(HttpMethod.GET, "/api/authen/**").permitAll();
-		http.authorizeRequests().antMatchers(HttpMethod.GET, "/api/public/**").permitAll();
-		http.authorizeRequests().antMatchers(HttpMethod.GET, "/api/streaming/**").permitAll();
-		http.authorizeRequests().antMatchers(HttpMethod.GET, "/api/manager/**").permitAll();
-		http.authorizeRequests().antMatchers(HttpMethod.GET, "/api/user/**").hasAnyAuthority("user");
-		http.authorizeRequests().antMatchers(HttpMethod.GET, "/api/artist/**").hasAnyAuthority("artist");
-
+		http.authorizeRequests().antMatchers("/api/authen/**").permitAll();
+		http.authorizeRequests().antMatchers("/api/public/**").permitAll();
+		http.authorizeRequests().antMatchers("/api/streaming/**").permitAll();
+		http.authorizeRequests().antMatchers("/api/user/**").hasAnyAuthority("user");
+		http.authorizeRequests().antMatchers("/api/artist/**").hasAnyAuthority("artist");
+		http.authorizeRequests().antMatchers("/api/manager/track/").hasAnyAuthority("admin");
+		
+		http.addFilter(authenticationFilter);
 		http.addFilterBefore(new CustomAuthorizationFilter(), UsernamePasswordAuthenticationFilter.class);
 	}
 
