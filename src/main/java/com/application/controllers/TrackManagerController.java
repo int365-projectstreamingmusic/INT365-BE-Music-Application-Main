@@ -53,6 +53,7 @@ public class TrackManagerController {
 	@Value("${minio.storage.music-thumbnail}")
 	String minioTrackThumbnailLocation;
 
+	// OK
 	// AddNewTrack
 	public TracksModel addNewTrack(AddNewTrackForm newTrackForm, MultipartFile trackFile, MultipartFile imageFile,
 			HttpServletRequest request) {
@@ -102,7 +103,6 @@ public class TrackManagerController {
 			String trackThumbnailFIleName = fileLinkRelController.insertNewTrackObjectLinkRel(imageFile, 201,
 					result.getId());
 			newTrack.setTrackThumbnail(trackThumbnailFIleName);
-			System.out.println(trackThumbnailFIleName);
 		}
 		String uploadedTrack = minioStorageService.uploadTrackToStorage(trackFile, minioTrackLocation);
 		result.setTrackFile(uploadedTrack);
