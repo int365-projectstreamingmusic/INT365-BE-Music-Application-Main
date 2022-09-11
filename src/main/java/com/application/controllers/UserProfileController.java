@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.application.entities.models.UserAccountModel;
+import com.application.entities.submittionforms.UserProfileForm;
 import com.application.repositories.UserAccountRepository;
 import com.application.utilities.JwtTokenUtills;
 
@@ -54,6 +55,31 @@ public class UserProfileController {
 		return newProfileName;
 	}
 
+	// OK!
+	// editBasicProfileInfo
+	public UserAccountModel editBasicProfileInfo(UserProfileForm form, HttpServletRequest request) {
+		UserAccountModel targetUser = userAccountRepository
+				.findByUsername(JwtTokenUtills.getUserNameFromToken(request));
+		if (form.getFirstName() != null && form.getFirstName() != "") {
+			userAccountRepository.updateUserFirstName(form.getFirstName(), targetUser.getAccountId());
+			targetUser.setFirstName(form.getFirstName());
+		}
+		if (form.getLastName() != null && form.getLastName() != "") {
+			userAccountRepository.updateUserLastName(form.getLastName(), targetUser.getAccountId());
+			targetUser.setLastName(form.getLastName());
+		}
+		if (form.getProfileName() != null && form.getProfileName() != "") {
+			userAccountRepository.updateUserProfileName(form.getProfileName(), targetUser.getAccountId());
+			targetUser.setProfileName(form.getProfileName());
+		}
+		if (form.getUserBios() != null && form.getUserBios() != "") {
+			userAccountRepository.updateUserBio(form.getUserBios(), targetUser.getAccountId());
+			targetUser.setUserBios(form.getUserBios());
+		}
+		return targetUser;
+	}
+
+	// OK!
 	// setNewUserProfileImage
 	public String setNewUserProfileImage(MultipartFile prodileImageFile, HttpServletRequest request) {
 		UserAccountModel targetUser = userAccountRepository

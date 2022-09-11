@@ -136,6 +136,10 @@ public class MinioStorageService {
 	public String uploadTrackToStorage(MultipartFile trackFile, String destination) {
 		String fileNameExtention = trackFile.getOriginalFilename()
 				.substring(trackFile.getOriginalFilename().lastIndexOf("."));
+		if (checkAutioFileExtention(fileNameExtention)) {
+			throw new ExceptionFoundation(EXCEPTION_CODES.MINIO_OBJECT_FORMAT_NOT_SUPPORT, HttpStatus.NOT_ACCEPTABLE,
+					"[ MinioStorageService ] Can't keep your file with this format. We only accept the MP3 format for now. ");
+		}
 		try {
 			InputStream trackFileStream = new BufferedInputStream(trackFile.getInputStream());
 			String trackname = StringGenerateService.generateTrackNameUUID() + EXTENTION_TRACKS;
@@ -154,6 +158,10 @@ public class MinioStorageService {
 	public String uploadImageToStorage(MultipartFile imageFile, String prefix, String imageFileLocation) {
 		String imageFileExtention = imageFile.getOriginalFilename()
 				.substring(imageFile.getOriginalFilename().lastIndexOf("."));
+		if (checkImageFileExtension(imageFileExtention)) {
+			throw new ExceptionFoundation(EXCEPTION_CODES.MINIO_OBJECT_FORMAT_NOT_SUPPORT, HttpStatus.NOT_ACCEPTABLE,
+					"[ MinioStorageService ] We only accept PNG and JPG.");
+		}
 		try {
 			InputStream imageFileStream = new BufferedInputStream(imageFile.getInputStream());
 			String imageFileName = prefix + StringGenerateService.generateImageNameUUID() + imageFileExtention;
@@ -178,6 +186,35 @@ public class MinioStorageService {
 			throw new ExceptionFoundation(EXCEPTION_CODES.CORE_INTERNAL_SERVER_ERROR, HttpStatus.INTERNAL_SERVER_ERROR,
 					"[ DeleteObjectFromMinIoByName ] Can't delete this object because : " + exc.getLocalizedMessage());
 		}
+	}
+
+	// checkImageFileExtension
+	private boolean checkImageFileExtension(String extension) {
+		boolean isAllowed = false;
+		switch (extension) {
+		case ".png": {
+			isAllowed = true;
+		}
+		case ".jpg": {
+			isAllowed = true;
+		}
+		default:
+			isAllowed = false;
+		}
+		return isAllowed;
+	}
+
+	// checkAutioFileExtention
+	private boolean checkAutioFileExtention(String extension) {
+		boolean isAllowed = false;
+		switch (extension) {
+		case ".mp3": {
+			isAllowed = true;
+		}
+		default:
+			isAllowed = false;
+		}
+		return isAllowed;
 	}
 
 }
