@@ -53,6 +53,7 @@ public class TrackManagerController {
 	@Value("${minio.storage.music-thumbnail}")
 	String minioTrackThumbnailLocation;
 
+	// OK
 	// AddNewTrack
 	public TracksModel addNewTrack(AddNewTrackForm newTrackForm, MultipartFile trackFile, MultipartFile imageFile,
 			HttpServletRequest request) {
@@ -92,7 +93,6 @@ public class TrackManagerController {
 								.orElseThrow(() -> new ExceptionFoundation(EXCEPTION_CODES.SEARCH_NOT_FOUND,
 										HttpStatus.NOT_FOUND, "[ addNewTrack ] Genre not found."))));
 			}
-			// genresTracksRepository.saveAll(addingGenreTrack);
 		}
 		TracksModel result = tracksModelRepository.findById(newTrack.getId())
 				.orElseThrow(() -> new ExceptionFoundation(EXCEPTION_CODES.SEARCH_NOT_FOUND, HttpStatus.NOT_FOUND,
@@ -100,7 +100,9 @@ public class TrackManagerController {
 
 		// Save image and track file.
 		if (imageFile != null) {
-			fileLinkRelController.insertNewLinkRel(imageFile, 201, result.getId());
+			String trackThumbnailFIleName = fileLinkRelController.insertNewTrackObjectLinkRel(imageFile, 201,
+					result.getId());
+			newTrack.setTrackThumbnail(trackThumbnailFIleName);
 		}
 		String uploadedTrack = minioStorageService.uploadTrackToStorage(trackFile, minioTrackLocation);
 		result.setTrackFile(uploadedTrack);

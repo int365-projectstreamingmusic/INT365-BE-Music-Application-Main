@@ -53,4 +53,11 @@ public class UserAccountModel {
 	@OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
 	@JoinColumn(name = "account_id")
 	private List<UserRolesModel> userRoles;
+
+	@Column(name = "profile_name")
+	private String profileName;
+
+	@Column(name = "profile_image")
+	private String profileIamge;
+
 }
