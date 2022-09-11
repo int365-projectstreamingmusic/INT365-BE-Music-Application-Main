@@ -28,7 +28,7 @@ import com.application.entities.submittionforms.UserRegiserationForm;
 import com.application.exceptons.ExceptionFoundation;
 import com.application.exceptons.ExceptionResponseModel.EXCEPTION_CODES;
 import com.application.repositories.RolesRepository;
-import com.application.repositories.UserAccountModelRepository;
+import com.application.repositories.UserAccountRepository;
 import com.application.repositories.UserRoleModelRepository;
 import com.application.utilities.EmailServiceUtility;
 import com.application.utilities.JwtTokenUtills;
@@ -43,7 +43,7 @@ public class UserAuthenticationController {
 	private PasswordEncoder passwordEncoder;
 
 	@Autowired
-	private UserAccountModelRepository userAccountModelRepository;
+	private UserAccountRepository userAccountModelRepository;
 	@Autowired
 	private RolesRepository rolesModelRepository;
 	@Autowired
@@ -84,7 +84,7 @@ public class UserAuthenticationController {
 		registeration.setRegistered_date(getRegisterationTimeStamp);
 		registeration.setUserBios("");
 		registeration.setProfileName(incomingRegisteration.getUsername());
-		registeration.setProfileIamge("default-user-profile.png");
+		registeration.setProfileIamge(null);
 
 		registeration = userAccountModelRepository.save(registeration);
 

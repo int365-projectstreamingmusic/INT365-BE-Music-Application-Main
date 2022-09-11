@@ -23,7 +23,7 @@ import com.application.exceptons.ExceptionResponseModel.EXCEPTION_CODES;
 import com.application.repositories.ReportTypeRepository;
 import com.application.repositories.ReportsRepository;
 import com.application.repositories.RolesRepository;
-import com.application.repositories.UserAccountModelRepository;
+import com.application.repositories.UserAccountRepository;
 import com.application.repositories.UserRoleModelRepository;
 import com.application.utilities.JwtTokenUtills;
 import com.application.utilities.StringGenerateService;
@@ -33,7 +33,7 @@ import com.application.utilities.StringGenerateService;
 public class UserAccountManagerController {
 
 	@Autowired
-	private UserAccountModelRepository userAccountModelRepository;
+	private UserAccountRepository userAccountModelRepository;
 	@Autowired
 	private RolesRepository rolesRepository;
 	@Autowired

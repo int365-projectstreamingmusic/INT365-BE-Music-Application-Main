@@ -25,7 +25,7 @@ import com.application.exceptons.ExceptionResponseModel.EXCEPTION_CODES;
 import com.application.repositories.GenreRepository;
 import com.application.repositories.GenresTracksRepository;
 import com.application.repositories.TracksRepository;
-import com.application.repositories.UserAccountModelRepository;
+import com.application.repositories.UserAccountRepository;
 import com.application.utilities.JwtTokenUtills;
 import com.application.utilities.MinioStorageService;
 
@@ -34,7 +34,7 @@ import com.application.utilities.MinioStorageService;
 public class TrackManagerController {
 
 	@Autowired
-	private UserAccountModelRepository userAccountModelRepository;
+	private UserAccountRepository userAccountModelRepository;
 	@Autowired
 	private TracksRepository tracksModelRepository;
 	@Autowired

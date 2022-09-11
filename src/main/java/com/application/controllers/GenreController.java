@@ -19,7 +19,7 @@ import com.application.exceptons.ExceptionResponseModel.EXCEPTION_CODES;
 import com.application.repositories.GenreRepository;
 import com.application.repositories.GenresTracksRepository;
 import com.application.repositories.TracksRepository;
-import com.application.repositories.UserAccountModelRepository;
+import com.application.repositories.UserAccountRepository;
 import com.application.utilities.JwtTokenUtills;
 
 @Service
@@ -29,7 +29,7 @@ public class GenreController {
 	public static int maxGenrePerPage = 250;
 
 	@Autowired
-	private UserAccountModelRepository userAccountModelRepository;
+	private UserAccountRepository userAccountModelRepository;
 	@Autowired
 	private TracksRepository tracksModelRepository;
 	@Autowired

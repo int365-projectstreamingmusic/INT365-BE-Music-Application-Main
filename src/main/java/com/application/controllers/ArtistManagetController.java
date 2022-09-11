@@ -19,7 +19,7 @@ import com.application.exceptons.ExceptionFoundation;
 import com.application.exceptons.ExceptionResponseModel.EXCEPTION_CODES;
 import com.application.repositories.ArtistsRepository;
 import com.application.repositories.ArtistsTracksRepository;
-import com.application.repositories.UserAccountModelRepository;
+import com.application.repositories.UserAccountRepository;
 import com.application.utilities.JwtTokenUtills;
 
 @RestController
@@ -30,7 +30,7 @@ public class ArtistManagetController {
 	public static int maxArtistsPerPage = 250;
 
 	@Autowired
-	private UserAccountModelRepository userAccountModelRepository;
+	private UserAccountRepository userAccountModelRepository;
 	@Autowired
 	private ArtistsRepository artistRepository;
 	@Autowired
