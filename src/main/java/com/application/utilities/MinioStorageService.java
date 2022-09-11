@@ -168,8 +168,8 @@ public class MinioStorageService {
 	}
 
 	// OK!
-	// DeleteObjectFromMinIoByName
-	public String deleteObjectFromMinioByName(String imageFileLocation) {
+	// DeleteObjectFromMinIoByPathAndName
+	public String DeleteObjectFromMinIoByPathAndName(String imageFileLocation) {
 		StatObjectResponse targetObject = getStatObjectFromObject(imageFileLocation);
 		try {
 			minioClient.removeObject(RemoveObjectArgs.builder().bucket(bucketname).object(imageFileLocation).build());

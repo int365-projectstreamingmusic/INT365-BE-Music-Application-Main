@@ -45,8 +45,16 @@ public class FileLinkRelController {
 				EXCEPTION_CODES.SEARCH_NOT_FOUND, HttpStatus.NOT_FOUND,
 				"[ FileLinkRelController] Can't delete this record because the file " + fileName + " is unreachable."));
 		String destination = target.getFileType().getPathRel() + fileName;
-		minioStorageService.deleteObjectFromMinioByName(destination);
-		fileLinkRefRepository.deleteById(fileName);
+		minioStorageService.DeleteObjectFromMinIoByPathAndName(destination);
+		fileLinkRefRepository.delete(target);
+	}
+	
+	// DeleteTargetFileByTypeIdAndLinkRef
+	public void deleteTargetFileByTypeIdAndLinkRef(int typeId, int refId) {
+		FileLinkRefModel target = fileLinkRefRepository.findByTargetRefAndTypeId(typeId, refId);
+		String destination = target.getFileType().getPathRel() + target.getFileId();
+		minioStorageService.DeleteObjectFromMinIoByPathAndName(destination);
+		fileLinkRefRepository.delete(target);
 	}
 
 	// OK!
