@@ -12,7 +12,7 @@ import org.springframework.stereotype.Repository;
 import com.application.entities.models.UserAccountModel;
 
 @Repository
-public interface UserAccountModelRepository extends JpaRepository<UserAccountModel, Integer> {
+public interface UserAccountRepository extends JpaRepository<UserAccountModel, Integer> {
 
 	UserAccountModel findByUsername(String username);
 
@@ -35,7 +35,7 @@ public interface UserAccountModelRepository extends JpaRepository<UserAccountMod
 
 	@Query(value = "SELECT u FROM UserAccountModel u WHERE u.accountId = :id AND u.username = :username ")
 	UserAccountModel findUserAccoutByNameAndId(int id, String username);
-	
+
 	@Query(value = "UPDATE UserAccountModel u SET u.profileName = :newProfileName WHERE u.accountId = :accountId")
 	@Transactional
 	@Modifying
@@ -45,20 +45,20 @@ public interface UserAccountModelRepository extends JpaRepository<UserAccountMod
 	@Transactional
 	@Modifying
 	int updateUserFirstName(String newFirstName, int accountId);
-	
+
 	@Query(value = "UPDATE UserAccountModel u SET u.lastName = :newLastName WHERE u.accountId = :accountId")
 	@Transactional
 	@Modifying
 	int updateUserLastName(String newLastName, int accountId);
-	
-	
-/*	@Query(value = "SELECT u FROM UserAccountModel u")
-	@Transactional
-	@Modifying
-	int updateUserFirstName(String newFirstName, int id);
 
-	@Query(value = "")
+	@Query(value = "UPDATE UserAccountModel u SET u.userBios = :newBio WHERE u.accountId = :accountId")
 	@Transactional
 	@Modifying
-	int updateUserLastName(String newLastName, int id);*/
+	int updateUserBio(String newBio, int accountId);
+	
+	@Query(value = "UPDATE UserAccountModel u SET u.profileIamge = :fileName WHERE u.accountId = :accountId")
+	@Transactional
+	@Modifying
+	int updateUserProfileImage(String fileName, int accountId);
+
 }

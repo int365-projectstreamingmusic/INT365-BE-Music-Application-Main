@@ -62,11 +62,8 @@ public class FileLinkRelController {
 
 	// OK!
 	// RetriveImageByTargetRef
-	public Resource retriveImageByTargetRef(int targetRef, int typeId) {
-		FileLinkRefModel fileModel = fileLinkRefRepository.findByTargetRefAndTypeId(targetRef,
-				fileTypeRepository.findById(typeId).orElseThrow(
-						() -> new ExceptionFoundation(EXCEPTION_CODES.SEARCH_NOT_FOUND, HttpStatus.NOT_FOUND,
-								"[ FileLinkRelController ] The type with id " + typeId + " not found.")));
+	public Resource retriveImageByTargetRef(int typeId, int targetRef) {
+		FileLinkRefModel fileModel = fileLinkRefRepository.findByTargetRefAndTypeId(typeId, targetRef);
 		String targetFileInMinIo = fileModel.getFileType().getPathRel() + fileModel.getFileId();
 		return minioStorageService.getImageFromMinIoByNameLocation(targetFileInMinIo);
 	}

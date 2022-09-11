@@ -5,15 +5,19 @@ import java.net.URI;
 import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.Resource;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import com.application.controllers.UserAccountManagerController;
+import com.application.controllers.UserProfileController;
 import com.application.entities.models.UserAccountModel;
 
 @RestController
@@ -21,37 +25,61 @@ import com.application.entities.models.UserAccountModel;
 public class MemberUserProfileAPIs {
 
 	@Autowired
-	private UserAccountManagerController userAccountController;
+	private UserProfileController userProfileController;
+	@Autowired
+	private UserAccountManagerController userAccountManagerController;
 
 	// OK!
 	// getMyProfile
 	@GetMapping("myprofile")
 	public ResponseEntity<UserAccountModel> getMyProfile(HttpServletRequest servletRequest) {
-		return ResponseEntity.ok().body(userAccountController.getProfileFromToken(servletRequest));
+		return ResponseEntity.ok().body(userAccountManagerController.getProfileFromToken(servletRequest));
 	}
 
+	// OK!
 	// editMyBios
-	@PutMapping("bio")
+	@PutMapping("user-bio")
 	public ResponseEntity<String> editMyBio(@RequestBody String NewBio, HttpServletRequest request) {
 		URI uri = URI
-				.create(ServletUriComponentsBuilder.fromCurrentContextPath().path("api/profile/first-name").toString());
-		return ResponseEntity.created(uri).body("");
+				.create(ServletUriComponentsBuilder.fromCurrentContextPath().path("api/profile/user-bio").toString());
+		return ResponseEntity.created(uri).body(userProfileController.setNewBio(NewBio, request));
 	}
 
+	// OK!
 	// EditFirstName
 	@PutMapping("first-name")
 	public ResponseEntity<String> editMyFirstName(@RequestBody String newFirstName, HttpServletRequest request) {
 		URI uri = URI
 				.create(ServletUriComponentsBuilder.fromCurrentContextPath().path("api/profile/first-name").toString());
-		return ResponseEntity.created(uri).body("");
+		return ResponseEntity.created(uri).body(userProfileController.setNewFirstName(newFirstName, request));
 	}
-	
+
+	// OK!
 	// EditLastName
 	@PutMapping("last-name")
-	public ResponseEntity<String> editMyLastName(@RequestBody String newFirstName, HttpServletRequest request) {
+	public ResponseEntity<String> editMyLastName(@RequestBody String newLastName, HttpServletRequest request) {
 		URI uri = URI
-				.create(ServletUriComponentsBuilder.fromCurrentContextPath().path("api/profile/first-name").toString());
-		return ResponseEntity.created(uri).body("");
+				.create(ServletUriComponentsBuilder.fromCurrentContextPath().path("api/profile/last-name").toString());
+		return ResponseEntity.created(uri).body(userProfileController.setNewLastName(newLastName, request));
+	}
+
+	// OK!
+	// EditProfileName
+	@PutMapping("profile-name")
+	public ResponseEntity<String> editMyProfile(@RequestBody String newProfileName, HttpServletRequest request) {
+		URI uri = URI.create(
+				ServletUriComponentsBuilder.fromCurrentContextPath().path("api/profile/profile-name").toString());
+		return ResponseEntity.created(uri).body(userProfileController.setNewProfileName(newProfileName, request));
+	}
+
+	// OK!
+	// updateProfileImage
+	@PutMapping("profile-image")
+	public ResponseEntity<String> updateProfileImage(@RequestPart MultipartFile profileImage,
+			HttpServletRequest request) {
+		URI uri = URI.create(
+				ServletUriComponentsBuilder.fromCurrentContextPath().path("api/profile/profile-image").toString());
+		return ResponseEntity.created(uri).body(userProfileController.setNewUserProfileImage(profileImage, request));
 	}
 
 }
