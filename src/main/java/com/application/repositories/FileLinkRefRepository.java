@@ -23,7 +23,7 @@ public interface FileLinkRefRepository extends JpaRepository<FileLinkRefModel, S
 	FileLinkRefModel findByTargetRefAndTypeId(int typeId, int targetRef);
 
 	// deleteByTargetRefAndTypeId
-	@Query(nativeQuery = true, value = "DELETE FROM file_link_ref WHERE target_ref = :targetRef AND type_id = :typeId")
+	@Query(nativeQuery = true, value = "DELETE FROM file_link_ref WHERE type_id = :typeId AND target_ref = :targetRef")
 	@Modifying
 	@Transactional
 	int deleteByTargetRefAndTypeId(int typeId, int targetRef);

@@ -19,6 +19,7 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import com.application.controllers.UserAccountManagerController;
 import com.application.controllers.UserProfileController;
 import com.application.entities.models.UserAccountModel;
+import com.application.entities.submittionforms.UserProfileForm;
 
 @RestController
 @RequestMapping("api/profile/")
@@ -70,6 +71,16 @@ public class MemberUserProfileAPIs {
 		URI uri = URI.create(
 				ServletUriComponentsBuilder.fromCurrentContextPath().path("api/profile/profile-name").toString());
 		return ResponseEntity.created(uri).body(userProfileController.setNewProfileName(newProfileName, request));
+	}
+
+	// OK!
+	// EditBasicProfileInfo
+	@PutMapping("edit-profile-info")
+	public ResponseEntity<UserAccountModel> editBasicProfileInfo(@RequestBody UserProfileForm newProfileInfo,
+			HttpServletRequest request) {
+		URI uri = URI.create(
+				ServletUriComponentsBuilder.fromCurrentContextPath().path("api/profile/edit-profile-info").toString());
+		return ResponseEntity.created(uri).body(userProfileController.editBasicProfileInfo(newProfileInfo, request));
 	}
 
 	// OK!
