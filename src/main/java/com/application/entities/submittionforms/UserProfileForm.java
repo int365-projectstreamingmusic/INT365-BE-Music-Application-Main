@@ -15,11 +15,11 @@ public class UserProfileForm {
 
 	@Nullable
 	@Basic(optional = true)
-	private String FirstName;
+	private String firstName;
 
 	@Nullable
 	@Basic(optional = true)
-	private String LastName;
+	private String lastName;
 
 	@Nullable
 	@Basic(optional = true)
