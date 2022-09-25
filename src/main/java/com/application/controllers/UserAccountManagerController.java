@@ -11,6 +11,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import com.application.entities.copmskeys.UserRolesCompKey;
@@ -43,9 +44,12 @@ public class UserAccountManagerController {
 	@Autowired
 	private ReportTypeRepository reportTypeRepository;
 
+	private BCryptPasswordEncoder passwordEncoder;
+
 	private int adminRoleNumber = 99001;
 	private int suspendingRoleNumber = 2003;
 	private int deletedRole = 2004;
+	// private int superUserRole = 99999;
 
 	private int reportRypeDeleteAction = 8002;
 
@@ -144,14 +148,19 @@ public class UserAccountManagerController {
 
 	// OK!
 	// DeleteUserAccountRequestedByUser
-	public void deleteUserAccountRequestedByUser(HttpServletRequest request) {
+	public void deleteUserAccountRequestedByUser(String password, HttpServletRequest request) {
 
 		String userName = JwtTokenUtills.getUserNameFromToken(request);
 		UserAccountModel targetUser = userAccountModelRepository.findByUsername(userName);
 
 		if (targetUser == null) {
-			throw new ExceptionFoundation(EXCEPTION_CODES.SEARCH_NOT_FOUND, HttpStatus.NOT_FOUND,
+			throw new ExceptionFoundation(EXCEPTION_CODES.ACCOUNT_NOT_FOUND, HttpStatus.NOT_FOUND,
 					"[ UserAccountManagerController ] The user with the name " + userName + " does not exist.");
+		}
+
+		if (!passwordEncoder.matches(password, targetUser.getUserPasscode())) {
+			throw new ExceptionFoundation(EXCEPTION_CODES.ACCOUNT_INCORRECT_CREDENTIALS, HttpStatus.I_AM_A_TEAPOT,
+					"[ REJECTED ] To delete the account, the owner must know what the password is.");
 		}
 
 		targetUser.setEmail(

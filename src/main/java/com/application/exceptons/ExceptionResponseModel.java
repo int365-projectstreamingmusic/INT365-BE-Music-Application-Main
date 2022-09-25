@@ -62,7 +62,23 @@ public class ExceptionResponseModel {
 		// User
 
 		// Others
-		DEAD(9999); // Just stupidly died with an unknown reason.
+		DEAD(9999), // Just stupidly died with an unknown reason.
+		
+		
+		// User registeration
+		REGISTERATION_INVALID_EMAIL(10001),
+		REGISTERATION_INVALID_PASSWORD(10002),
+		REGISTERATION_INVALID_USERNAME(10003),
+		REGISTERATION_TAKEN_EMAIL(10004),
+		REGISTERATION_TAKEN_USERNAME(10005),
+		REGISTERATION_PASSWORD_MISMATCH(10006),
+		
+		// User Authentication and authorization
+		ACCOUNT_INCORRECT_CREDENTIALS(20001),
+		ACCOUNT_ACCOUNT_SUSPENDED(20002),
+		ACCOUNT_INSUFFICIENT_PRIVILEGES(20003),
+		ACCOUNT_NOT_FOUND(20004);
+		
 
 		private final int codeValue;
 

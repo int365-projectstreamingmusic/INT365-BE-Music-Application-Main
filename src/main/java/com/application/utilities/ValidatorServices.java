@@ -8,9 +8,10 @@ import org.springframework.stereotype.Service;
 public class ValidatorServices {
 
 	Pattern emailPattern = Pattern.compile("[^@ \\t\\r\\n]+@[^@ \\t\\r\\n]+\\.[^@ \\t\\r\\n]+");
-	Pattern passwordPattern = Pattern.compile("^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!@$ %^&*-]).{8,128}$");
+	//Pattern passwordPattern = Pattern.compile("^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!@$ %^&*-]).{8,128}$");
+	Pattern passwordPattern = Pattern.compile("^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9]).{8,128}$");
 	Pattern phoneNumberPattern = Pattern.compile("^[0]\\\\d{1,10}$");
-	Pattern usernamePattern = Pattern.compile("^[a-zA-Z0-9_-]{6,30}$");
+	Pattern usernamePattern = Pattern.compile("^[a-zA-Z0-9_-]{6,45}$");
 
 	public boolean validateEmail(String email) {
 		return emailPattern.matcher(email).matches();

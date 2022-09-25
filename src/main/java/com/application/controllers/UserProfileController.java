@@ -99,11 +99,4 @@ public class UserProfileController {
 
 	}
 
-	// ---- WIP ----
-
-	// requestAccountDeletion
-	public void requestAccountDeletion(String password, HttpServletRequest request) {
-
-	}
-
 }
