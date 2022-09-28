@@ -146,11 +146,11 @@ public class UserAuthenticationController {
 
 		if (requestedUser == null
 				|| !passwordEncoder.matches(userLoginModel.getPassword(), requestedUser.getUserPasscode())) {
-			throw new ExceptionFoundation(EXCEPTION_CODES.ACCOUNT_INCORRECT_CREDENTIALS, HttpStatus.I_AM_A_TEAPOT,
+			throw new ExceptionFoundation(EXCEPTION_CODES.AUTHEN_INCORRECT_CREDENTIALS, HttpStatus.I_AM_A_TEAPOT,
 					"[ AUTHEN FAILED ] Username or password doesn't match.");
 		} else if (userRoleModelRepository
 				.existByUserIdAndRoleId(new UserRolesCompKey(requestedUser.getAccountId(), userRoleSuspendedId))) {
-			throw new ExceptionFoundation(EXCEPTION_CODES.ACCOUNT_ACCOUNT_SUSPENDED, HttpStatus.FORBIDDEN,
+			throw new ExceptionFoundation(EXCEPTION_CODES.AUTHEN_ACCOUNT_SUSPENDED, HttpStatus.FORBIDDEN,
 					"This account is suspended");
 		}
 
@@ -179,12 +179,12 @@ public class UserAuthenticationController {
 				.findByUsername(JwtTokenUtills.getUserNameFromToken(request));
 
 		if (requestedUser == null) {
-			throw new ExceptionFoundation(EXCEPTION_CODES.ACCOUNT_INCORRECT_CREDENTIALS, HttpStatus.UNAUTHORIZED,
+			throw new ExceptionFoundation(EXCEPTION_CODES.AUTHEN_INCORRECT_CREDENTIALS, HttpStatus.UNAUTHORIZED,
 					"[ userChangePassword ] This user does not exist... seriously...?");
 		}
 
 		if (!passwordEncoder.matches(passwordform.getOldPassword(), requestedUser.getUserPasscode())) {
-			throw new ExceptionFoundation(EXCEPTION_CODES.ACCOUNT_INCORRECT_CREDENTIALS, HttpStatus.UNAUTHORIZED,
+			throw new ExceptionFoundation(EXCEPTION_CODES.AUTHEN_INCORRECT_CREDENTIALS, HttpStatus.UNAUTHORIZED,
 					"[ userChangePassword ] User is not allowed to change a passwotd because an old password doesn't match.");
 		}
 

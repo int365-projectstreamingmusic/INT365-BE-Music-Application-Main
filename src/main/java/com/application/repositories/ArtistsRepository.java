@@ -26,5 +26,5 @@ public interface ArtistsRepository extends JpaRepository<ArtistsModel, Integer> 
 	@Transactional
 	@Modifying
 	ArtistsModel updateArtistBio(int artistId, String newBIo);
-
+	
 }

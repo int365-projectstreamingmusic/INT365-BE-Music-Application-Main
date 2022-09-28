@@ -154,12 +154,12 @@ public class UserAccountManagerController {
 		UserAccountModel targetUser = userAccountModelRepository.findByUsername(userName);
 
 		if (targetUser == null) {
-			throw new ExceptionFoundation(EXCEPTION_CODES.ACCOUNT_NOT_FOUND, HttpStatus.NOT_FOUND,
+			throw new ExceptionFoundation(EXCEPTION_CODES.AUTHEN_NOT_FOUND, HttpStatus.NOT_FOUND,
 					"[ UserAccountManagerController ] The user with the name " + userName + " does not exist.");
 		}
 
 		if (!passwordEncoder.matches(password, targetUser.getUserPasscode())) {
-			throw new ExceptionFoundation(EXCEPTION_CODES.ACCOUNT_INCORRECT_CREDENTIALS, HttpStatus.I_AM_A_TEAPOT,
+			throw new ExceptionFoundation(EXCEPTION_CODES.AUTHEN_INCORRECT_CREDENTIALS, HttpStatus.I_AM_A_TEAPOT,
 					"[ REJECTED ] To delete the account, the owner must know what the password is.");
 		}
 

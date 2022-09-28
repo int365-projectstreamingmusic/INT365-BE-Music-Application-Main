@@ -72,5 +72,9 @@ public class TracksModel {
 	@JoinColumn(name = "track_id", referencedColumnName = "track_id")
 	@OnDelete(action = OnDeleteAction.CASCADE)
 	private List<ArtistsTrackModel> artistTracks;
+	
+	@ManyToOne
+	@JoinColumn(name = "status_id", updatable = false, insertable = false)
+	private PlayTrackStatusModel playTrackStatus;
 
 }
