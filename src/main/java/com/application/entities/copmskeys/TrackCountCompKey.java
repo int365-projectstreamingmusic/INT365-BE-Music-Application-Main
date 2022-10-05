@@ -16,7 +16,7 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class ViewCountCompKey implements Serializable {
+public class TrackCountCompKey implements Serializable {
 
 	@Column(name = "track_id")
 	private int trackId;

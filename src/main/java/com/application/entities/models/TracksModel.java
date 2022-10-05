@@ -50,9 +50,9 @@ public class TracksModel {
 	@Column(name = "track_desc")
 	private String trackDesc;
 
-	@ManyToOne
+	/*@ManyToOne
 	@JoinColumn(name = "account_id", insertable = false, updatable = false)
-	private UserAccountModel userAccountModel;
+	private UserAccountModel userAccountModel;*/
 
 	@JsonIgnore
 	@Basic(optional = false)
@@ -72,5 +72,9 @@ public class TracksModel {
 	@JoinColumn(name = "track_id", referencedColumnName = "track_id")
 	@OnDelete(action = OnDeleteAction.CASCADE)
 	private List<ArtistsTrackModel> artistTracks;
+	
+	@ManyToOne
+	@JoinColumn(name = "status_id", updatable = false, insertable = false)
+	private PlayTrackStatusModel playTrackStatus;
 
 }

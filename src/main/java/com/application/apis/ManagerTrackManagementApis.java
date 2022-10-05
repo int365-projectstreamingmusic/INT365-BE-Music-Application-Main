@@ -52,8 +52,4 @@ public class ManagerTrackManagementApis {
 		return ResponseEntity.created(uri).body(null);
 	}
 
-	@GetMapping("")
-	public String whyThis() {
-		return "fuckl";
-	}
 }

@@ -1,6 +1,7 @@
 package com.application.entities.models;
 
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -30,7 +31,7 @@ public class PlayHistoryModel {
 
 	private int track_id;
 
-	@ManyToOne
+	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "account_id", referencedColumnName = "account_id", insertable = false, updatable = false)
 	private UserAccountModel userAccount;
 }

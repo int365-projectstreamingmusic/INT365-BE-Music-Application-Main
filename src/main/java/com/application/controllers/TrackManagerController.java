@@ -14,7 +14,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.application.entities.copmskeys.GenreTracksCompkey;
-import com.application.entities.models.FileLinkRefModel;
 import com.application.entities.models.GenreModel;
 import com.application.entities.models.GenresTracksModel;
 import com.application.entities.models.TracksModel;
@@ -23,7 +22,6 @@ import com.application.entities.submittionforms.AddNewTrackForm;
 import com.application.exceptons.ExceptionFoundation;
 import com.application.exceptons.ExceptionResponseModel.EXCEPTION_CODES;
 import com.application.repositories.GenreRepository;
-import com.application.repositories.GenresTracksRepository;
 import com.application.repositories.TracksRepository;
 import com.application.repositories.UserAccountRepository;
 import com.application.utilities.JwtTokenUtills;
@@ -33,14 +31,17 @@ import com.application.utilities.MinioStorageService;
 @PropertySource("generalsetting.properties")
 public class TrackManagerController {
 
+	@Value("${general.track.default-page-size}")
+	private int trackDefaultSize;
+	@Value("${general.track.max-page-size}")
+	private int trackMaxPageSize;
+
 	@Autowired
 	private UserAccountRepository userAccountModelRepository;
 	@Autowired
 	private TracksRepository tracksModelRepository;
 	@Autowired
 	private GenreRepository genreRepository;
-	@Autowired
-	private GenresTracksRepository genresTracksRepository;
 
 	@Autowired
 	private MinioStorageService minioStorageService;
@@ -67,7 +68,7 @@ public class TrackManagerController {
 
 		TracksModel newTrack = new TracksModel();
 
-		newTrack.setUserAccountModel(requestedBy);
+		//newTrack.setUserAccountModel(requestedBy);
 
 		newTrack.setDuration((int) trackFile.getSize());
 		newTrack.setTimestamp(new Timestamp(System.currentTimeMillis()).toString());
@@ -119,10 +120,10 @@ public class TrackManagerController {
 				.orElseThrow(() -> new ExceptionFoundation(EXCEPTION_CODES.SEARCH_NOT_FOUND, HttpStatus.NOT_FOUND,
 						"[ RemoveTrack ] This track does not exist."));
 
-		if (requestedBy.getAccountId() != targetTrack.getUserAccountModel().getAccountId()) {
+		/*if (requestedBy.getAccountId() != targetTrack.getUserAccountModel().getAccountId()) {
 			throw new ExceptionFoundation(EXCEPTION_CODES.AUTHEN_NOT_ALLOWED, HttpStatus.UNAUTHORIZED,
 					"[ RemoveTrack ] This user is not the owner of this track.");
-		}
+		}*/
 
 		tracksModelRepository.deleteById(trackId);
 

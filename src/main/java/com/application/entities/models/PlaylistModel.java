@@ -45,4 +45,8 @@ public class PlaylistModel {
 	@JoinColumn(name = "account_id", updatable = false, insertable = false)
 	private UserAccountModel userAccountModel;
 	
+	@ManyToOne
+	@JoinColumn(name = "status_id", updatable = false, insertable = false)
+	private PlayTrackStatusModel playTrackStatus;
+	
 }

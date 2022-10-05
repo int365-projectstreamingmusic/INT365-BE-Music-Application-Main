@@ -58,7 +58,10 @@ public class ReportsModel {
 
 	@Column(name = "report_text")
 	private String reportText;
-
+	
+	@Column(name = "report_ref")
+	private String reportRef;
+	
 	@ManyToOne
 	@JoinColumn(name = "type_id", referencedColumnName = "type_id")
 	private ReportTypeModel type;

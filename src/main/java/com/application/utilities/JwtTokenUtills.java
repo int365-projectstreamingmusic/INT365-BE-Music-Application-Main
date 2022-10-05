@@ -10,8 +10,10 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
+import com.application.entities.models.UserAccountModel;
 import com.application.exceptons.ExceptionFoundation;
 import com.application.exceptons.ExceptionResponseModel.EXCEPTION_CODES;
+import com.application.repositories.UserAccountRepository;
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.JWTVerifier;
 import com.auth0.jwt.algorithms.Algorithm;
@@ -22,6 +24,9 @@ import org.springframework.security.core.userdetails.User;
 
 @Service
 public class JwtTokenUtills {
+
+	@Autowired
+	private UserAccountRepository userAccountRepository;
 
 	@Autowired
 	private static String secret = "A0fzwr2zfklJ1nnapakMyL0ve1y2001dfgry4xcf5rycf";
@@ -58,6 +63,7 @@ public class JwtTokenUtills {
 		return Algorithm.HMAC256(secret.getBytes());
 	}
 
+	// GetUsernameFromToken
 	public static String getUserNameFromToken(HttpServletRequest request) {
 		String userName;
 		String authenHeader = request.getHeader(HttpHeaders.AUTHORIZATION);
@@ -71,6 +77,17 @@ public class JwtTokenUtills {
 			throw new ExceptionFoundation(EXCEPTION_CODES.AUTHEN_EMAIL_ALREADY_EXIST, HttpStatus.UNAUTHORIZED,
 					authenHeader);
 		}
+	}
+
+	// GetUserAvvountFromToken
+	public UserAccountModel getUserAccountFromToken(HttpServletRequest request) {
+		String targetUserName = JwtTokenUtills.getUserNameFromToken(request);
+		UserAccountModel targetUser = userAccountRepository.findByUsername(targetUserName);
+		if (targetUser == null) {
+			throw new ExceptionFoundation(EXCEPTION_CODES.USER_ACCOUNT_NOT_FOUND, HttpStatus.NOT_FOUND,
+					"[ EXCEPTION ] The user with this name does not exist.");
+		}
+		return targetUser;
 	}
 
 }

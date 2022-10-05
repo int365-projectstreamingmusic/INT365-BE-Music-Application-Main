@@ -2,31 +2,21 @@ package com.application.entities.submittionforms;
 
 import javax.persistence.Basic;
 
-import org.springframework.lang.Nullable;
-
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Data
-@AllArgsConstructor
 @NoArgsConstructor
-public class UserProfileForm {
+@AllArgsConstructor
+public class ArtistTrackForm {
 
-	@Nullable
 	@Basic(optional = true)
-	private String firstName;
-
-	@Nullable
+	private int trackId;
+	
 	@Basic(optional = true)
-	private String lastName;
-
-	@Nullable
+	private int artistId;
+	
 	@Basic(optional = true)
-	private String userBios;
-
-	@Nullable
-	@Basic(optional = true)
-	private String profileName;
-
+	private String description;
 }

@@ -9,6 +9,7 @@ import org.springframework.web.multipart.MultipartFile;
 import com.application.entities.models.UserAccountModel;
 import com.application.entities.submittionforms.UserProfileForm;
 import com.application.repositories.UserAccountRepository;
+import com.application.services.GeneralFunctionController;
 import com.application.utilities.JwtTokenUtills;
 
 @Service
@@ -18,6 +19,15 @@ public class UserProfileController {
 	private UserAccountRepository userAccountRepository;
 	@Autowired
 	private FileLinkRelController fileLinkRefController;
+
+	@Autowired
+	private GeneralFunctionController generalFunctionController;
+
+	// OK!
+	// getMyProfile
+	public UserAccountModel getMyProfile(HttpServletRequest request) {
+		return generalFunctionController.checkUserAccountExist(request);
+	}
 
 	// OK!
 	// setNewBio
@@ -96,13 +106,6 @@ public class UserProfileController {
 				targetUser.getAccountId());
 		userAccountRepository.updateUserProfileImage(profileImageFileName, targetUser.getAccountId());
 		return "Updated!";
-
-	}
-
-	// ---- WIP ----
-
-	// requestAccountDeletion
-	public void requestAccountDeletion(String password, HttpServletRequest request) {
 
 	}
 

@@ -21,6 +21,7 @@ import com.application.exceptons.ExceptionResponseModel.EXCEPTION_CODES;
 import com.application.utilities.JwtTokenUtills;
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.JWTVerifier;
+import com.auth0.jwt.exceptions.TokenExpiredException;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import com.google.common.net.HttpHeaders;
 
@@ -51,11 +52,19 @@ public class CustomAuthorizationFilter extends OncePerRequestFilter {
 					SecurityContextHolder.getContext().setAuthentication(authenticationToken);
 					filterChain.doFilter(request, response);
 
-				} catch (Exception exc) {
-					response.setHeader("Error", exc.getLocalizedMessage());
+				} catch (TokenExpiredException exc) {
+					throw new ExceptionFoundation(EXCEPTION_CODES.AUTHEN_BAD_TOKEN, HttpStatus.I_AM_A_TEAPOT,
+							"[ AUTHEN_BAD_TOKEN ] This token is expired");
+				}
+
+				catch (Exception exc) {
+					response.setHeader("Error", exc.getMessage());
+					response.setStatus(HttpServletResponse.SC_FORBIDDEN);
 					filterChain.doFilter(request, response);
-					/*throw new ExceptionFoundation(EXCEPTION_CODES.AUTHEN_HORRIBLE_TOKEN, HttpStatus.UNAUTHORIZED,
-							"[ JWT ] This token is invalid, or expired. ");*/
+					/*
+					 * throw new ExceptionFoundation(EXCEPTION_CODES.AUTHEN_HORRIBLE_TOKEN,
+					 * HttpStatus.UNAUTHORIZED, "[ JWT ] This token is invalid, or expired. ");
+					 */
 				}
 			} else {
 				filterChain.doFilter(request, response);

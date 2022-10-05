@@ -55,10 +55,16 @@ public interface UserAccountRepository extends JpaRepository<UserAccountModel, I
 	@Transactional
 	@Modifying
 	int updateUserBio(String newBio, int accountId);
-	
+
 	@Query(value = "UPDATE UserAccountModel u SET u.profileIamge = :fileName WHERE u.accountId = :accountId")
 	@Transactional
 	@Modifying
 	int updateUserProfileImage(String fileName, int accountId);
+
+	@Query(nativeQuery = true, value = "SELECT EXISTS(SELECT * FROM user_accounts WHERE account_id = :accountId)")
+	int existsByAccountId(int accountId);
+	
+	@Query(nativeQuery = true, value = "SELECT EXISTS(SELECT * FROM user_accounts ua INNER JOIN user_roles ur ON ua.account_id = ur.account_id WHERE ur.roles_id = 2003 AND ur.account_id = :accountId)")
+	int checkUserAccountIdIfSuspended(int accountId);
 
 }

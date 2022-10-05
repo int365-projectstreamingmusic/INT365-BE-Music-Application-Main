@@ -17,11 +17,12 @@ import org.springframework.stereotype.Service;
 
 import com.application.entities.models.FileTypeModel;
 import com.application.entities.models.TracksModel;
+import com.application.entities.models.UserTrackMarkingModel;
 import com.application.exceptons.ExceptionFoundation;
 import com.application.exceptons.ExceptionResponseModel.EXCEPTION_CODES;
 import com.application.repositories.FileTypeRepository;
 import com.application.repositories.TracksRepository;
-import com.application.repositories.ViewCountRepository;
+import com.application.repositories.TrackCountRepository;
 import com.application.utilities.JwtTokenUtills;
 import com.application.utilities.MinioStorageService;
 
@@ -29,8 +30,7 @@ import io.minio.StatObjectResponse;
 
 @Service
 @PropertySource("generalsetting.properties")
-public class TrackController {
-
+public class TrackGeneralController {
 	@Value("${general.track.default-page-size}")
 	private int trackDefaultSize;
 	@Value("${general.track.max-page-size}")
@@ -39,12 +39,18 @@ public class TrackController {
 	@Autowired
 	private TracksRepository tracksRepository;
 	@Autowired
-	private ViewCountRepository viewCountRepository;
+	private TrackCountRepository viewCountRepository;
 	@Autowired
 	private FileTypeRepository fileTypeRepository;
 
 	@Autowired
 	private MinioStorageService minioStorageService;
+
+	@Value("${minio.storage.track.music}")
+	String minioTrackLocation;
+
+	@Value("${minio.storage.music-thumbnail}")
+	String minioTrackThumbnailLocation;
 
 	// OK!
 	// ListTrackByPageAndName
@@ -135,6 +141,9 @@ public class TrackController {
 	// Put track into playground.
 	public void addTrackToPlayground(int trackId, HttpServletRequest request) {
 		String addedBy = JwtTokenUtills.getUserNameFromToken(request);
+		
+		UserTrackMarkingModel newUserMarking = new UserTrackMarkingModel();
+		newUserMarking.setId(null);
 
 	}
 

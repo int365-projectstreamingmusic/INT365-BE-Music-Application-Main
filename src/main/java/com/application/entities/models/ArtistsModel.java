@@ -42,8 +42,11 @@ public class ArtistsModel {
 	@OneToMany(fetch = FetchType.LAZY, orphanRemoval = true)
 	@JoinColumn(name = "artist_id", referencedColumnName = "artist_id")
 	private List<ArtistsTrackModel> artistTracks;
+	
+	@Column(name = "added_by")
+	private int addedBy;
 
-	@ManyToOne
+	/*@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "added_by", insertable = false, updatable = false)
-	private UserAccountModel userAccount;
+	private UserAccountModel userAccount;*/
 }
