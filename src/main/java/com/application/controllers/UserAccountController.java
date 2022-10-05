@@ -31,7 +31,7 @@ import com.application.utilities.StringGenerateService;
 
 @Service
 @PropertySource("generalsetting.properties")
-public class UserAccountManagerController {
+public class UserAccountController {
 
 	@Autowired
 	private UserAccountRepository userAccountModelRepository;

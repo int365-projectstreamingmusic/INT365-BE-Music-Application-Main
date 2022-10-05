@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.application.controllers.UserAccountManagerController;
+import com.application.controllers.UserAccountController;
 import com.application.entities.models.UserAccountModel;
 
 @RestController
@@ -16,7 +16,7 @@ import com.application.entities.models.UserAccountModel;
 public class ManagerUserManagementApis {
 
 	@Autowired
-	private UserAccountManagerController userAccountManagerController;
+	private UserAccountController userAccountManagerController;
 
 	// OK!
 	// listUserByNameOrEmail

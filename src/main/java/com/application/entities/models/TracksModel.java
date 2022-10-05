@@ -50,9 +50,9 @@ public class TracksModel {
 	@Column(name = "track_desc")
 	private String trackDesc;
 
-	@ManyToOne
+	/*@ManyToOne
 	@JoinColumn(name = "account_id", insertable = false, updatable = false)
-	private UserAccountModel userAccountModel;
+	private UserAccountModel userAccountModel;*/
 
 	@JsonIgnore
 	@Basic(optional = false)

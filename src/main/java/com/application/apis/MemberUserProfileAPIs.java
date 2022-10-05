@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
-import com.application.controllers.UserAccountManagerController;
+import com.application.controllers.UserAccountController;
 import com.application.controllers.UserProfileController;
 import com.application.entities.models.UserAccountModel;
 import com.application.entities.submittionforms.UserProfileForm;
@@ -27,7 +27,7 @@ public class MemberUserProfileAPIs {
 	@Autowired
 	private UserProfileController userProfileController;
 	@Autowired
-	private UserAccountManagerController userAccountManagerController;
+	private UserAccountController userAccountManagerController;
 
 	// OK!
 	// getMyProfile

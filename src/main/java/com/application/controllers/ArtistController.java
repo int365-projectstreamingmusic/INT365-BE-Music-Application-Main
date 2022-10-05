@@ -20,7 +20,7 @@ import com.application.exceptons.ExceptionFoundation;
 import com.application.exceptons.ExceptionResponseModel.EXCEPTION_CODES;
 import com.application.repositories.ArtistsRepository;
 import com.application.repositories.ArtistsTracksRepository;
-import com.application.utilities.GeneralFunctionController;
+import com.application.services.GeneralFunctionController;
 
 @RestController
 @RequestMapping("api/manager/artist/")
@@ -88,7 +88,7 @@ public class ArtistController {
 				EXCEPTION_CODES.BROWSE_NO_RECORD_EXISTS, HttpStatus.NOT_FOUND,
 				"[ BROWSE_NO_RECORD_EXISTS ] The artist with ID " + artistId + " does not exist in the database."));
 
-		if (requestedBy.getAccountId() != targetArtist.getUserAccount().getAccountId()) {
+		if (requestedBy.getAccountId() != targetArtist.getAddedBy()) {
 			throw new ExceptionFoundation(EXCEPTION_CODES.AUTHEN_NOT_THE_OWNER, HttpStatus.FORBIDDEN,
 					"[ AUTHEN_NOT_THE_OWNER ] This user is not an owner of this record.");
 		} else {
@@ -141,7 +141,7 @@ public class ArtistController {
 				.orElseThrow(() -> new ExceptionFoundation(EXCEPTION_CODES.BROWSE_NO_RECORD_EXISTS,
 						HttpStatus.NOT_FOUND, "[ BROWSE_NO_RECORD_EXISTS ] This artist does not exist."));
 
-		if (targetArtistRecord.getUserAccount().getAccountId() != owner.getAccountId()) {
+		if (targetArtistRecord.getAddedBy() != owner.getAccountId()) {
 			throw new ExceptionFoundation(EXCEPTION_CODES.AUTHEN_NOT_THE_OWNER, HttpStatus.FORBIDDEN,
 					"[ AUTHEN_NOT_THE_OWNER ] This user is not an owner of this record.");
 		}
@@ -175,7 +175,7 @@ public class ArtistController {
 				() -> new ExceptionFoundation(EXCEPTION_CODES.BROWSE_NO_RECORD_EXISTS, HttpStatus.NOT_FOUND,
 						"[ BROWSE_NO_RECORD_EXISTS ] This artist does not exist in the database."));
 
-		if (targetArtistRecord.getUserAccount().getAccountId() != owner.getAccountId()) {
+		if (targetArtistRecord.getAddedBy() != owner.getAccountId()) {
 			throw new ExceptionFoundation(EXCEPTION_CODES.AUTHEN_NOT_THE_OWNER, HttpStatus.FORBIDDEN,
 					"[ AUTHEN_NOT_THE_OWNER ] This user is not an owner of this record.");
 		}
@@ -198,7 +198,7 @@ public class ArtistController {
 								"[ RECORD_ALREADY_GONE ] This record does not exist, nothing to delete."));
 
 		generalFunctionController.checkOwnerShipForRecord(owner.getAccountId(),
-				targetArtistInTrack.getArtistsModel().getUserAccount().getAccountId());
+				targetArtistInTrack.getArtistsModel().getAddedBy());
 		artistTracksRepository.deleteById(targetArtistInTrack.getArtistTrackID());
 	}
 
@@ -215,7 +215,7 @@ public class ArtistController {
 						HttpStatus.NOT_FOUND, "[ BROWSE_NO_RECORD_EXISTS ] This artist does not exist in this track."));
 
 		generalFunctionController.checkOwnerShipForRecord(owner.getAccountId(),
-				targetArtist.getUserAccount().getAccountId());
+				targetArtist.getAddedBy());
 
 		ArtistsTrackModel newArtistTrack = new ArtistsTrackModel();
 		newArtistTrack.setArtistTrackID(new ArtistTrackCompKey(newForm.getTrackId(), newForm.getArtistId()));

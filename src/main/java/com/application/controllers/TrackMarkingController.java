@@ -14,9 +14,8 @@ import com.application.entities.models.UserAccountModel;
 import com.application.entities.models.UserTrackMarkingModel;
 import com.application.exceptons.ExceptionFoundation;
 import com.application.exceptons.ExceptionResponseModel.EXCEPTION_CODES;
-import com.application.repositories.UserAccountRepository;
 import com.application.repositories.UserTrackMarkingRepository;
-import com.application.utilities.JwtTokenUtills;
+import com.application.services.GeneralFunctionController;
 
 @Service
 public class TrackMarkingController {
@@ -28,18 +27,12 @@ public class TrackMarkingController {
 	@Autowired
 	private UserTrackMarkingRepository userTrackMarkingRepository;
 	@Autowired
-	private UserAccountRepository userAccountRepository;
-	@Autowired
-	private JwtTokenUtills jwtTokenUtills;
+	private GeneralFunctionController generalFunctionController;
 
 	// OK!
 	// AddNewTrackMarking
 	public UserTrackMarkingModel addNewTrackMarking(int trackId, int trackMarkingId, HttpServletRequest request) {
-		UserAccountModel addedByUser = jwtTokenUtills.getUserAccountFromToken(request);
-		if (addedByUser == null) {
-			throw new ExceptionFoundation(EXCEPTION_CODES.USER_ACCOUNT_NOT_FOUND, HttpStatus.NOT_FOUND,
-					"[ USER_ACCOUNT_NOT_FOUND ] This user is no longer exist in the database.");
-		}
+		UserAccountModel addedByUser = generalFunctionController.checkUserAccountExist(request);
 
 		UserTrackMarkingCompkey id = new UserTrackMarkingCompkey(trackId, addedByUser.getAccountId(), trackMarkingId);
 		if (userTrackMarkingRepository.existsById(id)) {
@@ -54,12 +47,7 @@ public class TrackMarkingController {
 	// OK!
 	// RemoveTrackMarking
 	public void removeTrackMarking(int trackId, int trackMarkingId, HttpServletRequest request) {
-		UserAccountModel removedByUser = jwtTokenUtills.getUserAccountFromToken(request);
-		if (removedByUser == null) {
-			throw new ExceptionFoundation(EXCEPTION_CODES.USER_ACCOUNT_NOT_FOUND, HttpStatus.NOT_FOUND,
-					"[ USER_ACCOUNT_NOT_FOUND ] This user is no longer exist in the database.");
-		}
-
+		UserAccountModel removedByUser = generalFunctionController.checkUserAccountExist(request);
 		UserTrackMarkingCompkey id = new UserTrackMarkingCompkey(trackId, removedByUser.getAccountId(), trackMarkingId);
 		if (!userTrackMarkingRepository.existsById(id)) {
 			throw new ExceptionFoundation(EXCEPTION_CODES.USER_SEARCH_NOT_FOUND, HttpStatus.I_AM_A_TEAPOT,
@@ -71,15 +59,10 @@ public class TrackMarkingController {
 
 	// OK!
 	// ClearTrackInPlayGround
-	public void clearTrackInPlayGround(int trackMarkingId, HttpServletRequest request) {
-		UserAccountModel requestedBy = userAccountRepository
-				.findByUsername(JwtTokenUtills.getUserNameFromToken(request));
-		if (requestedBy == null) {
-			throw new ExceptionFoundation(EXCEPTION_CODES.USER_ACCOUNT_NOT_FOUND, HttpStatus.NOT_FOUND,
-					"[ USER_ACCOUNT_NOT_FOUND ] This user does not exist or no longer exist.");
-		}
+	public void clearTrackInPlayGround(HttpServletRequest request) {
+		UserAccountModel requestedBy = generalFunctionController.checkUserAccountExist(request);
 		try {
-			userTrackMarkingRepository.deleteAllPlaygroundById(requestedBy.getAccountId(), trackMarkingId);
+			userTrackMarkingRepository.deleteAllPlaygroundById(requestedBy.getAccountId(), 1002);
 		} catch (Exception exc) {
 			throw new ExceptionFoundation(EXCEPTION_CODES.RECORD_ALREADY_GONE, HttpStatus.I_AM_A_TEAPOT,
 					"[ DELETE_ALREADY_GONE ] Can't delete because the target record is not in the database.");
@@ -89,7 +72,7 @@ public class TrackMarkingController {
 	// OK!
 	// ListTrackByTrackMarkingAndUserAccountId
 	public Page<UserTrackMarkingModel> listTrackByTrackMarkingAndUserAccountId(int page, int size, int trackMarkingId,
-			HttpServletRequest request, String searchContent) {
+			String searchContent, HttpServletRequest request) {
 		if (page < 0) {
 			page = 0;
 		}

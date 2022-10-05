@@ -1,4 +1,4 @@
-package com.application.utilities;
+package com.application.services;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -10,6 +10,7 @@ import com.application.entities.models.UserAccountModel;
 import com.application.exceptons.ExceptionFoundation;
 import com.application.exceptons.ExceptionResponseModel.EXCEPTION_CODES;
 import com.application.repositories.UserAccountRepository;
+import com.application.utilities.JwtTokenUtills;
 
 @Service
 public class GeneralFunctionController {

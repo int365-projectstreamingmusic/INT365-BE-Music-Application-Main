@@ -1,6 +1,7 @@
 package com.application.controllers;
 
 import java.sql.Timestamp;
+import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -17,7 +18,7 @@ import com.application.exceptons.ExceptionFoundation;
 import com.application.exceptons.ExceptionResponseModel.EXCEPTION_CODES;
 import com.application.repositories.PlayHistoryRepository;
 import com.application.repositories.UserAccountRepository;
-import com.application.utilities.JwtTokenUtills;
+import com.application.services.GeneralFunctionController;
 
 @Service
 public class PlayHistoryController {
@@ -27,8 +28,23 @@ public class PlayHistoryController {
 	@Autowired
 	private UserAccountRepository userAccountRepository;
 
+	@Autowired
+	private GeneralFunctionController generalFunctionController;
+
 	private static int maxHistoryPageSize = 250;
 	private static int defaultHistoryPageSize = 50;
+
+	// OK!
+	// listMyLastVisit
+	public List<PlayHistoryModel> listMyLastVisit(int numberOfRecord, HttpServletRequest request) {
+		UserAccountModel requestedBy = generalFunctionController.checkUserAccountExist(request);
+		List<PlayHistoryModel> result = playHistoryRepository.listLastVisit(requestedBy.getAccountId(), numberOfRecord);
+		if (result.size() < 1) {
+			throw new ExceptionFoundation(EXCEPTION_CODES.BROWSE_NO_RECORD_EXISTS, HttpStatus.I_AM_A_TEAPOT,
+					"[ BROWSE_NO_RECORD_EXISTS ] This user has no history.");
+		}
+		return result;
+	}
 
 	// OK!
 	// GetMyHistory
@@ -41,12 +57,7 @@ public class PlayHistoryController {
 			pageSize = defaultHistoryPageSize;
 		}
 
-		UserAccountModel requestedBy = userAccountRepository
-				.findByUsername(JwtTokenUtills.getUserNameFromToken(request));
-		if (requestedBy == null) {
-			throw new ExceptionFoundation(EXCEPTION_CODES.USER_ACCOUNT_NOT_FOUND, HttpStatus.NOT_FOUND,
-					"[ USER_ACCOUNT_NOT_FOUND ] This user does not exist in our database.");
-		}
+		UserAccountModel requestedBy = generalFunctionController.checkUserAccountExist(request);
 
 		Pageable sendPageRequest = PageRequest.of(page, pageSize);
 		Page<PlayHistoryModel> result;
@@ -57,6 +68,10 @@ public class PlayHistoryController {
 			result = playHistoryRepository.findHistoryByUserIdAndSearchName(requestedBy.getAccountId(), searchContent,
 					sendPageRequest);
 		}
+		if (result.getTotalElements() <= 0) {
+			throw new ExceptionFoundation(EXCEPTION_CODES.BROWSE_NO_RECORD_EXISTS, HttpStatus.NOT_FOUND,
+					"[ BROWSE_NO_RECORD_EXISTS ] No record found.");
+		}
 
 		return result;
 	}
@@ -64,12 +79,7 @@ public class PlayHistoryController {
 	// OK!
 	// GetRecordsByUserIdAndTrackId
 	public PlayHistoryModel getRecordsByUserIdAndTrackId(int trackId, HttpServletRequest request) {
-		UserAccountModel requestedBy = userAccountRepository
-				.findByUsername(JwtTokenUtills.getUserNameFromToken(request));
-		if (requestedBy == null) {
-			throw new ExceptionFoundation(EXCEPTION_CODES.USER_ACCOUNT_NOT_FOUND, HttpStatus.NOT_FOUND,
-					"[ USER_ACCOUNT_NOT_FOUND ] This user does not exist in our database.");
-		}
+		UserAccountModel requestedBy = generalFunctionController.checkUserAccountExist(request);
 
 		PlayHistoryModel playHistoryModel = playHistoryRepository
 				.findRecordByUserIdAndTrackId(requestedBy.getAccountId(), trackId);
@@ -77,7 +87,6 @@ public class PlayHistoryController {
 			throw new ExceptionFoundation(EXCEPTION_CODES.BROWSE_NO_RECORD_EXISTS, HttpStatus.NOT_FOUND,
 					"[ BROWSE_NO_RECORD_EXISTS ] This record does not exist.");
 		}
-
 		return playHistoryModel;
 
 	}
@@ -86,7 +95,6 @@ public class PlayHistoryController {
 	// AUTOMATION METHOD
 	// InsertNewHistoryByUserId
 	public void insertNewHistoryByUserId(int userId, int trackId) {
-
 		if (playHistoryRepository.isExistedRecord(userId, trackId) == 1) {
 			throw new ExceptionFoundation(EXCEPTION_CODES.USER_SAVE_REJECTED, HttpStatus.I_AM_A_TEAPOT,
 					"[ USER_SAVE_REJECTED ] This record is already exist.");
@@ -98,12 +106,7 @@ public class PlayHistoryController {
 	// OK!
 	// ClearHistory
 	public void clearHistory(HttpServletRequest request) {
-		UserAccountModel requestedBy = userAccountRepository
-				.findByUsername(JwtTokenUtills.getUserNameFromToken(request));
-		if (requestedBy == null) {
-			throw new ExceptionFoundation(EXCEPTION_CODES.USER_ACCOUNT_NOT_FOUND, HttpStatus.NOT_FOUND,
-					"[ USER_ACCOUNT_NOT_FOUND ] This user does not exist in our database.");
-		}
+		UserAccountModel requestedBy = generalFunctionController.checkUserAccountExist(request);
 
 		if (playHistoryRepository.hasAtLeastOneRecord(requestedBy.getAccountId()) == 1) {
 			playHistoryRepository.deleteAllByUserAccountId(requestedBy.getAccountId());
@@ -117,12 +120,7 @@ public class PlayHistoryController {
 	// OK!
 	// ClearHistoryInThePassHoures
 	public void clearHistoryInThePassHoures(HttpServletRequest request, int inTheLastXMinute) {
-		UserAccountModel requestedBy = userAccountRepository
-				.findByUsername(JwtTokenUtills.getUserNameFromToken(request));
-		if (requestedBy == null) {
-			throw new ExceptionFoundation(EXCEPTION_CODES.USER_ACCOUNT_NOT_FOUND, HttpStatus.NOT_FOUND,
-					"[ USER_ACCOUNT_NOT_FOUND ] This user does not exist in our database.");
-		}
+		UserAccountModel requestedBy = generalFunctionController.checkUserAccountExist(request);
 
 		Timestamp targetAfterThisTime = new Timestamp(System.currentTimeMillis() - (inTheLastXMinute * 1000));
 
@@ -140,12 +138,7 @@ public class PlayHistoryController {
 	// OK!
 	// DeleteRecordById
 	public void deleteRecordById(int historyId, HttpServletRequest request) {
-		UserAccountModel requestedBy = userAccountRepository
-				.findByUsername(JwtTokenUtills.getUserNameFromToken(request));
-		if (requestedBy == null) {
-			throw new ExceptionFoundation(EXCEPTION_CODES.USER_ACCOUNT_NOT_FOUND, HttpStatus.NOT_FOUND,
-					"[ USER_ACCOUNT_NOT_FOUND ] This user does not exist in our database.");
-		}
+		UserAccountModel requestedBy = generalFunctionController.checkUserAccountExist(request);
 
 		PlayHistoryModel targetHistory = playHistoryRepository.findById(historyId)
 				.orElseThrow(() -> new ExceptionFoundation(EXCEPTION_CODES.RECORD_ALREADY_GONE,
@@ -163,12 +156,7 @@ public class PlayHistoryController {
 	// OK!
 	// DeleteRecordByUserIdAndTrackId
 	public void deleteRecordByUserIdAndTrackId(int trackId, HttpServletRequest request) {
-		UserAccountModel requestedBy = userAccountRepository
-				.findByUsername(JwtTokenUtills.getUserNameFromToken(request));
-		if (requestedBy == null) {
-			throw new ExceptionFoundation(EXCEPTION_CODES.USER_ACCOUNT_NOT_FOUND, HttpStatus.NOT_FOUND,
-					"[ USER_ACCOUNT_NOT_FOUND ] This user does not exist in our database.");
-		}
+		UserAccountModel requestedBy = generalFunctionController.checkUserAccountExist(request);
 
 		if (playHistoryRepository.isExistedRecord(requestedBy.getAccountId(), trackId) == 0) {
 			throw new ExceptionFoundation(EXCEPTION_CODES.RECORD_ALREADY_GONE, HttpStatus.I_AM_A_TEAPOT,
@@ -183,12 +171,7 @@ public class PlayHistoryController {
 	// AUTIMATION METHOD
 	// CheckAndUpdateRepeatedHistoryByUserToken
 	public void checkAndUpdateRepeatedHistoryByUserToken(int trackId, HttpServletRequest request) {
-		UserAccountModel requestedBy = userAccountRepository
-				.findByUsername(JwtTokenUtills.getUserNameFromToken(request));
-		if (requestedBy == null) {
-			throw new ExceptionFoundation(EXCEPTION_CODES.USER_ACCOUNT_NOT_FOUND, HttpStatus.NOT_FOUND,
-					"[ USER_ACCOUNT_NOT_FOUND ] This user does not exist in our database.");
-		}
+		UserAccountModel requestedBy = generalFunctionController.checkUserAccountExist(request);
 
 		if (playHistoryRepository.isExistedRecord(requestedBy.getAccountId(), trackId) == 0) {
 			throw new ExceptionFoundation(EXCEPTION_CODES.BROWSE_NO_RECORD_EXISTS, HttpStatus.NOT_FOUND,
