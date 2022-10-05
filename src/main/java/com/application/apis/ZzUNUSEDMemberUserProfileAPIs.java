@@ -22,7 +22,7 @@ import com.application.entities.submittionforms.UserProfileForm;*/
 
 /*@RestController
 @RequestMapping("api/profile/")*/
-public class UNUSEDMemberUserProfileAPIs {
+public class ZzUNUSEDMemberUserProfileAPIs {
 
 	/*@Autowired
 	private UserProfileController userProfileController;

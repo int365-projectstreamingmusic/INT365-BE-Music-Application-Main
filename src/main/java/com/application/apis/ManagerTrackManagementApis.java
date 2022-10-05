@@ -18,7 +18,7 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import com.application.controllers.TrackManagerController;
 import com.application.entities.models.TracksModel;
-import com.application.entities.submittionforms.AddNewTrackForm;
+import com.application.entities.submittionforms.TrackForm;
 
 @RestController
 @RequestMapping("api/manager/track/")
@@ -29,7 +29,7 @@ public class ManagerTrackManagementApis {
 
 	// AddNewTrack
 	@PostMapping("new-track")
-	public ResponseEntity<TracksModel> addNewTrack(@RequestPart AddNewTrackForm newTrack,
+	public ResponseEntity<TracksModel> addNewTrack(@RequestPart TrackForm newTrack,
 			@RequestPart MultipartFile trackFile, @RequestPart MultipartFile imageFile, HttpServletRequest request) {
 		URI uri = URI.create(
 				ServletUriComponentsBuilder.fromCurrentContextPath().path("api/member/track/newtrack").toString());
@@ -45,7 +45,7 @@ public class ManagerTrackManagementApis {
 
 	// EditTrackInformation
 	@PutMapping("edit-track")
-	public ResponseEntity<TracksModel> editTrackInformation(@RequestPart AddNewTrackForm newTrackInfo,
+	public ResponseEntity<TracksModel> editTrackInformation(@RequestPart TrackForm newTrackInfo,
 			HttpServletRequest request) {
 		URI uri = URI.create(ServletUriComponentsBuilder.fromCurrentContextPath()
 				.path("api/member/track/editdescription").toString());
