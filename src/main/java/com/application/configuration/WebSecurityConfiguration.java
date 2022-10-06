@@ -47,10 +47,11 @@ public class WebSecurityConfiguration extends WebSecurityConfigurerAdapter {
 		http.authorizeRequests().antMatchers("/api/authen/**").permitAll();
 		http.authorizeRequests().antMatchers("/api/public/**").permitAll();
 		http.authorizeRequests().antMatchers("/api/streaming/**").permitAll();
-		http.authorizeRequests().antMatchers("/api/user/**").hasAnyAuthority("user","admin");
-		http.authorizeRequests().antMatchers("/api/artist/**").hasAnyAuthority("artist","admin");
+		http.authorizeRequests().antMatchers("/api/user/**").hasAnyAuthority("user", "admin");
+		http.authorizeRequests().antMatchers("/api/artist/**").hasAnyAuthority("artist", "admin");
 		http.authorizeRequests().antMatchers("/api/manager/track/").hasAnyAuthority("admin");
-		
+		http.authorizeRequests().antMatchers("/test/**").hasAnyAuthority("super user");
+
 		http.addFilter(authenticationFilter);
 		http.addFilterBefore(new CustomAuthorizationFilter(), UsernamePasswordAuthenticationFilter.class);
 	}
