@@ -94,9 +94,11 @@ public class TrackCountController {
 	}
 
 	// GetViewCountInPassWeeks
-	public void GetViewCountInPassWeeks(int trackId, int numberOfDay) {
+	public int GetViewCountInPassWeeks(int trackId, int numberOfDay) {
 		long milisecondToday = getTimestampToday().getTime();
 		long milisecondFrom = 0;
+		
+		return trackCountRepository.getAllViewCountFromTrackIdBetween(trackId, null, null);
 	}
 
 	// GetViewCountInAllWeek
