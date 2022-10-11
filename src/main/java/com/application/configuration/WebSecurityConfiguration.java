@@ -47,9 +47,10 @@ public class WebSecurityConfiguration extends WebSecurityConfigurerAdapter {
 		http.authorizeRequests().antMatchers("/api/authen/**").permitAll();
 		http.authorizeRequests().antMatchers("/api/public/**").permitAll();
 		http.authorizeRequests().antMatchers("/api/streaming/**").permitAll();
-		http.authorizeRequests().antMatchers("/api/user/**").hasAnyAuthority("user", "admin");
-		http.authorizeRequests().antMatchers("/api/artist/**").hasAnyAuthority("artist", "admin");
-		http.authorizeRequests().antMatchers("/api/manager/track/").hasAnyAuthority("admin");
+		http.authorizeRequests().antMatchers("/api/user/**").hasAnyAuthority("user", "artist", "admin", "super user");
+		http.authorizeRequests().antMatchers("/api/artist/**").hasAnyAuthority("artist", "admin", "super user");
+		http.authorizeRequests().antMatchers("/api/staff/**").hasAnyAuthority("admin", "staff", "super user");
+		http.authorizeRequests().antMatchers("/api/manager/**").hasAnyAuthority("admin", "super user");
 		http.authorizeRequests().antMatchers("/test/**").hasAnyAuthority("super user");
 
 		http.addFilter(authenticationFilter);

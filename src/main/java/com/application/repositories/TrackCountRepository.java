@@ -27,6 +27,7 @@ public interface TrackCountRepository extends JpaRepository<TrackCountModel, Tra
 	@Query(value = "UPDATE TrackCountModel v SET v.viewCount = :newViewCount WHERE v.id = :id ")
 	void updateViewCount(int newViewCount, TrackCountCompKey id);
 	
+
 	/*@Modifying
 	@Transactional
 	@Query
