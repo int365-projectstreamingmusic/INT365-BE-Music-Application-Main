@@ -23,7 +23,6 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import com.application.controllers.PlayHistoryController;
 import com.application.controllers.TrackMarkingController;
-import com.application.controllers.UserAccountController;
 import com.application.controllers.UserProfileController;
 import com.application.entities.models.PlayHistoryModel;
 import com.application.entities.models.UserAccountModel;
@@ -60,7 +59,7 @@ public class UserApis {
 				.create(ServletUriComponentsBuilder.fromCurrentContextPath().path(mapping + "myProfile").toString());
 		return ResponseEntity.created(uri).body(userProfileController.editBasicProfileInfo(newInfo, request));
 	}
-	
+
 	@PutMapping("profile-image")
 	public ResponseEntity<String> updateProfileImage(@RequestPart MultipartFile profileImage,
 			HttpServletRequest request) {

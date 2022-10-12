@@ -144,7 +144,7 @@ public class PlayHistoryController {
 				.orElseThrow(() -> new ExceptionFoundation(EXCEPTION_CODES.RECORD_ALREADY_GONE,
 						HttpStatus.I_AM_A_TEAPOT, "[ DELETE_ALREADY_GONE ] No history of this Id."));
 
-		if (targetHistory.getUserAccount().getAccountId() != requestedBy.getAccountId()) {
+		if (targetHistory.getAccountid() != requestedBy.getAccountId()) {
 			throw new ExceptionFoundation(EXCEPTION_CODES.AUTHEN_NOT_THE_OWNER, HttpStatus.I_AM_A_TEAPOT,
 					"[ AUTHEN_NOT_THE_OWNER ] This user is not the owner of this record, and is not allowed to commit change to this record.");
 		} else {

@@ -71,16 +71,16 @@ public class TrackMarkingController {
 
 	// OK!
 	// ListTrackByTrackMarkingAndUserAccountId
-	public Page<UserTrackMarkingModel> listTrackByTrackMarkingAndUserAccountId(int page, int size, int trackMarkingId,
+	public Page<UserTrackMarkingModel> listTrackByTrackMarkingAndUserAccountId(int page, int pageSize, int trackMarkingId,
 			String searchContent, HttpServletRequest request) {
 		if (page < 0) {
 			page = 0;
 		}
-		if (size < 1 || size > maxMarkingPerPage) {
-			size = defaultMarkingPerPage;
+		if (pageSize < 1 || pageSize > maxMarkingPerPage) {
+			pageSize = defaultMarkingPerPage;
 		}
 
-		Pageable pageRequest = PageRequest.of(page, size);
+		Pageable pageRequest = PageRequest.of(page, pageSize);
 		Page<UserTrackMarkingModel> result;
 		if (searchContent != "") {
 			result = userTrackMarkingRepository.listAllFromUserIdAndTrackMarkingIdAndSearchName(1, trackMarkingId,

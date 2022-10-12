@@ -18,7 +18,7 @@ import com.application.entities.models.GenreModel;
 import com.application.entities.models.GenresTracksModel;
 import com.application.entities.models.TracksModel;
 import com.application.entities.models.UserAccountModel;
-import com.application.entities.submittionforms.AddNewTrackForm;
+import com.application.entities.submittionforms.TrackForm;
 import com.application.exceptons.ExceptionFoundation;
 import com.application.exceptons.ExceptionResponseModel.EXCEPTION_CODES;
 import com.application.repositories.GenreRepository;
@@ -56,7 +56,7 @@ public class TrackManagerController {
 
 	// OK
 	// AddNewTrack
-	public TracksModel addNewTrack(AddNewTrackForm newTrackForm, MultipartFile trackFile, MultipartFile imageFile,
+	public TracksModel addNewTrack(TrackForm newTrackForm, MultipartFile trackFile, MultipartFile imageFile,
 			HttpServletRequest request) {
 		UserAccountModel requestedBy = userAccountModelRepository
 				.findByUsername(JwtTokenUtills.getUserNameFromToken(request));
@@ -130,7 +130,7 @@ public class TrackManagerController {
 	}
 
 	// EditTrackInfo
-	public void editTrackInfo(int trackId, AddNewTrackForm newTrackInfo, HttpServletRequest request) {
+	public void editTrackInfo(int trackId, TrackForm newTrackInfo, HttpServletRequest request) {
 		TracksModel targetTrack = tracksModelRepository.findById(trackId)
 				.orElseThrow(() -> new ExceptionFoundation(EXCEPTION_CODES.SEARCH_NOT_FOUND, HttpStatus.NOT_FOUND,
 						"[ EditTrackInfo ] This track does not exist."));
