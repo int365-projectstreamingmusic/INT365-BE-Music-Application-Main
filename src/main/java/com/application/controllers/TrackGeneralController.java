@@ -17,11 +17,13 @@ import org.springframework.stereotype.Service;
 
 import com.application.entities.models.FileTypeModel;
 import com.application.entities.models.TracksModel;
+import com.application.entities.models.UserAccountModel;
 import com.application.entities.models.UserTrackMarkingModel;
 import com.application.exceptons.ExceptionFoundation;
 import com.application.exceptons.ExceptionResponseModel.EXCEPTION_CODES;
 import com.application.repositories.FileTypeRepository;
 import com.application.repositories.TracksRepository;
+import com.application.services.GeneralFunctionController;
 import com.application.repositories.TrackCountRepository;
 import com.application.utilities.JwtTokenUtills;
 import com.application.utilities.MinioStorageService;
@@ -45,12 +47,25 @@ public class TrackGeneralController {
 
 	@Autowired
 	private MinioStorageService minioStorageService;
+	@Autowired
+	private GeneralFunctionController generalFunctionController;
 
 	@Value("${minio.storage.track.music}")
 	String minioTrackLocation;
 
 	@Value("${minio.storage.music-thumbnail}")
 	String minioTrackThumbnailLocation;
+
+	// OK!
+	// ListLastRelease
+	public List<TracksModel> listLatestRelease(int numberOfTrack) {
+		List<TracksModel> result = tracksRepository.listLatsestRelease(numberOfTrack);
+		if (result.size() < 1) {
+			throw new ExceptionFoundation(EXCEPTION_CODES.BROWSE_NO_RECORD_EXISTS, HttpStatus.NOT_FOUND,
+					"[ BROWSE_NO_RECORD_EXISTS ] No track released today.");
+		}
+		return result;
+	}
 
 	// OK!
 	// ListTrackByPageAndName
@@ -141,7 +156,7 @@ public class TrackGeneralController {
 	// Put track into playground.
 	public void addTrackToPlayground(int trackId, HttpServletRequest request) {
 		String addedBy = JwtTokenUtills.getUserNameFromToken(request);
-		
+
 		UserTrackMarkingModel newUserMarking = new UserTrackMarkingModel();
 		newUserMarking.setId(null);
 
@@ -164,5 +179,43 @@ public class TrackGeneralController {
 	// Get all track from playground by page.
 
 	// Report Track
+
+	// ListMyTrack
+	public Page<TracksModel> ListMyTrack(int page, int pageSize, String searchContent, HttpServletRequest request) {
+		UserAccountModel requestedBy = generalFunctionController.getUserAccount(request);
+
+		if (page < 0) {
+			page = 0;
+		}
+		if (pageSize < 1 || pageSize > trackMaxPageSize) {
+			pageSize = trackDefaultSize;
+		}
+
+		Pageable sendPageRequest = PageRequest.of(00, 0);
+		Page<TracksModel> result;
+
+		if (searchContent == "") {
+			result = tracksRepository.listMyTrack(requestedBy.getAccountId(), sendPageRequest);
+		} else {
+			result = tracksRepository.listMyTrackByName(requestedBy.getAccountId(), searchContent, sendPageRequest);
+		}
+
+		if (result.getTotalElements() <= 0) {
+			throw new ExceptionFoundation(EXCEPTION_CODES.BROWSE_NO_RECORD_EXISTS, HttpStatus.NOT_FOUND,
+					"[ BROWSE_NO_RECORD_EXISTS ] THis user has no owned track.");
+		}
+
+		return result;
+	}
+
+	// ChangeTrackStatus
+	public void ChangeTrackStatus(int trackId, int trackStatusId, HttpServletRequest request) {
+
+	}
+
+	// DeleteTrack
+	public void deleteTrack(int trackId, HttpServletRequest request) {
+
+	}
 
 }

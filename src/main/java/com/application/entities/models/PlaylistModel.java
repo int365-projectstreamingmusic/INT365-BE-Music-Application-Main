@@ -1,19 +1,13 @@
 package com.application.entities.models;
 
-import java.util.List;
-
-import javax.persistence.Basic;
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
-import javax.persistence.OneToMany;
 import javax.persistence.Table;
-
-import org.hibernate.annotations.OnDelete;
-import org.hibernate.annotations.OnDeleteAction;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 
@@ -30,23 +24,27 @@ public class PlaylistModel {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	private int playlist_id;
+	@Column(name = "playlist_id")
+	private int id;
 
-	private String playlist_name;
+	@Column(name = "playlist_name")
+	private String playlistName;
 
 	@JsonFormat(pattern = "yyyy-MM-dd")
-	private String created_date;
+	@Column(name = "created_date")
+	private String createdDate;
 
-	private String playlist_desc;
+	@Column(name = "playlist_desc")
+	private String playlistDesc;
 
 	private String thumbnail;
 
 	@ManyToOne
 	@JoinColumn(name = "account_id", updatable = false, insertable = false)
 	private UserAccountModel userAccountModel;
-	
+
 	@ManyToOne
 	@JoinColumn(name = "status_id", updatable = false, insertable = false)
 	private PlayTrackStatusModel playTrackStatus;
-	
+
 }

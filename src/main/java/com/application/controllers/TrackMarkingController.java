@@ -32,7 +32,7 @@ public class TrackMarkingController {
 	// OK!
 	// AddNewTrackMarking
 	public UserTrackMarkingModel addNewTrackMarking(int trackId, int trackMarkingId, HttpServletRequest request) {
-		UserAccountModel addedByUser = generalFunctionController.checkUserAccountExist(request);
+		UserAccountModel addedByUser = generalFunctionController.getUserAccount(request);
 
 		UserTrackMarkingCompkey id = new UserTrackMarkingCompkey(trackId, addedByUser.getAccountId(), trackMarkingId);
 		if (userTrackMarkingRepository.existsById(id)) {
@@ -47,7 +47,7 @@ public class TrackMarkingController {
 	// OK!
 	// RemoveTrackMarking
 	public void removeTrackMarking(int trackId, int trackMarkingId, HttpServletRequest request) {
-		UserAccountModel removedByUser = generalFunctionController.checkUserAccountExist(request);
+		UserAccountModel removedByUser = generalFunctionController.getUserAccount(request);
 		UserTrackMarkingCompkey id = new UserTrackMarkingCompkey(trackId, removedByUser.getAccountId(), trackMarkingId);
 		if (!userTrackMarkingRepository.existsById(id)) {
 			throw new ExceptionFoundation(EXCEPTION_CODES.USER_SEARCH_NOT_FOUND, HttpStatus.I_AM_A_TEAPOT,
@@ -60,7 +60,7 @@ public class TrackMarkingController {
 	// OK!
 	// ClearTrackInPlayGround
 	public void clearTrackInPlayGround(HttpServletRequest request) {
-		UserAccountModel requestedBy = generalFunctionController.checkUserAccountExist(request);
+		UserAccountModel requestedBy = generalFunctionController.getUserAccount(request);
 		try {
 			userTrackMarkingRepository.deleteAllPlaygroundById(requestedBy.getAccountId(), 1002);
 		} catch (Exception exc) {
@@ -71,16 +71,16 @@ public class TrackMarkingController {
 
 	// OK!
 	// ListTrackByTrackMarkingAndUserAccountId
-	public Page<UserTrackMarkingModel> listTrackByTrackMarkingAndUserAccountId(int page, int size, int trackMarkingId,
+	public Page<UserTrackMarkingModel> listTrackByTrackMarkingAndUserAccountId(int page, int pageSize, int trackMarkingId,
 			String searchContent, HttpServletRequest request) {
 		if (page < 0) {
 			page = 0;
 		}
-		if (size < 1 || size > maxMarkingPerPage) {
-			size = defaultMarkingPerPage;
+		if (pageSize < 1 || pageSize > maxMarkingPerPage) {
+			pageSize = defaultMarkingPerPage;
 		}
 
-		Pageable pageRequest = PageRequest.of(page, size);
+		Pageable pageRequest = PageRequest.of(page, pageSize);
 		Page<UserTrackMarkingModel> result;
 		if (searchContent != "") {
 			result = userTrackMarkingRepository.listAllFromUserIdAndTrackMarkingIdAndSearchName(1, trackMarkingId,

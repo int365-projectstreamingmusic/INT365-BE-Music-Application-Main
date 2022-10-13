@@ -1,7 +1,9 @@
 package com.application.repositories;
 
-import java.util.Optional;
+import java.util.List;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -14,18 +16,21 @@ import com.application.entities.models.PlaylistModel;
 
 public interface PlaylistRepository extends JpaRepository<PlaylistModel, Integer> {
 
-	// @Query(value = "SELECT p FROM playlist p WHERE p.account_id = ?1")
-	// Page<PlaylistModel> findByUserAccountModel(int account_id, Pageable
-	// pageable);
+	@Query(nativeQuery = true, value = "SELECT * FROM playlist WHERE status_id = 2001 AND LOWER(playlist_name) LIKE LOWER(CONCAT('%',:searchName,'%')) ORDER BY created_date DESC ")
+	Page<PlaylistModel> listAllPlaylist(String searchName, Pageable pageable);
 
-	//Optional<PlaylistModel> findByPlaylist_Id(int playlist_id);
+	@Query(nativeQuery = true, value = "SELECT * FROM playlist WHERE account_id = :userId AND LOWER(playlist_name) LIKE LOWER(CONCAT('%',:searchName,'%')) ORDER BY created_date DESC ")
+	Page<PlaylistModel> listAllPlaylistOwnedBy(int userId, String searchName, Pageable pageable);
 
-	@Query("UPDATE PlaylistModel p SET p.playlist_desc = :desc WHERE p.playlist_id = :playlistId")
+	@Query(nativeQuery = true, value = "SELECT * FROM playlist WHERE status_id = 2001 ORDER BY created_date DESC LIMIT :numberOfPlaylist")
+	List<PlaylistModel> listLatestPlaylist(int numberOfPlaylist);
+
+	@Query("UPDATE PlaylistModel p SET p.playlistDesc = :desc WHERE p.id = :playlistId")
 	@Transactional
 	@Modifying
 	PlaylistModel updatePlaylistDesc(int playlistId, String desc);
 
-	@Query("UPDATE PlaylistModel p SET p.thumbnail = :thumbnail WHERE p.playlist_id = :playlistId")
+	@Query("UPDATE PlaylistModel p SET p.thumbnail = :thumbnail WHERE p.id = :playlistId")
 	@Transactional
 	@Modifying
 	PlaylistModel updatePlaylistThumbnail(int playlistId, String thumbnail);

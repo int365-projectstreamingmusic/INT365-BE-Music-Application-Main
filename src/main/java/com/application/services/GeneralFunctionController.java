@@ -18,7 +18,7 @@ public class GeneralFunctionController {
 	@Autowired
 	private UserAccountRepository userAccountRepository;
 
-	public UserAccountModel checkUserAccountExist(HttpServletRequest request) {
+	public UserAccountModel getUserAccount(HttpServletRequest request) {
 		UserAccountModel userProfile = userAccountRepository
 				.findByUsername(JwtTokenUtills.getUserNameFromToken(request));
 		if (userProfile == null) {

@@ -1,5 +1,5 @@
 package com.application.apis;
-
+/*
 import java.net.URI;
 
 import javax.servlet.http.HttpServletRequest;
@@ -18,23 +18,16 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import com.application.controllers.UserAccountController;
 import com.application.controllers.UserProfileController;
 import com.application.entities.models.UserAccountModel;
-import com.application.entities.submittionforms.UserProfileForm;
+import com.application.entities.submittionforms.UserProfileForm;*/
 
-@RestController
-@RequestMapping("api/profile/")
-public class MemberUserProfileAPIs {
+/*@RestController
+@RequestMapping("api/profile/")*/
+public class ZzUNUSEDMemberUserProfileAPIs {
 
-	@Autowired
+	/*@Autowired
 	private UserProfileController userProfileController;
 	@Autowired
 	private UserAccountController userAccountManagerController;
-
-	// OK!
-	// getMyProfile
-	@GetMapping("myprofile")
-	public ResponseEntity<UserAccountModel> getMyProfile(HttpServletRequest servletRequest) {
-		return ResponseEntity.ok().body(userAccountManagerController.getProfileFromToken(servletRequest));
-	}
 
 	// OK!
 	// editMyBios
@@ -70,26 +63,7 @@ public class MemberUserProfileAPIs {
 		URI uri = URI.create(
 				ServletUriComponentsBuilder.fromCurrentContextPath().path("api/profile/profile-name").toString());
 		return ResponseEntity.created(uri).body(userProfileController.setNewProfileName(newProfileName, request));
-	}
+	}*/
 
-	// OK!
-	// EditBasicProfileInfo
-	@PutMapping("edit-profile-info")
-	public ResponseEntity<UserAccountModel> editBasicProfileInfo(@RequestBody UserProfileForm newProfileInfo,
-			HttpServletRequest request) {
-		URI uri = URI.create(
-				ServletUriComponentsBuilder.fromCurrentContextPath().path("api/profile/edit-profile-info").toString());
-		return ResponseEntity.created(uri).body(userProfileController.editBasicProfileInfo(newProfileInfo, request));
-	}
-
-	// OK!
-	// updateProfileImage
-	@PutMapping("profile-image")
-	public ResponseEntity<String> updateProfileImage(@RequestPart MultipartFile profileImage,
-			HttpServletRequest request) {
-		URI uri = URI.create(
-				ServletUriComponentsBuilder.fromCurrentContextPath().path("api/profile/profile-image").toString());
-		return ResponseEntity.created(uri).body(userProfileController.setNewUserProfileImage(profileImage, request));
-	}
 
 }
