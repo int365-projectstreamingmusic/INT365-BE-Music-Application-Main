@@ -32,8 +32,8 @@ public class PlaylistManagementService {
 		UserAccountModel createdBy = new UserAccountModel();
 
 		PlaylistModel createdPlaylist = new PlaylistModel();
-		createdPlaylist.setPlaylist_name(newPlaylist.getPlaylist_name());
-		createdPlaylist.setPlaylist_desc(newPlaylist.getPlaylist_desc());
+		createdPlaylist.setPlaylistName(newPlaylist.getPlaylist_name());
+		createdPlaylist.setPlaylistDesc(newPlaylist.getPlaylist_desc());
 	}
 
 	// Edit playlist description

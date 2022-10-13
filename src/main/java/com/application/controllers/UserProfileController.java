@@ -26,7 +26,7 @@ public class UserProfileController {
 	// OK!
 	// getMyProfile
 	public UserAccountModel getMyProfile(HttpServletRequest request) {
-		return generalFunctionController.checkUserAccountExist(request);
+		return generalFunctionController.getUserAccount(request);
 	}
 
 	// OK!

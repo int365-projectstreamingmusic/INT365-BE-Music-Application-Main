@@ -41,13 +41,19 @@ public class TestingApis {
 	public ResponseEntity<HttpStatus> increaseViewCount(@RequestParam int trackId) {
 		URI uri = URI
 				.create(ServletUriComponentsBuilder.fromCurrentContextPath().path(mapping + "addViewCount").toString());
-		trackCountController.addViewCountToTrack(trackId);
+		trackCountController.increateViewCount(trackId);
 		return ResponseEntity.created(uri).body(HttpStatus.OK);
 	}
-	
+
 	@GetMapping("getAllView")
-	public ResponseEntity<String> getAllViewByTrackId(@RequestParam(required = true) int trackId){
-		return ResponseEntity.ok().body(" view = " + trackCountController.getViewCountInAllWeek(trackId));
+	public ResponseEntity<String> getAllViewByTrackId(@RequestParam(required = true) int trackId) {
+		return ResponseEntity.ok().body(" view = " + trackCountController.getViewCount(trackId));
+	}
+
+	@GetMapping("getViewFromDayTo")
+	public ResponseEntity<Integer> getViewCountInThePastFewDay(@RequestParam(required = true) int trackId,
+			@RequestParam(defaultValue = "7") int days) {
+		return ResponseEntity.ok().body(trackCountController.getViewCountInPassDays(trackId, days));
 	}
 
 	@GetMapping("getKen")

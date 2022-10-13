@@ -182,7 +182,7 @@ public class TrackGeneralController {
 
 	// ListMyTrack
 	public Page<TracksModel> ListMyTrack(int page, int pageSize, String searchContent, HttpServletRequest request) {
-		UserAccountModel requestedBy = generalFunctionController.checkUserAccountExist(request);
+		UserAccountModel requestedBy = generalFunctionController.getUserAccount(request);
 
 		if (page < 0) {
 			page = 0;

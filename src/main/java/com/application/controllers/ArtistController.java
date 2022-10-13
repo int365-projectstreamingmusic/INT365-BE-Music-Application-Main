@@ -60,7 +60,7 @@ public class ArtistController {
 	// ListMyArtistList
 	public Page<ArtistsModel> listMyArtistList(int page, int pageSize, String searchContent,
 			HttpServletRequest request) {
-		UserAccountModel requestedBy = generalFunctionController.checkUserAccountExist(request);
+		UserAccountModel requestedBy = generalFunctionController.getUserAccount(request);
 		if (page < 0) {
 			page = 0;
 		}
@@ -82,7 +82,7 @@ public class ArtistController {
 	// OK!
 	// DeleteArtist
 	public void deleteArtist(int artistId, HttpServletRequest request) {
-		UserAccountModel requestedBy = generalFunctionController.checkUserAccountExist(request);
+		UserAccountModel requestedBy = generalFunctionController.getUserAccount(request);
 
 		ArtistsModel targetArtist = artistRepository.findById(artistId).orElseThrow(() -> new ExceptionFoundation(
 				EXCEPTION_CODES.BROWSE_NO_RECORD_EXISTS, HttpStatus.NOT_FOUND,
@@ -135,7 +135,7 @@ public class ArtistController {
 	// EditArtistInfo
 	public ArtistsModel editArtistInfo(ArtistsEditForm newInformation, HttpServletRequest request) {
 
-		UserAccountModel owner = generalFunctionController.checkUserAccountExist(request);
+		UserAccountModel owner = generalFunctionController.getUserAccount(request);
 
 		ArtistsModel targetArtistRecord = artistRepository.findById(newInformation.getArtistId())
 				.orElseThrow(() -> new ExceptionFoundation(EXCEPTION_CODES.BROWSE_NO_RECORD_EXISTS,
@@ -165,7 +165,7 @@ public class ArtistController {
 	public ArtistsTrackModel editArtistTrackDescription(ArtistTrackForm newInfo, HttpServletRequest request) {
 
 		CheckIncomingArtistTrackForm(newInfo);
-		UserAccountModel owner = generalFunctionController.checkUserAccountExist(request);
+		UserAccountModel owner = generalFunctionController.getUserAccount(request);
 
 		ArtistsTrackModel targetArtistTrackRecord = artistTracksRepository
 				.findById(new ArtistTrackCompKey(newInfo.getTrackId(), newInfo.getArtistId()))
@@ -190,7 +190,7 @@ public class ArtistController {
 	// DeleteArtistFromTrack
 	public void DeleteArtistFromTrack(ArtistTrackForm targetForm, HttpServletRequest request) {
 		CheckIncomingArtistTrackForm(targetForm);
-		UserAccountModel owner = generalFunctionController.checkUserAccountExist(request);
+		UserAccountModel owner = generalFunctionController.getUserAccount(request);
 
 		ArtistsTrackModel targetArtistInTrack = artistTracksRepository
 				.findById(new ArtistTrackCompKey(targetForm.getTrackId(), targetForm.getArtistId())).orElseThrow(
@@ -208,7 +208,7 @@ public class ArtistController {
 
 		CheckIncomingArtistTrackForm(newForm);
 
-		UserAccountModel owner = generalFunctionController.checkUserAccountExist(request);
+		UserAccountModel owner = generalFunctionController.getUserAccount(request);
 
 		ArtistsModel targetArtist = artistRepository.findById(newForm.getArtistId())
 				.orElseThrow(() -> new ExceptionFoundation(EXCEPTION_CODES.BROWSE_NO_RECORD_EXISTS,

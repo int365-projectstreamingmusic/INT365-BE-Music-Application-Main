@@ -32,7 +32,7 @@ public class TrackMarkingController {
 	// OK!
 	// AddNewTrackMarking
 	public UserTrackMarkingModel addNewTrackMarking(int trackId, int trackMarkingId, HttpServletRequest request) {
-		UserAccountModel addedByUser = generalFunctionController.checkUserAccountExist(request);
+		UserAccountModel addedByUser = generalFunctionController.getUserAccount(request);
 
 		UserTrackMarkingCompkey id = new UserTrackMarkingCompkey(trackId, addedByUser.getAccountId(), trackMarkingId);
 		if (userTrackMarkingRepository.existsById(id)) {
@@ -47,7 +47,7 @@ public class TrackMarkingController {
 	// OK!
 	// RemoveTrackMarking
 	public void removeTrackMarking(int trackId, int trackMarkingId, HttpServletRequest request) {
-		UserAccountModel removedByUser = generalFunctionController.checkUserAccountExist(request);
+		UserAccountModel removedByUser = generalFunctionController.getUserAccount(request);
 		UserTrackMarkingCompkey id = new UserTrackMarkingCompkey(trackId, removedByUser.getAccountId(), trackMarkingId);
 		if (!userTrackMarkingRepository.existsById(id)) {
 			throw new ExceptionFoundation(EXCEPTION_CODES.USER_SEARCH_NOT_FOUND, HttpStatus.I_AM_A_TEAPOT,
@@ -60,7 +60,7 @@ public class TrackMarkingController {
 	// OK!
 	// ClearTrackInPlayGround
 	public void clearTrackInPlayGround(HttpServletRequest request) {
-		UserAccountModel requestedBy = generalFunctionController.checkUserAccountExist(request);
+		UserAccountModel requestedBy = generalFunctionController.getUserAccount(request);
 		try {
 			userTrackMarkingRepository.deleteAllPlaygroundById(requestedBy.getAccountId(), 1002);
 		} catch (Exception exc) {

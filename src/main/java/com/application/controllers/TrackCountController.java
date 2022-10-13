@@ -1,7 +1,6 @@
 package com.application.controllers;
 
 import java.sql.Timestamp;
-import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -11,13 +10,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
-import java.util.TimeZone;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
-import com.application.entities.models.TracksModel;
 import com.application.entities.copmskeys.TrackCountCompKey;
 import com.application.entities.models.TrackCountModel;
 import com.application.exceptons.ExceptionFoundation;
@@ -34,10 +31,115 @@ public class TrackCountController {
 	private TrackCountRepository trackCountRepository;
 
 	private static final long TIME_DIF_DAY = 86400000;
-	private static final long TIME_DIF_WEEK = 86400000 * 7;
 	private static final long TIME_DIF = 25200000;
 
+	// GetViewCountInPassDays
+	public int getViewCountInPassDays(int trackId, int numberOfDay) {
+		String timesTampTo = getTimestampToday().toString();
+		String timesTampFrom = getTimeStampFromMilisecond(getTimestampToday().getTime() - (numberOfDay * TIME_DIF_DAY))
+				.toString();
+		return trackCountRepository.getAllViewCountFromTrackIdBetween(trackId, timesTampFrom, timesTampTo);
+	}
+
+	// GetViewCount
+	public int getViewCount(int trackId) {
+		if (!tracksRepository.existsById(trackId)) {
+			throw new ExceptionFoundation(EXCEPTION_CODES.BROWSE_NO_RECORD_EXISTS, HttpStatus.NOT_FOUND,
+					"[ BROWSE_NO_RECORD_EXISTS ] The track with this ID does not exist.");
+		} else {
+			return trackCountRepository.getAllViewCountFromTrackId(trackId);
+		}
+
+	}
+
+	// getAllFavouriteCount
+	public int getAllFavouriteCount(int trackId) {
+		if (!tracksRepository.existsById(trackId)) {
+			throw new ExceptionFoundation(EXCEPTION_CODES.BROWSE_NO_RECORD_EXISTS, HttpStatus.NOT_FOUND,
+					"[ BROWSE_NO_RECORD_EXISTS ] The track with this ID does not exist.");
+		} else {
+			return trackCountRepository.getAllViewCountFromTrackId(trackId);
+		}
+	}
+
+	// --------------------------------
+	// Adding and deleting view count or favorite count
+	// --------------------------------
+
+	// NO API
+	// increateViewCount
+	public void increateViewCount(int trackId) {
+		TrackCountCompKey id = new TrackCountCompKey(trackId, getTimestampToday().toString());
+		TrackCountModel trackCount = trackCountRepository.findById(id).orElse(null);
+		if (trackCount == null) {
+			trackCount = createNewTrackCountRecordForToday(trackId);
+		}
+		trackCountRepository.updateViewCount(trackCount.getViewCount() + 1, id);
+	}
+
+	// NO API
+	// IncreaseFavouriteCount
+	public void increaseFavouriteCount(int trackId) {
+		TrackCountCompKey id = new TrackCountCompKey(trackId, getTimestampToday().toString());
+		TrackCountModel trackCount = trackCountRepository.findById(id).orElse(null);
+		if (trackCount == null) {
+			trackCount = createNewTrackCountRecordForToday(trackId);
+		}
+		trackCountRepository.updateFavoriteCount(trackCount.getFavouriteCount() + 1, id);
+	}
+
+	// NO API
+	// DecreaseFavouriteCount
+	public void decreaseFavouriteCount(int trackId) {
+		TrackCountCompKey id = new TrackCountCompKey(trackId, getTimestampToday().toString());
+		TrackCountModel trackCount = trackCountRepository.findById(id).orElse(null);
+		if (trackCount == null) {
+			createNewTrackCountRecordForToday(trackId);
+		}
+		trackCountRepository.updateFavoriteCount(trackCount.getFavouriteCount() - 1, id);
+	}
+
+	// ---------------
+	// PRIVATE or AUTOMATION
+	// ---------------
+
+	// PRIVATE
+	// GetTimestampToday
+	private Timestamp getTimestampToday() {
+		long currentTimeMili = Calendar.getInstance().getTimeInMillis();
+		long currentTimeRecord = currentTimeMili - (currentTimeMili % TIME_DIF_DAY) - TIME_DIF;
+		Timestamp timeStamp = new Timestamp(currentTimeRecord);
+		return timeStamp;
+	}
+
+	// PRIVATE
+	// GetTimeStampFromMilisecond
+	private Timestamp getTimeStampFromMilisecond(long miliSecond) {
+		Timestamp timestamp = new Timestamp(miliSecond);
+		return timestamp;
+	}
+
+	// PRIVATE
+	// CreateNewTrackCountRecordForToday
+	private TrackCountModel createNewTrackCountRecordForToday(int trackId) {
+		long currentTimeMili = Calendar.getInstance().getTimeInMillis();
+		long currentTimeRecord = currentTimeMili - (currentTimeMili % TIME_DIF_DAY) - TIME_DIF;
+		Timestamp timeStamp = new Timestamp(currentTimeRecord);
+		TrackCountModel newTrackCount = new TrackCountModel();
+
+		System.out.println(timeStamp.toString());
+
+		newTrackCount.setViewCount(0);
+		newTrackCount.setFavouriteCount(0);
+		newTrackCount.setId(new TrackCountCompKey(trackId, timeStamp.toString()));
+		trackCountRepository.save(newTrackCount);
+		return newTrackCount;
+	}
+
+	// ---------------
 	// !! TESTING FUNCTION !!
+	// ---------------
+
 	// AddCuctomVIewCount
 	public List<TrackCountModel> addCustomViewCount(int trackId, int numberOfWeek) {
 		tracksRepository.findById(trackId)
@@ -77,93 +179,6 @@ public class TrackCountController {
 			throw new ExceptionFoundation(EXCEPTION_CODES.DEAD, HttpStatus.INTERNAL_SERVER_ERROR,
 					"[ DEAD ] Error in function : addCustomViewCount " + e.getLocalizedMessage());
 		}
-	}
-
-	// NO API
-	// AddViewCountToTrack
-	public void addViewCountToTrack(int trackId) {
-		TrackCountCompKey id = new TrackCountCompKey(trackId, getTimestampToday().toString());
-		if (trackCountRepository.existsById(id)) {
-			TrackCountModel trackCount = trackCountRepository.findById(id)
-					.orElseThrow(() -> new ExceptionFoundation(EXCEPTION_CODES.BROWSE_NO_RECORD_EXISTS,
-							HttpStatus.NOT_FOUND, "[ BROWSE_NO_RECORD_EXISTS ] No record found for this Id."));
-			trackCountRepository.updateViewCount(trackCount.getViewCount() + 1, id);
-		} else {
-			createNewTrackCountRecordForThisWeek(trackId);
-		}
-	}
-
-	// GetViewCountInPassWeeks
-	public int GetViewCountInPassWeeks(int trackId, int numberOfDay) {
-		long milisecondToday = getTimestampToday().getTime();
-		long milisecondFrom = 0;
-		
-		return trackCountRepository.getAllViewCountFromTrackIdBetween(trackId, null, null);
-	}
-
-	// GetViewCountInAllWeek
-	public int getViewCountInAllWeek(int trackId) {
-		if (!tracksRepository.existsById(trackId)) {
-			throw new ExceptionFoundation(EXCEPTION_CODES.BROWSE_NO_RECORD_EXISTS, HttpStatus.NOT_FOUND,
-					"[ BROWSE_NO_RECORD_EXISTS ] The track with this ID does not exist.");
-		} else {
-			return trackCountRepository.getAllViewCountFromTrackId(trackId);
-		}
-
-	}
-
-	// NO API
-	// IncreaseFavouriteCount
-	public void increaseFavouriteCount(int trackId) {
-
-	}
-
-	// NO API
-	// DecreaseFavouriteCount
-	public void decreaseFavouriteCount(int trackId) {
-
-	}
-
-	// getAllFavouriteCount
-	public void getAllFavouriteCount(int trackId) {
-
-	}
-
-	// ---------------
-	// PRIVATE or AUTOMATION
-	// ---------------
-
-	// PRIVATE
-	// GetTimestampToday
-	private Timestamp getTimestampToday() {
-		long currentTimeMili = Calendar.getInstance().getTimeInMillis();
-		long currentTimeRecord = currentTimeMili - (currentTimeMili % TIME_DIF_DAY) - TIME_DIF;
-		Timestamp timeStamp = new Timestamp(currentTimeRecord);
-		return timeStamp;
-	}
-
-	// PRIVATE
-	// GetTimeStampFromMilisecond
-	private Timestamp getTimeStampFromMilisecond(long miliSecond) {
-		Timestamp timestamp = new Timestamp(miliSecond);
-		return timestamp;
-	}
-
-	// PRIVATE
-	// CreateNewTrackCountRecordForThisWeek
-	private TrackCountModel createNewTrackCountRecordForThisWeek(int trackId) {
-		long currentTimeMili = Calendar.getInstance().getTimeInMillis();
-		long currentTimeRecord = currentTimeMili - (currentTimeMili % TIME_DIF_DAY) - TIME_DIF;
-		Timestamp timeStamp = new Timestamp(currentTimeRecord);
-		TrackCountModel newTrackCount = new TrackCountModel();
-
-		System.out.println(timeStamp.toString());
-
-		newTrackCount.setViewCount(0);
-		newTrackCount.setFavouriteCount(0);
-		newTrackCount.setId(new TrackCountCompKey(trackId, timeStamp.toString()));
-		trackCountRepository.save(newTrackCount);
-		return newTrackCount;
 	}
 
 }

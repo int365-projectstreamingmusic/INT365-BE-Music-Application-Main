@@ -37,7 +37,7 @@ public class PlayHistoryController {
 	// OK!
 	// listMyLastVisit
 	public List<PlayHistoryModel> listMyLastVisit(int numberOfRecord, HttpServletRequest request) {
-		UserAccountModel requestedBy = generalFunctionController.checkUserAccountExist(request);
+		UserAccountModel requestedBy = generalFunctionController.getUserAccount(request);
 		List<PlayHistoryModel> result = playHistoryRepository.listLastVisit(requestedBy.getAccountId(), numberOfRecord);
 		if (result.size() < 1) {
 			throw new ExceptionFoundation(EXCEPTION_CODES.BROWSE_NO_RECORD_EXISTS, HttpStatus.I_AM_A_TEAPOT,
@@ -57,7 +57,7 @@ public class PlayHistoryController {
 			pageSize = defaultHistoryPageSize;
 		}
 
-		UserAccountModel requestedBy = generalFunctionController.checkUserAccountExist(request);
+		UserAccountModel requestedBy = generalFunctionController.getUserAccount(request);
 
 		Pageable sendPageRequest = PageRequest.of(page, pageSize);
 		Page<PlayHistoryModel> result;
@@ -79,7 +79,7 @@ public class PlayHistoryController {
 	// OK!
 	// GetRecordsByUserIdAndTrackId
 	public PlayHistoryModel getRecordsByUserIdAndTrackId(int trackId, HttpServletRequest request) {
-		UserAccountModel requestedBy = generalFunctionController.checkUserAccountExist(request);
+		UserAccountModel requestedBy = generalFunctionController.getUserAccount(request);
 
 		PlayHistoryModel playHistoryModel = playHistoryRepository
 				.findRecordByUserIdAndTrackId(requestedBy.getAccountId(), trackId);
@@ -106,7 +106,7 @@ public class PlayHistoryController {
 	// OK!
 	// ClearHistory
 	public void clearHistory(HttpServletRequest request) {
-		UserAccountModel requestedBy = generalFunctionController.checkUserAccountExist(request);
+		UserAccountModel requestedBy = generalFunctionController.getUserAccount(request);
 
 		if (playHistoryRepository.hasAtLeastOneRecord(requestedBy.getAccountId()) == 1) {
 			playHistoryRepository.deleteAllByUserAccountId(requestedBy.getAccountId());
@@ -120,7 +120,7 @@ public class PlayHistoryController {
 	// OK!
 	// ClearHistoryInThePassHoures
 	public void clearHistoryInThePassHoures(HttpServletRequest request, int inTheLastXMinute) {
-		UserAccountModel requestedBy = generalFunctionController.checkUserAccountExist(request);
+		UserAccountModel requestedBy = generalFunctionController.getUserAccount(request);
 
 		Timestamp targetAfterThisTime = new Timestamp(System.currentTimeMillis() - (inTheLastXMinute * 1000));
 
@@ -138,7 +138,7 @@ public class PlayHistoryController {
 	// OK!
 	// DeleteRecordById
 	public void deleteRecordById(int historyId, HttpServletRequest request) {
-		UserAccountModel requestedBy = generalFunctionController.checkUserAccountExist(request);
+		UserAccountModel requestedBy = generalFunctionController.getUserAccount(request);
 
 		PlayHistoryModel targetHistory = playHistoryRepository.findById(historyId)
 				.orElseThrow(() -> new ExceptionFoundation(EXCEPTION_CODES.RECORD_ALREADY_GONE,
@@ -156,7 +156,7 @@ public class PlayHistoryController {
 	// OK!
 	// DeleteRecordByUserIdAndTrackId
 	public void deleteRecordByUserIdAndTrackId(int trackId, HttpServletRequest request) {
-		UserAccountModel requestedBy = generalFunctionController.checkUserAccountExist(request);
+		UserAccountModel requestedBy = generalFunctionController.getUserAccount(request);
 
 		if (playHistoryRepository.isExistedRecord(requestedBy.getAccountId(), trackId) == 0) {
 			throw new ExceptionFoundation(EXCEPTION_CODES.RECORD_ALREADY_GONE, HttpStatus.I_AM_A_TEAPOT,
@@ -171,7 +171,7 @@ public class PlayHistoryController {
 	// AUTIMATION METHOD
 	// CheckAndUpdateRepeatedHistoryByUserToken
 	public void checkAndUpdateRepeatedHistoryByUserToken(int trackId, HttpServletRequest request) {
-		UserAccountModel requestedBy = generalFunctionController.checkUserAccountExist(request);
+		UserAccountModel requestedBy = generalFunctionController.getUserAccount(request);
 
 		if (playHistoryRepository.isExistedRecord(requestedBy.getAccountId(), trackId) == 0) {
 			throw new ExceptionFoundation(EXCEPTION_CODES.BROWSE_NO_RECORD_EXISTS, HttpStatus.NOT_FOUND,

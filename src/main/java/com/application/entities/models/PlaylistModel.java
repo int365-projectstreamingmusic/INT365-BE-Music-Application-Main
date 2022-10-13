@@ -1,5 +1,6 @@
 package com.application.entities.models;
 
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -23,23 +24,27 @@ public class PlaylistModel {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	private int playlist_id;
+	@Column(name = "playlist_id")
+	private int id;
 
-	private String playlist_name;
+	@Column(name = "playlist_name")
+	private String playlistName;
 
 	@JsonFormat(pattern = "yyyy-MM-dd")
-	private String created_date;
+	@Column(name = "created_date")
+	private String createdDate;
 
-	private String playlist_desc;
+	@Column(name = "playlist_desc")
+	private String playlistDesc;
 
 	private String thumbnail;
 
 	@ManyToOne
 	@JoinColumn(name = "account_id", updatable = false, insertable = false)
 	private UserAccountModel userAccountModel;
-	
+
 	@ManyToOne
 	@JoinColumn(name = "status_id", updatable = false, insertable = false)
 	private PlayTrackStatusModel playTrackStatus;
-	
+
 }

@@ -22,9 +22,11 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import com.application.controllers.PlayHistoryController;
+import com.application.controllers.PlaylistController;
 import com.application.controllers.TrackMarkingController;
 import com.application.controllers.UserProfileController;
 import com.application.entities.models.PlayHistoryModel;
+import com.application.entities.models.PlaylistModel;
 import com.application.entities.models.UserAccountModel;
 import com.application.entities.models.UserTrackMarkingModel;
 import com.application.entities.submittionforms.UserProfileForm;
@@ -38,11 +40,25 @@ public class UserApis {
 	private static String mapping = "/api/user/";
 
 	@Autowired
+	private PlaylistController playlistController;
+	@Autowired
 	private UserProfileController userProfileController;
 	@Autowired
 	private TrackMarkingController trackMarkingController;
 	@Autowired
 	private PlayHistoryController playHistoryController;
+
+	// ---------------------
+	// Playlist
+	// ---------------------
+
+	// ListMyCreatedPlaylist
+	@GetMapping("playlist")
+	public ResponseEntity<Page<PlaylistModel>> listMyOwnedPlaylist(@RequestParam(defaultValue = "0") int page,
+			@RequestParam(defaultValue = "0") int pageSize, @RequestParam(defaultValue = "") String searchContent,
+			HttpServletRequest request) {
+		return ResponseEntity.ok().body(playlistController.getMyPlaylist(page, pageSize, searchContent, request));
+	}
 
 	// ---------------------
 	// User profile Api
