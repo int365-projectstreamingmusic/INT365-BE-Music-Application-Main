@@ -20,7 +20,7 @@ import com.application.entities.models.TrackCountModel;
 import com.application.exceptons.ExceptionFoundation;
 import com.application.exceptons.ExceptionResponseModel.EXCEPTION_CODES;
 import com.application.repositories.TracksRepository;
-import com.application.repositories.TrackCountRepository;
+import com.application.repositories.TrackCountStatisticRepository;
 
 @Service
 public class TrackCountController {
@@ -28,7 +28,7 @@ public class TrackCountController {
 	@Autowired
 	private TracksRepository tracksRepository;
 	@Autowired
-	private TrackCountRepository trackCountRepository;
+	private TrackCountStatisticRepository trackCountRepository;
 
 	private static final long TIME_DIF_DAY = 86400000;
 	private static final long TIME_DIF = 25200000;
@@ -85,7 +85,7 @@ public class TrackCountController {
 		if (trackCount == null) {
 			trackCount = createNewTrackCountRecordForToday(trackId);
 		}
-		trackCountRepository.updateFavoriteCount(trackCount.getFavouriteCount() + 1, id);
+		trackCountRepository.updateFavoriteCount(trackCount.getFavoriteCount() + 1, id);
 	}
 
 	// NO API
@@ -96,7 +96,7 @@ public class TrackCountController {
 		if (trackCount == null) {
 			createNewTrackCountRecordForToday(trackId);
 		}
-		trackCountRepository.updateFavoriteCount(trackCount.getFavouriteCount() - 1, id);
+		trackCountRepository.updateFavoriteCount(trackCount.getFavoriteCount() - 1, id);
 	}
 
 	// ---------------
@@ -130,7 +130,7 @@ public class TrackCountController {
 		System.out.println(timeStamp.toString());
 
 		newTrackCount.setViewCount(0);
-		newTrackCount.setFavouriteCount(0);
+		newTrackCount.setFavoriteCount(0);
 		newTrackCount.setId(new TrackCountCompKey(trackId, timeStamp.toString()));
 		trackCountRepository.save(newTrackCount);
 		return newTrackCount;
@@ -169,7 +169,7 @@ public class TrackCountController {
 				resultMap.put("day" + i, currentDate.toString());
 				Timestamp timeStamp = new Timestamp(currentMili);
 				TrackCountModel newTrackCount = new TrackCountModel();
-				newTrackCount.setFavouriteCount(randomizedNumberOfFavorite);
+				newTrackCount.setFavoriteCount(randomizedNumberOfFavorite);
 				newTrackCount.setViewCount(randomizedNumberOfview);
 				newTrackCount.setId(new TrackCountCompKey(trackId, timeStamp.toString()));
 				trackCountRepository.save(newTrackCount);

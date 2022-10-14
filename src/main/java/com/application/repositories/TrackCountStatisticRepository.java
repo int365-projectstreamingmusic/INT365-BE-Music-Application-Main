@@ -12,17 +12,17 @@ import com.application.entities.copmskeys.TrackCountCompKey;
 import com.application.entities.models.TrackCountModel;
 
 @Repository
-public interface TrackCountRepository extends JpaRepository<TrackCountModel, TrackCountCompKey> {
+public interface TrackCountStatisticRepository extends JpaRepository<TrackCountModel, TrackCountCompKey> {
 
-	@Query(nativeQuery = true, value = "SELECT v FROM view_count v WHERE v.track_id = :trackId")
+	@Query(nativeQuery = true, value = "SELECT v FROM track_count_statistic v WHERE v.track_id = :trackId")
 	List<TrackCountModel> listViewCountByTrackId(int trackId);
 
-	@Query(nativeQuery = true, value = "SELECT CASE WHEN EXISTS(SELECT * FROM view_count WHERE track_id = :trackId ) THEN SUM(v.view_count) ELSE 0 END FROM view_count v WHERE v.track_id = :trackId")
+	@Query(nativeQuery = true, value = "SELECT CASE WHEN EXISTS(SELECT * FROM track_count_statistic WHERE track_id = :trackId ) THEN SUM(v.view_count) ELSE 0 END FROM track_count_statistic v WHERE v.track_id = :trackId")
 	int getAllViewCountFromTrackId(int trackId);
 
 	@Query(nativeQuery = true, value = "SELECT CASE WHEN EXISTS"
-			+ "(SELECT * FROM view_count WHERE track_id = :trackId AND view_count_date BETWEEN :from AND :to) "
-			+ "THEN SUM(v.view_count) ELSE 0 END FROM view_count v WHERE v.track_id = :trackId AND v.view_count_date "
+			+ "(SELECT * FROM track_count_statistic WHERE track_id = :trackId AND view_count_date BETWEEN :from AND :to) "
+			+ "THEN SUM(v.view_count) ELSE 0 END FROM track_count_statistic v WHERE v.track_id = :trackId AND v.view_count_date "
 			+ "BETWEEN :from AND :to")
 	int getAllViewCountFromTrackIdBetween(int trackId, String from, String to);
 
@@ -35,7 +35,7 @@ public interface TrackCountRepository extends JpaRepository<TrackCountModel, Tra
 	// UpdateFavoriteCount
 	@Modifying
 	@Transactional
-	@Query(value = "UPDATE TrackCountModel v SET v.favouriteCount = :newFavoriteCount WHERE v.id = :id ")
+	@Query(value = "UPDATE TrackCountModel v SET v.favoriteCount = :newFavoriteCount WHERE v.id = :id ")
 	void updateFavoriteCount(int newFavoriteCount, TrackCountCompKey id);
 
 }
