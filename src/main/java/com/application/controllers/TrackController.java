@@ -7,6 +7,9 @@ import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -52,27 +55,83 @@ public class TrackController {
 	@Value("${minio.storage.music-thumbnail}")
 	String minioTrackThumbnailLocation;
 
-	// -------------------------------------------------
+	// █████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████
 	//
 	// Visitor zone for creator only.
 	//
-	// -------------------------------------------------
+	// █████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████
+
+	// ▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬
 
 	// DB-V5 OK!
-	// getTopTrack
-	public List<TracksModel> getTopTrackOfNDay(int numberOfTrack) {
-		if (numberOfTrack > trackMaxPageSize) {
-			numberOfTrack = trackMaxPageSize;
+	// ListTrackByPageAndName
+	public Page<TracksModel> listTrackByPageAndName(int page, int pageSize, String searchContent) {
+		if (page < 0) {
+			page = 0;
 		}
-		List<TracksModel> result = tracksRepository.listTopTrack(numberOfTrack);
+		if (pageSize < 1 || pageSize > trackMaxPageSize) {
+			pageSize = trackDefaultSize;
+		}
+
+		Pageable sendPageRequest = PageRequest.of(page, pageSize);
+		Page<TracksModel> result;
+
+		if (searchContent == "") {
+			result = tracksRepository.findAll(sendPageRequest);
+		} else {
+			result = tracksRepository.findByTrackName(searchContent, sendPageRequest);
+			if (result.getTotalPages() < page + 1) {
+				throw new ExceptionFoundation(EXCEPTION_CODES.SEARCH_NOT_FOUND, HttpStatus.NOT_FOUND,
+						"[ TrackController ] Found nothing here. Seems like there is no track here.");
+			}
+		}
 		return result;
 	}
 
 	// DB-V5 OK!
+	// getTrackById
+	public TracksModel getTrackById(int trackId) {
+		TracksModel track = tracksRepository.findById(trackId)
+				.orElseThrow(() -> new ExceptionFoundation(EXCEPTION_CODES.BROWSE_NO_RECORD_EXISTS,
+						HttpStatus.NOT_FOUND, "[ BROWSE_NO_RECORD_EXISTS ] Track with this ID does not exist."));
+		if (track.getPlayTrackStatus().getId() != 1001) {
+			throw new ExceptionFoundation(EXCEPTION_CODES.BROWSE_FORBIDDEN, HttpStatus.I_AM_A_TEAPOT,
+					"[ BROWSE_FORBIDDEN ] This track is not visible to public.");
+		}
+		return track;
+	}
+
+	// DB-V5 OK!
+	// listLatestRelease
+	public List<TracksModel> listLatestRelease(int numberOfTracks) {
+		if (numberOfTracks > trackMaxPageSize) {
+			numberOfTracks = trackMaxPageSize;
+		}
+		List<TracksModel> result = tracksRepository.listLatsestRelease(numberOfTracks);
+		if (result.size() < 1) {
+			throw new ExceptionFoundation(EXCEPTION_CODES.BROWSE_NO_RECORD_EXISTS, HttpStatus.NOT_FOUND,
+					"[ BROWSE_NO_RECORD_EXISTS ] No track released today.");
+		}
+		return result;
+	}
+
+	// ▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬
+	// DB-V5 OK!
+	// getTopTrack
+	public List<TracksModel> getTopTrackOfNDay(int numberOfTracks) {
+		if (numberOfTracks > trackMaxPageSize) {
+			numberOfTracks = trackMaxPageSize;
+		}
+		List<TracksModel> result = tracksRepository.listTopTrack(numberOfTracks);
+		return result;
+	}
+
+	// ▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬
+	// DB-V5 OK!
 	// getTopTrackOfNDay
-	public List<TracksModel> getTopTrackOfNDay(int numberOfTrack, int lastDay) {
-		if (numberOfTrack > trackMaxPageSize) {
-			numberOfTrack = trackMaxPageSize;
+	public List<TracksModel> getTopTrackOfNDay(int numberOfTracks, int lastDay) {
+		if (numberOfTracks > trackMaxPageSize) {
+			numberOfTracks = trackMaxPageSize;
 		}
 		long timestampToday = trackCountController.getTimestampToday().getTime();
 
@@ -80,16 +139,17 @@ public class TrackController {
 				.getTimeStampFromMilisecond(timestampToday - (trackCountController.TIME_DIF_DAY * lastDay)).toString();
 		String to = trackCountController.getTimeStampFromMilisecond(timestampToday).toString();
 
-		List<TracksModel> result = tracksRepository.listTopTrack(numberOfTrack, from, to);
+		List<TracksModel> result = tracksRepository.listTopTrack(numberOfTracks, from, to);
 		return result;
 	}
 
-	// -------------------------------------------------
+	// █████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████
 	//
 	// Management zone for creator only.
 	//
-	// -------------------------------------------------
+	// █████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████
 
+	// ▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬
 	// DB-V5 OK!
 	// AddNewTrack
 	public TracksModel addNewTrack(TrackForm newTrackForm, MultipartFile trackFile, MultipartFile imageFile,
@@ -138,6 +198,7 @@ public class TrackController {
 		return result;
 	}
 
+	// ▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬
 	// DB-V5 OK!
 	// editTrack
 	public TracksModel editTrack(TrackForm trackInfo, HttpServletRequest request) {
@@ -162,6 +223,7 @@ public class TrackController {
 		return track;
 	}
 
+	// ▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬
 	// DB-V5 OK!
 	// uploadNewThumbnail
 	public void uploadNewThumbnail(int trackId, MultipartFile imageFile, HttpServletRequest request) {
@@ -178,6 +240,7 @@ public class TrackController {
 
 	}
 
+	// ▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬
 	// DB-V5 OK!
 	// SwitchTrackStatus
 	public String switchTrackStatus(int trackId, HttpServletRequest request) {
@@ -197,6 +260,7 @@ public class TrackController {
 
 	}
 
+	// ▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬
 	// DB-V5 OK!
 	// DeleteTrack
 	public void deleteTrack(int trackId, HttpServletRequest request) {

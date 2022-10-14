@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -13,7 +14,6 @@ import org.springframework.web.bind.annotation.RestController;
 import com.application.controllers.GenreController;
 import com.application.controllers.PlaylistController;
 import com.application.controllers.TrackController;
-import com.application.controllers.TrackGeneralController;
 import com.application.entities.models.GenreModel;
 import com.application.entities.models.PlaylistModel;
 import com.application.entities.models.TracksModel;
@@ -23,13 +23,36 @@ import com.application.entities.models.TracksModel;
 public class A1VisitorApi {
 
 	@Autowired
-	private TrackGeneralController trackGeneralController;
-	@Autowired
 	private TrackController trackController;
 	@Autowired
 	private PlaylistController playlistController;
 	@Autowired
 	private GenreController genreController;
+
+	// ▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬
+
+	// DB-V5 OK!
+	// TRACK : Get track by page
+	@GetMapping("track")
+	public ResponseEntity<Page<TracksModel>> listTrackByPageAndName(@RequestParam(defaultValue = "0") int page,
+			@RequestParam(defaultValue = "15") int pageSize, @RequestParam(defaultValue = "") String searchContent) {
+		return ResponseEntity.ok().body(trackController.listTrackByPageAndName(page, pageSize, searchContent));
+	}
+
+	// DB-V5 OK!
+	// TRACK : Get track by ID
+	@GetMapping("track/{id}")
+	public ResponseEntity<TracksModel> getTrackById(@PathVariable int id) {
+		return ResponseEntity.ok().body(trackController.getTrackById(id));
+	}
+
+	// DB-V5 OK!
+	// TRACK : Get latest X tracks.
+	@GetMapping("track/latest")
+	public ResponseEntity<List<TracksModel>> listLatestReleaseByNumber(
+			@RequestParam(defaultValue = "5") int numberOfTrack) {
+		return ResponseEntity.ok().body(trackController.listLatestRelease(numberOfTrack));
+	}
 
 	// DB-V5 OK!
 	// TRACK : Get the top track people listen in the past week.
@@ -46,6 +69,8 @@ public class A1VisitorApi {
 		return ResponseEntity.ok().body(trackController.getTopTrackOfNDay(numberOfTracks, days));
 	}
 
+	// ▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬
+
 	// DB-V5 OK!
 	// GENRE : Get all genre list
 	@GetMapping("genres")
@@ -54,13 +79,7 @@ public class A1VisitorApi {
 		return ResponseEntity.ok().body(genreController.listGenreListByPage(page, pageSize, searchContent));
 	}
 
-	// DB-V5 OK!
-	// TRACK : Get latest X tracks.
-	@GetMapping("latest")
-	public ResponseEntity<List<TracksModel>> listLatestReleaseByNumber(
-			@RequestParam(defaultValue = "5") int numberOfTrack) {
-		return ResponseEntity.ok().body(trackGeneralController.listLatestRelease(numberOfTrack));
-	}
+	// ▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬
 
 	// DB-V5 OK!
 	// PLAYLIST : Get play list by name.

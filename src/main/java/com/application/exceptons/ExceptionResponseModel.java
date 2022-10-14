@@ -89,6 +89,7 @@ public class ExceptionResponseModel {
 		// Browsing
 		BROWSE_NO_RECORD_EXISTS(40001),
 		BROWSE_IMPOSSIBLE(40002),
+		BROWSE_FORBIDDEN(40003),
 		
 		// Deleting
 		RECORD_ALREADY_GONE(50001),

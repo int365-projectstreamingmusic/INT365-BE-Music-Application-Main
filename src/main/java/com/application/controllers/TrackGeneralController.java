@@ -56,43 +56,7 @@ public class TrackGeneralController {
 	@Value("${minio.storage.music-thumbnail}")
 	String minioTrackThumbnailLocation;
 
-	// OK!
-	// ListLastRelease
-	public List<TracksModel> listLatestRelease(int numberOfTrack) {
-		List<TracksModel> result = tracksRepository.listLatsestRelease(numberOfTrack);
-		if (result.size() < 1) {
-			throw new ExceptionFoundation(EXCEPTION_CODES.BROWSE_NO_RECORD_EXISTS, HttpStatus.NOT_FOUND,
-					"[ BROWSE_NO_RECORD_EXISTS ] No track released today.");
-		}
-		return result;
-	}
-
-	// OK!
-	// ListTrackByPageAndName
-	public Page<TracksModel> listTrackByPageAndName(int page, int pageSize, String searchContent) {
-		if (page < 0) {
-			page = 0;
-		}
-		if (pageSize < 1 || pageSize > trackMaxPageSize) {
-			pageSize = trackDefaultSize;
-		}
-
-		Pageable sendPageRequest = PageRequest.of(page, pageSize);
-		Page<TracksModel> result;
-
-		if (searchContent == "") {
-			result = tracksRepository.findAll(sendPageRequest);
-		} else {
-			result = tracksRepository.findByTrackName(searchContent, sendPageRequest);
-			if (result.getTotalPages() < page + 1) {
-				throw new ExceptionFoundation(EXCEPTION_CODES.SEARCH_NOT_FOUND, HttpStatus.NOT_FOUND,
-						"[ TrackController ] Found nothing here.");
-			}
-		}
-
-		return result;
-	}
-
+	
 	// OK!
 	// GetTrackDetailById
 	public Map<String, Object> getTrackDetailById(int trackId) {
