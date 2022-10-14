@@ -13,7 +13,7 @@ import lombok.NoArgsConstructor;
 
 @Data
 @Entity
-@Table(name = "view_count", schema = "sitgarden")
+@Table(name = "track_count_statistic", schema = "sitgarden")
 @AllArgsConstructor
 @NoArgsConstructor
 public class TrackCountModel {
@@ -24,7 +24,7 @@ public class TrackCountModel {
 	@Column(name = "view_count")
 	private int viewCount;
 	
-	@Column(name = "favourite_count")
-	private int favouriteCount;
+	@Column(name = "favorite_count")
+	private int favoriteCount;
 
 }

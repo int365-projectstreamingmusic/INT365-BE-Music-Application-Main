@@ -24,7 +24,7 @@ import com.application.exceptons.ExceptionResponseModel.EXCEPTION_CODES;
 import com.application.repositories.FileTypeRepository;
 import com.application.repositories.TracksRepository;
 import com.application.services.GeneralFunctionController;
-import com.application.repositories.TrackCountRepository;
+import com.application.repositories.TrackCountStatisticRepository;
 import com.application.utilities.JwtTokenUtills;
 import com.application.utilities.MinioStorageService;
 
@@ -41,7 +41,7 @@ public class TrackGeneralController {
 	@Autowired
 	private TracksRepository tracksRepository;
 	@Autowired
-	private TrackCountRepository viewCountRepository;
+	private TrackCountStatisticRepository viewCountRepository;
 	@Autowired
 	private FileTypeRepository fileTypeRepository;
 

@@ -29,6 +29,7 @@ import com.application.entities.models.PlayHistoryModel;
 import com.application.entities.models.PlaylistModel;
 import com.application.entities.models.UserAccountModel;
 import com.application.entities.models.UserTrackMarkingModel;
+import com.application.entities.submittionforms.PlaylistForm;
 import com.application.entities.submittionforms.UserProfileForm;
 import com.application.exceptons.ExceptionFoundation;
 import com.application.exceptons.ExceptionResponseModel.EXCEPTION_CODES;
@@ -58,6 +59,14 @@ public class UserApis {
 			@RequestParam(defaultValue = "0") int pageSize, @RequestParam(defaultValue = "") String searchContent,
 			HttpServletRequest request) {
 		return ResponseEntity.ok().body(playlistController.getMyPlaylist(page, pageSize, searchContent, request));
+	}
+
+	@PostMapping("playlist/create")
+	public ResponseEntity<Page<PlaylistModel>> createNewPlaylist(@RequestBody PlaylistForm newPlaylist,
+			HttpServletRequest request) {
+		URI uri = URI.create(
+				ServletUriComponentsBuilder.fromCurrentContextPath().path(mapping + "playlist/create").toString());
+		return ResponseEntity.created(uri).body(null);
 	}
 
 	// ---------------------
