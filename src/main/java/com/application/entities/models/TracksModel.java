@@ -61,7 +61,7 @@ public class TracksModel {
 	private String trackThumbnail;
 
 	@ManyToOne
-	@JoinColumn(name = "status_id", updatable = false, insertable = false)
+	@JoinColumn(name = "status_id", referencedColumnName = "status_id")
 	private PlayTrackStatusModel playTrackStatus;
 
 	@OneToMany

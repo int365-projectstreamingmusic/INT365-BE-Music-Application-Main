@@ -10,14 +10,11 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.filter.OncePerRequestFilter;
 
-import com.application.exceptons.ExceptionFoundation;
-import com.application.exceptons.ExceptionResponseModel.EXCEPTION_CODES;
 import com.application.utilities.JwtTokenUtills;
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.JWTVerifier;
@@ -53,18 +50,14 @@ public class CustomAuthorizationFilter extends OncePerRequestFilter {
 					filterChain.doFilter(request, response);
 
 				} catch (TokenExpiredException exc) {
-					throw new ExceptionFoundation(EXCEPTION_CODES.AUTHEN_BAD_TOKEN, HttpStatus.I_AM_A_TEAPOT,
-							"[ AUTHEN_BAD_TOKEN ] This token is expired");
+					response.setHeader("Error", exc.getMessage());
+					filterChain.doFilter(request, response);
 				}
 
 				catch (Exception exc) {
 					response.setHeader("Error", exc.getMessage());
 					response.setStatus(HttpServletResponse.SC_FORBIDDEN);
 					filterChain.doFilter(request, response);
-					/*
-					 * throw new ExceptionFoundation(EXCEPTION_CODES.AUTHEN_HORRIBLE_TOKEN,
-					 * HttpStatus.UNAUTHORIZED, "[ JWT ] This token is invalid, or expired. ");
-					 */
 				}
 			} else {
 				filterChain.doFilter(request, response);
