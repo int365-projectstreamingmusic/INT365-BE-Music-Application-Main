@@ -1,9 +1,6 @@
 package com.application.controllers;
 
 import java.sql.Timestamp;
-import java.util.ArrayList;
-import java.util.List;
-
 import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,20 +9,14 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.application.entities.copmskeys.GenreTracksCompkey;
-import com.application.entities.models.GenreModel;
-import com.application.entities.models.GenresTracksModel;
 import com.application.entities.models.TracksModel;
 import com.application.entities.models.UserAccountModel;
 import com.application.entities.submittionforms.TrackForm;
 import com.application.exceptons.ExceptionFoundation;
 import com.application.exceptons.ExceptionResponseModel.EXCEPTION_CODES;
-import com.application.repositories.GenreRepository;
 import com.application.repositories.PlayTrackRepository;
 import com.application.repositories.TracksRepository;
-import com.application.repositories.UserAccountRepository;
 import com.application.services.GeneralFunctionController;
-import com.application.utilities.JwtTokenUtills;
 import com.application.utilities.MinioStorageService;
 
 @Service
@@ -37,11 +28,7 @@ public class TrackController {
 	private int trackMaxPageSize;
 
 	@Autowired
-	private UserAccountRepository userAccountModelRepository;
-	@Autowired
 	private TracksRepository tracksRepository;
-	@Autowired
-	private GenreRepository genreRepository;
 	@Autowired
 	private PlayTrackRepository playTrackRepository;
 
@@ -61,55 +48,51 @@ public class TrackController {
 	@Value("${minio.storage.music-thumbnail}")
 	String minioTrackThumbnailLocation;
 
-	// WIP
+	// DB-V5 OK!
 	// AddNewTrack
 	public TracksModel addNewTrack(TrackForm newTrackForm, MultipartFile trackFile, MultipartFile imageFile,
 			HttpServletRequest request) {
 		UserAccountModel requestedBy = generalFunctionController.getUserAccount(request);
 
 		TracksModel newTrack = new TracksModel();
-		newTrack.setDuration((int) trackFile.getSize());
+		// General information.
 		newTrack.setTimestamp(new Timestamp(System.currentTimeMillis()).toString());
 		newTrack.setAccountId(requestedBy.getAccountId());
 
+		// Information given in the form.
 		newTrack.setTrackDesc(newTrackForm.getTrackDesc());
 		newTrack.setTrackName(newTrackForm.getTrackName());
 
-		newTrack.setGenreTrack(null);
-		newTrack.setTrackFile("-");
-
+		// No view or favorite at the begining.
 		newTrack.setViewCount(0);
 		newTrack.setFavoriteCount(0);
-		newTrack.setPlayTrackStatus(playTrackRepository.findById(1001).get());
+		newTrack.setDuration(0);
 
+		// Track status is hiden when first uploaded.
+		newTrack.setPlayTrackStatus(playTrackRepository.findById(1002).get());
+
+		// Thinks to add later.
+		newTrack.setGenreTrack(null);
+		newTrack.setTrackFile("-");
 		newTrack = tracksRepository.save(newTrack);
 
 		// Adding genre to the track
-		List<GenresTracksModel> addingGenreTrack = new ArrayList<GenresTracksModel>();
-		List<GenreModel> targetGenres = newTrackForm.getGenreList();
-
-		if (targetGenres != null && targetGenres.size() > 0) {
-			for (int i = 0; i < newTrackForm.getGenreList().size(); i++) {
-				addingGenreTrack.add(new GenresTracksModel(
-						new GenreTracksCompkey(newTrack.getId(), targetGenres.get(i).getGenreId()),
-						genreRepository.findById(targetGenres.get(i).getGenreId())
-								.orElseThrow(() -> new ExceptionFoundation(EXCEPTION_CODES.SEARCH_NOT_FOUND,
-										HttpStatus.NOT_FOUND, "[ addNewTrack ] Genre not found."))));
-			}
+		if (newTrackForm.getGenreList() != null) {
+			newTrack.setGenreTrack(genreController.addGenreToTrack(newTrack.getId(), newTrackForm.getGenreList()));
 		}
-		TracksModel result = tracksRepository.findById(newTrack.getId())
-				.orElseThrow(() -> new ExceptionFoundation(EXCEPTION_CODES.SEARCH_NOT_FOUND, HttpStatus.NOT_FOUND,
-						"[ addNewTrack ] Track not found."));
 
 		// Save image and track file.
 		if (imageFile != null) {
-			String trackThumbnailFIleName = fileLinkRelController.insertNewTrackObjectLinkRel(imageFile, 201,
-					result.getId());
-			newTrack.setTrackThumbnail(trackThumbnailFIleName);
+			String trackThumbnailFileName = fileLinkRelController.insertNewTrackObjectLinkRel(imageFile, 201,
+					newTrack.getId());
+			newTrack.setTrackThumbnail(trackThumbnailFileName);
+			tracksRepository.updateTrackThumbnail(newTrack.getId(), trackThumbnailFileName);
 		}
 		String uploadedTrack = minioStorageService.uploadTrackToStorage(trackFile, minioTrackLocation);
-		result.setTrackFile(uploadedTrack);
-		tracksRepository.updateTrackFileName(uploadedTrack, result.getId());
+		newTrack.setTrackFile(uploadedTrack);
+		tracksRepository.updateTrackFileName(uploadedTrack, newTrack.getId());
+
+		TracksModel result = tracksRepository.findById(newTrack.getId()).orElse(null);
 		return result;
 	}
 
@@ -137,6 +120,21 @@ public class TrackController {
 		return track;
 	}
 
+	// uploadNewThumbnail
+	public void uploadNewThumbnail(int trackId, MultipartFile imageFile, HttpServletRequest request) {
+		UserAccountModel owner = generalFunctionController.getUserAccount(request);
+		TracksModel target = tracksRepository.findById(trackId)
+				.orElseThrow(() -> new ExceptionFoundation(EXCEPTION_CODES.BROWSE_NO_RECORD_EXISTS,
+						HttpStatus.NOT_FOUND, "[ BROWSE_NO_RECORD_EXISTS ] Track with this ID does not exist."));
+		generalFunctionController.checkOwnerShipForRecord(owner.getAccountId(), target.getAccountId());
+
+		fileLinkRelController.deleteTargetFileByName(target.getTrackThumbnail());
+		String trackThumbnailFileName = fileLinkRelController.insertNewTrackObjectLinkRel(imageFile, 201,
+				target.getId());
+		tracksRepository.updateTrackThumbnail(target.getId(), trackThumbnailFileName);
+
+	}
+
 	// DB-V5 OK!
 	// SwitchTrackStatus
 	public String switchTrackStatus(int trackId, HttpServletRequest request) {
@@ -154,5 +152,16 @@ public class TrackController {
 			return "The track ID " + trackId + ":" + target.getTrackName() + " is now visible.";
 		}
 
+	}
+
+	// DB-V5 OK!
+	// DeleteTrack
+	public void deleteTrack(int trackId, HttpServletRequest request) {
+		UserAccountModel owner = generalFunctionController.getUserAccount(request);
+		TracksModel target = tracksRepository.findById(trackId).orElseThrow(
+				() -> new ExceptionFoundation(EXCEPTION_CODES.BROWSE_NO_RECORD_EXISTS, HttpStatus.NOT_FOUND,
+						"[ BROWSE_NO_RECORD_EXISTS ] Track with this ID does not exist. Nothing is deleted."));
+		generalFunctionController.checkOwnerShipForRecord(owner.getAccountId(), target.getAccountId());
+		tracksRepository.deleteById(trackId);
 	}
 }

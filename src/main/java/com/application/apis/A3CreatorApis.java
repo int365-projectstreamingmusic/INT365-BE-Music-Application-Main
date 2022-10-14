@@ -11,6 +11,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -40,12 +41,6 @@ public class A3CreatorApis {
 	@Autowired
 	private TrackGeneralController trackGeneralController;
 	@Autowired
-	private ValidatorServices validatorServices;
-	@Autowired
-	private TrackMarkingController trackMarkingController;
-	@Autowired
-	private TrackCountController trackCountController;
-	@Autowired
 	private ArtistController artistController;
 	@Autowired
 	private TrackController trackController;
@@ -57,47 +52,58 @@ public class A3CreatorApis {
 	// --------------------
 
 	// DB-V5 OK!
-	@GetMapping("tracks")
+	@GetMapping("track")
 	public ResponseEntity<Page<TracksModel>> getMyTrack(@RequestParam(defaultValue = "0") int page,
 			@RequestParam(defaultValue = "0") int pageSize, @RequestParam(defaultValue = "") String searchContent,
 			HttpServletRequest request) {
 		return ResponseEntity.ok().body(trackGeneralController.listMyTrack(page, pageSize, searchContent, request));
 	}
 
-	//
-	@PostMapping("newTrack")
+	// DB-V5 OK!
+	@PostMapping("track")
 	public ResponseEntity<TracksModel> createNewTrack(@RequestPart TrackForm newTrack,
 			@RequestPart MultipartFile trackFile, @RequestPart MultipartFile imageFile, HttpServletRequest request) {
-		URI uri = URI
-				.create(ServletUriComponentsBuilder.fromCurrentContextPath().path(mapping + "newTrack").toString());
+		URI uri = URI.create(ServletUriComponentsBuilder.fromCurrentContextPath().path(mapping + "track").toString());
 		return ResponseEntity.created(uri).body(trackController.addNewTrack(newTrack, trackFile, imageFile, request));
 	}
 
 	// DB-V5 OK!
-	@PutMapping("edit-track")
+	@PutMapping("track/edit")
 	public ResponseEntity<TracksModel> editTrack(@RequestBody TrackForm track, HttpServletRequest request) {
 		URI uri = URI
-				.create(ServletUriComponentsBuilder.fromCurrentContextPath().path(mapping + "edit-track").toString());
+				.create(ServletUriComponentsBuilder.fromCurrentContextPath().path(mapping + "track/edit").toString());
 		return ResponseEntity.created(uri).body(trackController.editTrack(track, request));
 	}
 
 	// DB-V5 OK!
-	@PutMapping("trackstatus")
+	@PutMapping("track/thumbnail/{trackId}")
+	public ResponseEntity<String> uploadThumbnail(@PathVariable(required = true) int trackId,
+			@RequestPart MultipartFile image, HttpServletRequest request) {
+		URI uri = URI.create(
+				ServletUriComponentsBuilder.fromCurrentContextPath().path(mapping + "track/thumbnail").toString());
+		trackController.uploadNewThumbnail(trackId, image, request);
+		return ResponseEntity.created(uri).body("Thumbnail changes!");
+	}
+
+	// DB-V5 OK!
+	@PutMapping("track/status")
 	public ResponseEntity<String> changeStatus(@RequestParam(required = true) int trackId, HttpServletRequest request) {
 		URI uri = URI
-				.create(ServletUriComponentsBuilder.fromCurrentContextPath().path(mapping + "trackstatus").toString());
+				.create(ServletUriComponentsBuilder.fromCurrentContextPath().path(mapping + "track/status").toString());
 		return ResponseEntity.created(uri).body(trackController.switchTrackStatus(trackId, request));
 	}
 
-	//
+	// DB-V5 OK!
 	// DANGEROUS METHOD
-	@DeleteMapping("deletetrack")
+	@DeleteMapping("track/delete")
 	public ResponseEntity<String> deleteMyTrack(@RequestParam(required = true) int trackId,
 			HttpServletRequest request) {
 		URI uri = URI
-				.create(ServletUriComponentsBuilder.fromCurrentContextPath().path(mapping + "deletetrack").toString());
-		return ResponseEntity.created(uri).body(null);
+				.create(ServletUriComponentsBuilder.fromCurrentContextPath().path(mapping + "track/delete").toString());
+		trackController.deleteTrack(trackId, request);
+		return ResponseEntity.created(uri).body("Deleted");
 	}
+
 	// --------------------
 	// Artists
 	// --------------------
