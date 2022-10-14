@@ -16,11 +16,10 @@ import com.application.controllers.TrackGeneralController;
 import com.application.entities.models.GenreModel;
 import com.application.entities.models.PlaylistModel;
 import com.application.entities.models.TracksModel;
-import com.google.j2objc.annotations.AutoreleasePool;
 
 @RestController
 @RequestMapping("api/public/")
-public class A1VIsitorApi {
+public class A1VisitorApi {
 	private static String mapping = "api/public/";
 
 	@Autowired
