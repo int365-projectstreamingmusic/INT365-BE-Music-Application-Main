@@ -16,40 +16,11 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
-import com.application.controllers.TrackManagerController;
 import com.application.entities.models.TracksModel;
 import com.application.entities.submittionforms.TrackForm;
 
 @RestController
 @RequestMapping("api/manager/track/")
 public class A4ManagerTrackManagementApis {
-
-	@Autowired
-	private TrackManagerController trackManagerController;
-
-	// AddNewTrack
-	@PostMapping("new-track")
-	public ResponseEntity<TracksModel> addNewTrack(@RequestPart TrackForm newTrack,
-			@RequestPart MultipartFile trackFile, @RequestPart MultipartFile imageFile, HttpServletRequest request) {
-		URI uri = URI.create(
-				ServletUriComponentsBuilder.fromCurrentContextPath().path("api/member/track/newtrack").toString());
-		return ResponseEntity.created(uri)
-				.body(trackManagerController.addNewTrack(newTrack, trackFile, imageFile, request));
-	}
-
-	// RemoveTrack
-	@DeleteMapping("remove-track")
-	public ResponseEntity<String> removeTrack(int trackId, HttpServletRequest request) {
-		return null;
-	}
-
-	// EditTrackInformation
-	@PutMapping("edit-track")
-	public ResponseEntity<TracksModel> editTrackInformation(@RequestPart TrackForm newTrackInfo,
-			HttpServletRequest request) {
-		URI uri = URI.create(ServletUriComponentsBuilder.fromCurrentContextPath()
-				.path("api/member/track/editdescription").toString());
-		return ResponseEntity.created(uri).body(null);
-	}
 
 }

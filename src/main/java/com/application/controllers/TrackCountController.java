@@ -30,8 +30,8 @@ public class TrackCountController {
 	@Autowired
 	private TrackCountStatisticRepository trackCountRepository;
 
-	private static final long TIME_DIF_DAY = 86400000;
-	private static final long TIME_DIF = 25200000;
+	public final long TIME_DIF_DAY = 86400000;
+	public final long TIME_DIF = 25200000;
 
 	// GetViewCountInPassDays
 	public int getViewCountInPassDays(int trackId, int numberOfDay) {
@@ -105,7 +105,7 @@ public class TrackCountController {
 
 	// PRIVATE
 	// GetTimestampToday
-	private Timestamp getTimestampToday() {
+	public Timestamp getTimestampToday() {
 		long currentTimeMili = Calendar.getInstance().getTimeInMillis();
 		long currentTimeRecord = currentTimeMili - (currentTimeMili % TIME_DIF_DAY) - TIME_DIF;
 		Timestamp timeStamp = new Timestamp(currentTimeRecord);
@@ -114,7 +114,7 @@ public class TrackCountController {
 
 	// PRIVATE
 	// GetTimeStampFromMilisecond
-	private Timestamp getTimeStampFromMilisecond(long miliSecond) {
+	public Timestamp getTimeStampFromMilisecond(long miliSecond) {
 		Timestamp timestamp = new Timestamp(miliSecond);
 		return timestamp;
 	}
@@ -149,8 +149,6 @@ public class TrackCountController {
 		SimpleDateFormat sdf = new SimpleDateFormat("yyyy/MM/dd");
 		try {
 			Calendar calendarToday = Calendar.getInstance();
-			System.out.println(calendarToday.getTime());
-
 			Date today = sdf.parse(calendarToday.get(Calendar.YEAR) + "/" + (calendarToday.get(Calendar.MONTH) + 1)
 					+ "/" + calendarToday.get(Calendar.DAY_OF_MONTH));
 

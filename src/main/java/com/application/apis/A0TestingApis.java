@@ -31,10 +31,10 @@ public class A0TestingApis {
 
 	@GetMapping("AddCustomTrackCount")
 	public ResponseEntity<List<TrackCountModel>> addCustomTrackCount(@RequestParam int trackId,
-			@RequestParam int nWeek) {
+			@RequestParam int nDays) {
 		URI uri = URI.create(
 				ServletUriComponentsBuilder.fromCurrentContextPath().path(mapping + "addMyArtistToTrack").toString());
-		return ResponseEntity.created(uri).body(trackCountController.addCustomViewCount(trackId, nWeek));
+		return ResponseEntity.created(uri).body(trackCountController.addCustomViewCount(trackId, nDays));
 	}
 
 	@PutMapping("addViewCount")

@@ -1,6 +1,8 @@
 package com.application.controllers;
 
 import java.sql.Timestamp;
+import java.util.List;
+
 import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -41,12 +43,52 @@ public class TrackController {
 	private FileLinkRelController fileLinkRelController;
 	@Autowired
 	private GeneralFunctionController generalFunctionController;
+	@Autowired
+	private TrackCountController trackCountController;
 
 	@Value("${minio.storage.track.music}")
 	String minioTrackLocation;
 
 	@Value("${minio.storage.music-thumbnail}")
 	String minioTrackThumbnailLocation;
+
+	// -------------------------------------------------
+	//
+	// Visitor zone for creator only.
+	//
+	// -------------------------------------------------
+
+	// DB-V5 OK!
+	// getTopTrack
+	public List<TracksModel> getTopTrackOfNDay(int numberOfTrack) {
+		if (numberOfTrack > trackMaxPageSize) {
+			numberOfTrack = trackMaxPageSize;
+		}
+		List<TracksModel> result = tracksRepository.listTopTrack(numberOfTrack);
+		return result;
+	}
+
+	// DB-V5 OK!
+	// getTopTrackOfNDay
+	public List<TracksModel> getTopTrackOfNDay(int numberOfTrack, int lastDay) {
+		if (numberOfTrack > trackMaxPageSize) {
+			numberOfTrack = trackMaxPageSize;
+		}
+		long timestampToday = trackCountController.getTimestampToday().getTime();
+
+		String from = trackCountController
+				.getTimeStampFromMilisecond(timestampToday - (trackCountController.TIME_DIF_DAY * lastDay)).toString();
+		String to = trackCountController.getTimeStampFromMilisecond(timestampToday).toString();
+
+		List<TracksModel> result = tracksRepository.listTopTrack(numberOfTrack, from, to);
+		return result;
+	}
+
+	// -------------------------------------------------
+	//
+	// Management zone for creator only.
+	//
+	// -------------------------------------------------
 
 	// DB-V5 OK!
 	// AddNewTrack
@@ -120,6 +162,7 @@ public class TrackController {
 		return track;
 	}
 
+	// DB-V5 OK!
 	// uploadNewThumbnail
 	public void uploadNewThumbnail(int trackId, MultipartFile imageFile, HttpServletRequest request) {
 		UserAccountModel owner = generalFunctionController.getUserAccount(request);

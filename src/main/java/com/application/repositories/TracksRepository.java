@@ -27,6 +27,12 @@ public interface TracksRepository extends JpaRepository<TracksModel, Integer> {
 	@Query(nativeQuery = true, value = "SELECT * FROM tracks WHERE account_id = :accountId AND track_name LIKE LOWER(CONCAT('%',:searchName,'%')) ORDER BY timestamp DESC")
 	Page<TracksModel> listMyTrackByName(int accountId, String searchName, Pageable pageable);
 
+	@Query(nativeQuery = true, value = "SELECT SUM(s.view_count) AS view_count, t.* FROM tracks t RIGHT JOIN track_count_statistic s ON t.track_id = s.track_id GROUP BY t.track_id ORDER BY view_count DESC LIMIT :numberOfTrack")
+	List<TracksModel> listTopTrack(int numberOfTrack);
+
+	@Query(nativeQuery = true, value = "SELECT SUM(s.view_count) AS view_count, t.* FROM tracks t RIGHT JOIN track_count_statistic s ON t.track_id = s.track_id WHERE s.view_count_date BETWEEN :from AND :to GROUP BY t.track_id ORDER BY view_count DESC LIMIT :numberOfTrack")
+	List<TracksModel> listTopTrack(int numberOfTrack, String from, String to);
+
 	@Query(value = "UPDATE TracksModel t SET t.trackFile = :trackName WHERE t.id = :trackId")
 	@Transactional
 	@Modifying
