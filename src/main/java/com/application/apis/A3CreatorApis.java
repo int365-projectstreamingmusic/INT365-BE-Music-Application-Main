@@ -81,12 +81,12 @@ public class A3CreatorApis {
 		return ResponseEntity.created(uri).body(trackController.editTrack(track, request));
 	}
 
-	//
+	// DB-V5 OK!
 	@PutMapping("trackstatus")
 	public ResponseEntity<String> changeStatus(@RequestParam(required = true) int trackId, HttpServletRequest request) {
 		URI uri = URI
 				.create(ServletUriComponentsBuilder.fromCurrentContextPath().path(mapping + "trackstatus").toString());
-		return ResponseEntity.created(uri).body(null);
+		return ResponseEntity.created(uri).body(trackController.switchTrackStatus(trackId, request));
 	}
 
 	//

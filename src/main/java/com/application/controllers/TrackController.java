@@ -61,7 +61,7 @@ public class TrackController {
 	@Value("${minio.storage.music-thumbnail}")
 	String minioTrackThumbnailLocation;
 
-	// OK
+	// WIP
 	// AddNewTrack
 	public TracksModel addNewTrack(TrackForm newTrackForm, MultipartFile trackFile, MultipartFile imageFile,
 			HttpServletRequest request) {
@@ -135,5 +135,24 @@ public class TrackController {
 		}
 
 		return track;
+	}
+
+	// DB-V5 OK!
+	// SwitchTrackStatus
+	public String switchTrackStatus(int trackId, HttpServletRequest request) {
+		UserAccountModel owner = generalFunctionController.getUserAccount(request);
+		TracksModel target = tracksRepository.findById(trackId)
+				.orElseThrow(() -> new ExceptionFoundation(EXCEPTION_CODES.BROWSE_NO_RECORD_EXISTS,
+						HttpStatus.NOT_FOUND, "[ BROWSE_NO_RECORD_EXISTS ] Track with this ID does not exist."));
+		generalFunctionController.checkOwnerShipForRecord(owner.getAccountId(), target.getAccountId());
+
+		if (target.getPlayTrackStatus().getId() == 1001) {
+			tracksRepository.updateTrackStatus(trackId, 1002);
+			return "The track ID " + trackId + ":" + target.getTrackName() + " is now hiden.";
+		} else {
+			tracksRepository.updateTrackStatus(trackId, 1001);
+			return "The track ID " + trackId + ":" + target.getTrackName() + " is now visible.";
+		}
+
 	}
 }
