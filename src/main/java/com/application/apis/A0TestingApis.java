@@ -55,15 +55,4 @@ public class A0TestingApis {
 			@RequestParam(defaultValue = "7") int days) {
 		return ResponseEntity.ok().body(trackCountController.getViewCountInPassDays(trackId, days));
 	}
-
-	@GetMapping("getKen")
-	public ResponseEntity<Boolean> getKen(@RequestParam int value1, @RequestParam int value2,
-			@RequestParam int value3) {
-		if (value1 < value2 || value2 < value3 || value1 < value3) {
-			return ResponseEntity.ok().body(true);
-		} else {
-			return ResponseEntity.ok().body(false);
-		}
-	}
-
 }

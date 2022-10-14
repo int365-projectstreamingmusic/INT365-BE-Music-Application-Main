@@ -49,11 +49,9 @@ public class A2UserApis {
 	@Autowired
 	private PlayHistoryController playHistoryController;
 
-	// ---------------------
-	// Playlist
-	// ---------------------
+	// ▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬
 
-	// ListMyCreatedPlaylist
+	// PLAYLIST : ListMyCreatedPlaylist
 	@GetMapping("playlist")
 	public ResponseEntity<Page<PlaylistModel>> listMyOwnedPlaylist(@RequestParam(defaultValue = "0") int page,
 			@RequestParam(defaultValue = "0") int pageSize, @RequestParam(defaultValue = "") String searchContent,
@@ -61,6 +59,7 @@ public class A2UserApis {
 		return ResponseEntity.ok().body(playlistController.getMyPlaylist(page, pageSize, searchContent, request));
 	}
 
+	// PLAYLIST : Create Playlist
 	@PostMapping("playlist/create")
 	public ResponseEntity<Page<PlaylistModel>> createNewPlaylist(@RequestBody PlaylistForm newPlaylist,
 			HttpServletRequest request) {

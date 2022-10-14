@@ -1,5 +1,6 @@
 package com.application.controllers;
 
+import java.sql.Timestamp;
 import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
@@ -36,7 +37,8 @@ public class PlaylistController {
 	public static int maxPlaylistPerPage = 250;
 	public static int maxTrackPerPlaylist = 100;
 
-	// OK!
+	// ▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬
+	// DB-V5 OK!
 	// ListAllPlaylist
 	public Page<PlaylistModel> listAllPlaylist(int page, int pageSize, String searchContent) {
 		if (page < 0) {
@@ -55,7 +57,8 @@ public class PlaylistController {
 		return result;
 	}
 
-	// OK!
+	// ▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬
+	// DB-V5 OK!
 	// ListLatestPlaylist
 	public List<PlaylistModel> listLatestPlaylist(int numberOfPlaylist) {
 		if (numberOfPlaylist > maxPlaylistPerPage) {
@@ -70,7 +73,8 @@ public class PlaylistController {
 		}
 	}
 
-	// OK!
+	// ▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬
+	// DB-V5 OK!
 	// GetMyPlaylist
 	public Page<PlaylistModel> getMyPlaylist(int page, int pageSize, String searchContent, HttpServletRequest request) {
 		UserAccountModel owner = generalFunctionController.getUserAccount(request);
@@ -90,20 +94,22 @@ public class PlaylistController {
 		return result;
 	}
 
+	// ▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬
+	//
 	// CreateMyPlaylist
-	public void createMyPlaylist(PlaylistForm newPlaylistForm, HttpServletRequest request) {
+	/*public void createMyPlaylist(PlaylistForm newPlaylistForm, HttpServletRequest request) {
 		UserAccountModel createdBy = generalFunctionController.getUserAccount(request);
 
 		PlaylistModel newPlaylist = new PlaylistModel();
 
-		newPlaylist.setCreatedDate(null);
+		newPlaylist.setCreatedDate(new Timestamp().toString());
 		newPlaylist.setPlaylistDesc(null);
 		newPlaylist.setPlaylistName(null);
 		newPlaylist.setPlayTrackStatus(null);
 		newPlaylist.setUserAccountModel(createdBy);
 		newPlaylist.setThumbnail(null);
 
-	}
+	}*/
 
 	// EditMyPlaylist
 	public void editMyPlaylist(PlaylistForm newInfoForm, HttpServletRequest request) {

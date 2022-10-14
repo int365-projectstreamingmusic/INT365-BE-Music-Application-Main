@@ -50,8 +50,8 @@ public class A1VisitorApi {
 	// TRACK : Get latest X tracks.
 	@GetMapping("track/latest")
 	public ResponseEntity<List<TracksModel>> listLatestReleaseByNumber(
-			@RequestParam(defaultValue = "5") int numberOfTrack) {
-		return ResponseEntity.ok().body(trackController.listLatestRelease(numberOfTrack));
+			@RequestParam(defaultValue = "5") int numberOfTracks) {
+		return ResponseEntity.ok().body(trackController.listLatestRelease(numberOfTracks));
 	}
 
 	// DB-V5 OK!
@@ -85,7 +85,7 @@ public class A1VisitorApi {
 	// PLAYLIST : Get play list by name.
 	@GetMapping("playlist")
 	public ResponseEntity<Page<PlaylistModel>> listPlaylist(@RequestParam(defaultValue = "0") int page,
-			@RequestParam(defaultValue = "0") int pageSize, @RequestParam(defaultValue = "") String searchContent) {
+			@RequestParam(defaultValue = "15") int pageSize, @RequestParam(defaultValue = "") String searchContent) {
 		return ResponseEntity.ok().body(playlistController.listAllPlaylist(page, pageSize, searchContent));
 	}
 
