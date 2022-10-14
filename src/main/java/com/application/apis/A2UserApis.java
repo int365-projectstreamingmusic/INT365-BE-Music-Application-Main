@@ -36,7 +36,7 @@ import com.application.exceptons.ExceptionResponseModel.EXCEPTION_CODES;
 
 @RestController
 @RequestMapping("/api/user/")
-public class UserApis {
+public class A2UserApis {
 
 	private static String mapping = "/api/user/";
 

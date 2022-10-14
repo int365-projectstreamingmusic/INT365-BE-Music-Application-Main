@@ -32,8 +32,8 @@ public class GeneralFunctionController {
 		return userProfile;
 	}
 
-	public boolean checkOwnerShipForRecord(int userId, int recordUserId) {
-		if (userId == recordUserId) {
+	public boolean checkOwnerShipForRecord(int userId, int ownerInRecord) {
+		if (userId == ownerInRecord) {
 			return true;
 		} else {
 			throw new ExceptionFoundation(EXCEPTION_CODES.AUTHEN_NOT_THE_OWNER, HttpStatus.FORBIDDEN,

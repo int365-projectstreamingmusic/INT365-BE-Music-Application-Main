@@ -13,7 +13,7 @@ import com.application.entities.models.UserAccountModel;
 
 @RestController
 @RequestMapping("api/manager/user/")
-public class ManagerUserManagementApis {
+public class A4ManagerUserManagementApis {
 
 	@Autowired
 	private UserAccountController userAccountManagerController;

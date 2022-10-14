@@ -22,7 +22,7 @@ import reactor.core.publisher.Mono;
 
 @RestController
 @RequestMapping("api/streaming/")
-public class PublicFileRetrievalAPIs {
+public class A1PublicFileRetrievalAPIs {
 
 	@Autowired
 	private MusicStreamingController musicStreamingController;
