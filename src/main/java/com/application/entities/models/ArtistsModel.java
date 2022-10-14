@@ -9,11 +9,8 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
-
-import org.hibernate.annotations.Fetch;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
@@ -42,8 +39,11 @@ public class ArtistsModel {
 	@OneToMany(fetch = FetchType.LAZY, orphanRemoval = true)
 	@JoinColumn(name = "artist_id", referencedColumnName = "artist_id")
 	private List<ArtistsTrackModel> artistTracks;
+	
+	@Column(name = "added_by")
+	private int addedBy;
 
-	@ManyToOne
+	/*@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "added_by", insertable = false, updatable = false)
-	private UserAccountModel userAccount;
+	private UserAccountModel userAccount;*/
 }

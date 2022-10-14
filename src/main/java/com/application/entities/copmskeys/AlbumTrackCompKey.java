@@ -5,8 +5,6 @@ import java.io.Serializable;
 import javax.persistence.Column;
 import javax.persistence.Embeddable;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
-
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -16,13 +14,11 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class ViewCountCompKey implements Serializable {
+public class AlbumTrackCompKey implements Serializable {
+
+	@Column(name = "album_id")
+	private int albumId;
 
 	@Column(name = "track_id")
 	private int trackId;
-
-	@Column(name = "view_count_date")
-	@JsonFormat(pattern = "yyyy/mm/dd")
-	private String countDate;
-
 }

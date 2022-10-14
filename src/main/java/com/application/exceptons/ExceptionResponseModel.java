@@ -56,11 +56,44 @@ public class ExceptionResponseModel {
 		MINIO_BUCKET_UNREACHABLE(7001), // Minio bucket is not reachable.
 		MINIO_OBJECT_UNREACHABLE(7002), // Minio object is unreachable.
 		MINIO_OBJECT_INVALID(7003), // What they have and what we need are not the same.
+		MINIO_OBJECT_FORMAT_NOT_SUPPORT(7004),
+	
 
 		// User
 
 		// Others
-		DEAD(9999); // Just stupidly died with an unknown reason.
+		DEAD(9999), // Just stupidly died with an unknown reason.
+		
+		
+		// User registeration
+		REGISTERATION_INVALID_EMAIL(10001),
+		REGISTERATION_INVALID_PASSWORD(10002),
+		REGISTERATION_INVALID_USERNAME(10003),
+		REGISTERATION_TAKEN_EMAIL(10004),
+		REGISTERATION_TAKEN_USERNAME(10005),
+		REGISTERATION_PASSWORD_MISMATCH(10006),
+		
+		// User Authentication and authorization
+		AUTHEN_INCORRECT_CREDENTIALS(20001),
+		AUTHEN_ACCOUNT_SUSPENDED(20002),
+		AUTHEN_INSUFFICIENT_PRIVILEGES(20003),
+		AUTHEN_NOT_THE_OWNER(20004),
+		AUTHEN_NOT_FOUND(20005),
+		AUTHEN_BAD_TOKEN(20006),
+		
+		// User action
+		USER_ACCOUNT_NOT_FOUND(30001),
+		USER_SEARCH_NOT_FOUND(30002),
+		USER_SAVE_REJECTED(30003),
+		
+		// Browsing
+		BROWSE_NO_RECORD_EXISTS(40001),
+		BROWSE_IMPOSSIBLE(40002),
+		
+		// Deleting
+		RECORD_ALREADY_GONE(50001),
+		RECORE_ALREADY_EXIST(50002);
+		
 
 		private final int codeValue;
 

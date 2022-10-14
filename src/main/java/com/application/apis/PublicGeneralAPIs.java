@@ -13,10 +13,11 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.application.controllers.GenreController;
-import com.application.controllers.TrackController;
+import com.application.controllers.TrackGeneralController;
+import com.application.controllers.TrackManagerController;
 import com.application.entities.models.GenreModel;
+import com.application.entities.models.PlaylistModel;
 import com.application.entities.models.TracksModel;
-import com.application.repositories.TracksRepository;
 
 @RestController
 @RequestMapping("api/public/general/")
@@ -25,7 +26,7 @@ public class PublicGeneralAPIs {
 	@Autowired
 	private GenreController genreController;
 	@Autowired
-	private TrackController trackController;
+	private TrackGeneralController trackGeneralController;
 
 	// GetWelcomePageObject
 	@GetMapping("welcome")
@@ -56,7 +57,7 @@ public class PublicGeneralAPIs {
 	@GetMapping("track")
 	public ResponseEntity<Page<TracksModel>> listTrackByPageAndName(@RequestParam(defaultValue = "0") int page,
 			@RequestParam(defaultValue = "20") int pageSize, @RequestParam(defaultValue = "") String searchContent) {
-		return ResponseEntity.ok().body(trackController.listTrackByPageAndName(page, pageSize, searchContent));
+		return ResponseEntity.ok().body(trackGeneralController.listTrackByPageAndName(page, pageSize, searchContent));
 
 	}
 
@@ -64,7 +65,7 @@ public class PublicGeneralAPIs {
 	// GetTrackDetailByTrackId
 	@GetMapping("track/{trackId}")
 	public ResponseEntity<Map<String, Object>> getTrackDetailByTrackId(@PathVariable int trackId) {
-		return ResponseEntity.ok().body(trackController.getTrackDetailById(trackId));
+		return ResponseEntity.ok().body(trackGeneralController.getTrackDetailById(trackId));
 	}
 
 	// ListTopArtists
@@ -76,8 +77,9 @@ public class PublicGeneralAPIs {
 	// ListNewArtist
 
 	// ListTrackOfTheWeek
-	
-	//--TEST--
+
+	// --TEST--
+
 	
 
 }

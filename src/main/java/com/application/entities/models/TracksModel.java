@@ -15,7 +15,6 @@ import javax.persistence.Table;
 
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
-import org.springframework.lang.Nullable;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -42,26 +41,28 @@ public class TracksModel {
 	@Column(name = "track_name")
 	private String trackName;
 
-	@JsonFormat(pattern = "yyyy/mm/dd")
-	private String timestamp;
-
-	private int duration;
-
 	@Column(name = "track_desc")
 	private String trackDesc;
 
-	@ManyToOne
-	@JoinColumn(name = "account_id", insertable = false, updatable = false)
-	private UserAccountModel userAccountModel;
+	@JsonFormat(pattern = "yyyy/mm/dd")
+	private String timestamp;
 
-	@JsonIgnore
-	@Basic(optional = false)
-	@Column(name = "account_id")
-	private int accountId;
+	@Column(name = "view_count")
+	private int viewCount;
+
+	@Column(name = "favorite_count")
+	private int favoriteCount;
+
+	@Column(name = "duration")
+	private int duration;
 
 	@Column(name = "track_thumbnail")
 	@Basic(optional = true)
 	private String trackThumbnail;
+
+	@ManyToOne
+	@JoinColumn(name = "status_id", updatable = false, insertable = false)
+	private PlayTrackStatusModel playTrackStatus;
 
 	@OneToMany
 	@JoinColumn(name = "track_id", referencedColumnName = "track_id")
@@ -72,5 +73,10 @@ public class TracksModel {
 	@JoinColumn(name = "track_id", referencedColumnName = "track_id")
 	@OnDelete(action = OnDeleteAction.CASCADE)
 	private List<ArtistsTrackModel> artistTracks;
+
+	@JsonIgnore
+	@Basic(optional = false)
+	@Column(name = "account_id")
+	private int accountId;
 
 }

@@ -45,8 +45,16 @@ public class FileLinkRelController {
 				EXCEPTION_CODES.SEARCH_NOT_FOUND, HttpStatus.NOT_FOUND,
 				"[ FileLinkRelController] Can't delete this record because the file " + fileName + " is unreachable."));
 		String destination = target.getFileType().getPathRel() + fileName;
-		minioStorageService.deleteObjectFromMinioByName(destination);
-		fileLinkRefRepository.deleteById(fileName);
+		minioStorageService.DeleteObjectFromMinIoByPathAndName(destination);
+		fileLinkRefRepository.delete(target);
+	}
+	
+	// DeleteTargetFileByTypeIdAndLinkRef
+	public void deleteTargetFileByTypeIdAndLinkRef(int typeId, int refId) {
+		FileLinkRefModel target = fileLinkRefRepository.findByTargetRefAndTypeId(typeId, refId);
+		String destination = target.getFileType().getPathRel() + target.getFileId();
+		minioStorageService.DeleteObjectFromMinIoByPathAndName(destination);
+		fileLinkRefRepository.delete(target);
 	}
 
 	// OK!
@@ -62,11 +70,8 @@ public class FileLinkRelController {
 
 	// OK!
 	// RetriveImageByTargetRef
-	public Resource retriveImageByTargetRef(int targetRef, int typeId) {
-		FileLinkRefModel fileModel = fileLinkRefRepository.findByTargetRefAndTypeId(targetRef,
-				fileTypeRepository.findById(typeId).orElseThrow(
-						() -> new ExceptionFoundation(EXCEPTION_CODES.SEARCH_NOT_FOUND, HttpStatus.NOT_FOUND,
-								"[ FileLinkRelController ] The type with id " + typeId + " not found.")));
+	public Resource retriveImageByTargetRef(int typeId, int targetRef) {
+		FileLinkRefModel fileModel = fileLinkRefRepository.findByTargetRefAndTypeId(typeId, targetRef);
 		String targetFileInMinIo = fileModel.getFileType().getPathRel() + fileModel.getFileId();
 		return minioStorageService.getImageFromMinIoByNameLocation(targetFileInMinIo);
 	}

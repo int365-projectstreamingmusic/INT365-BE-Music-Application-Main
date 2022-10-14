@@ -28,10 +28,11 @@ import com.application.entities.submittionforms.UserRegiserationForm;
 import com.application.exceptons.ExceptionFoundation;
 import com.application.exceptons.ExceptionResponseModel.EXCEPTION_CODES;
 import com.application.repositories.RolesRepository;
-import com.application.repositories.UserAccountModelRepository;
+import com.application.repositories.UserAccountRepository;
 import com.application.repositories.UserRoleModelRepository;
 import com.application.utilities.EmailServiceUtility;
 import com.application.utilities.JwtTokenUtills;
+import com.application.utilities.ValidatorServices;
 
 @Service
 @PropertySource("generalsetting.properties")
@@ -43,11 +44,13 @@ public class UserAuthenticationController {
 	private PasswordEncoder passwordEncoder;
 
 	@Autowired
-	private UserAccountModelRepository userAccountModelRepository;
+	private UserAccountRepository userAccountModelRepository;
 	@Autowired
 	private RolesRepository rolesModelRepository;
 	@Autowired
 	private UserRoleModelRepository userRoleModelRepository;
+	@Autowired
+	private ValidatorServices validatorServices;
 
 	@Value("${general.role.user}")
 	private int userRoleMemberId;
@@ -62,13 +65,27 @@ public class UserAuthenticationController {
 		UserAccountModel registeration = new UserAccountModel();
 
 		if (userAccountModelRepository.existsByUsernameIgnoreCase(incomingRegisteration.getUsername())) {
-			throw new ExceptionFoundation(EXCEPTION_CODES.AUTHEN_USERNAME_ALREADY_EXISTED, HttpStatus.I_AM_A_TEAPOT,
+			throw new ExceptionFoundation(EXCEPTION_CODES.REGISTERATION_TAKEN_USERNAME, HttpStatus.I_AM_A_TEAPOT,
 					"[ userRegistration ] This usename is in use.");
 		}
 
 		if (userAccountModelRepository.existsByEmailIgnoreCase(incomingRegisteration.getEmail())) {
-			throw new ExceptionFoundation(EXCEPTION_CODES.AUTHEN_EMAIL_ALREADY_EXIST, HttpStatus.I_AM_A_TEAPOT,
+			throw new ExceptionFoundation(EXCEPTION_CODES.REGISTERATION_TAKEN_EMAIL, HttpStatus.I_AM_A_TEAPOT,
 					"[ userRegistration ] This email is in use by another account.");
+		}
+
+		// Validation
+		if (!validatorServices.validateEmail(incomingRegisteration.getEmail())) {
+			throw new ExceptionFoundation(EXCEPTION_CODES.REGISTERATION_INVALID_EMAIL, HttpStatus.I_AM_A_TEAPOT,
+					"[ userRegistration ] This is not a valid email.");
+		}
+		if (!validatorServices.validateUsername(incomingRegisteration.getUsername())) {
+			throw new ExceptionFoundation(EXCEPTION_CODES.REGISTERATION_INVALID_USERNAME, HttpStatus.I_AM_A_TEAPOT,
+					"[ userRegistration ] This username is invalid. The username must have at least 6 characters and not more than 45 characters");
+		}
+		if (!validatorServices.validatePassword(incomingRegisteration.getUser_passcode())) {
+			throw new ExceptionFoundation(EXCEPTION_CODES.REGISTERATION_INVALID_PASSWORD, HttpStatus.I_AM_A_TEAPOT,
+					"[ userRegistration ] This password has less than 8 characters and is not strong enough. The password should have capital and small letter, and a number.");
 		}
 
 		List<UserRolesModel> userFirstRolesGroup = new ArrayList<>();
@@ -84,7 +101,7 @@ public class UserAuthenticationController {
 		registeration.setRegistered_date(getRegisterationTimeStamp);
 		registeration.setUserBios("");
 		registeration.setProfileName(incomingRegisteration.getUsername());
-		registeration.setProfileIamge("default-user-profile.png");
+		registeration.setProfileIamge(null);
 
 		registeration = userAccountModelRepository.save(registeration);
 
@@ -114,7 +131,8 @@ public class UserAuthenticationController {
 
 		// Send result when success.
 		Map<String, Object> resultMap = new HashMap<>();
-		resultMap.put("registration", userAccountModelRepository.findById(registeration.getAccountId()));
+		// resultMap.put("registration",
+		// userAccountModelRepository.findById(registeration.getAccountId()));
 		resultMap.put("status", "Success");
 
 		return resultMap;
@@ -128,11 +146,11 @@ public class UserAuthenticationController {
 
 		if (requestedUser == null
 				|| !passwordEncoder.matches(userLoginModel.getPassword(), requestedUser.getUserPasscode())) {
-			throw new ExceptionFoundation(EXCEPTION_CODES.AUTHEN_BAD_CREDENTIALS, HttpStatus.I_AM_A_TEAPOT,
+			throw new ExceptionFoundation(EXCEPTION_CODES.AUTHEN_INCORRECT_CREDENTIALS, HttpStatus.I_AM_A_TEAPOT,
 					"[ AUTHEN FAILED ] Username or password doesn't match.");
 		} else if (userRoleModelRepository
 				.existByUserIdAndRoleId(new UserRolesCompKey(requestedUser.getAccountId(), userRoleSuspendedId))) {
-			throw new ExceptionFoundation(EXCEPTION_CODES.AUTHEN_NOT_ALLOWED, HttpStatus.FORBIDDEN,
+			throw new ExceptionFoundation(EXCEPTION_CODES.AUTHEN_ACCOUNT_SUSPENDED, HttpStatus.FORBIDDEN,
 					"This account is suspended");
 		}
 
@@ -155,27 +173,27 @@ public class UserAuthenticationController {
 
 	// OK!
 	// userChangePassword
-	public void userChangePassword(ChangePasswordForm passwordform, HttpServletRequest request,
+	public ResponseEntity<HttpStatus> userChangePassword(ChangePasswordForm passwordform, HttpServletRequest request,
 			HttpServletResponse response) {
 		UserAccountModel requestedUser = userAccountModelRepository
 				.findByUsername(JwtTokenUtills.getUserNameFromToken(request));
 
 		if (requestedUser == null) {
-			throw new ExceptionFoundation(EXCEPTION_CODES.AUTHEN_NOT_ALLOWED, HttpStatus.UNAUTHORIZED,
+			throw new ExceptionFoundation(EXCEPTION_CODES.AUTHEN_INCORRECT_CREDENTIALS, HttpStatus.UNAUTHORIZED,
 					"[ userChangePassword ] This user does not exist... seriously...?");
 		}
 
 		if (!passwordEncoder.matches(passwordform.getOldPassword(), requestedUser.getUserPasscode())) {
-			throw new ExceptionFoundation(EXCEPTION_CODES.AUTHEN_BAD_CREDENTIALS, HttpStatus.UNAUTHORIZED,
+			throw new ExceptionFoundation(EXCEPTION_CODES.AUTHEN_INCORRECT_CREDENTIALS, HttpStatus.UNAUTHORIZED,
 					"[ userChangePassword ] User is not allowed to change a passwotd because an old password doesn't match.");
 		}
 
 		if (passwordform.getNewPassword().equals(passwordform.getConfirmationPassword())) {
 			String newPasswordForRequestedUser = passwordEncoder.encode(passwordform.getNewPassword());
 			userAccountModelRepository.updateUserPassword(newPasswordForRequestedUser, requestedUser.getAccountId());
-			response.setHeader(HttpHeaders.AUTHORIZATION, "");
+			return userLogOut(response);
 		} else {
-			throw new ExceptionFoundation(EXCEPTION_CODES.AUTHEN_PASSWORD_MISSMATCH, HttpStatus.I_AM_A_TEAPOT,
+			throw new ExceptionFoundation(EXCEPTION_CODES.REGISTERATION_PASSWORD_MISMATCH, HttpStatus.I_AM_A_TEAPOT,
 					"[ userChangePassword ] Confirmation password is not the same with new password.");
 		}
 
