@@ -18,7 +18,7 @@ import com.application.entities.models.TrackCountModel;
 
 @RestController
 @RequestMapping("test/")
-public class TestingApis {
+public class A0TestingApis {
 
 	@Autowired
 	private TrackCountController trackCountController;

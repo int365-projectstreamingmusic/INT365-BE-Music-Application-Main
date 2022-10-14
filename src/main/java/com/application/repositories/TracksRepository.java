@@ -31,7 +31,10 @@ public interface TracksRepository extends JpaRepository<TracksModel, Integer> {
 	@Transactional
 	@Modifying
 	int updateTrackFileName(String trackName, int trackId);
-	
-	//void updateTrackStatus(int trackId,int newStatus);
+
+	@Transactional
+	@Modifying
+	@Query(nativeQuery = true, value = "UPDATE tracks SET track_name = :newTrackName, track_desc = :newTrackDesc WHERE track_id = :trackId")
+	void updateBasicTrackInfo(int trackId, String newTrackName, String newTrackDesc);
 
 }

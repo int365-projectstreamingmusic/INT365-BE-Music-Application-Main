@@ -26,7 +26,7 @@ import com.application.exceptons.ExceptionResponseModel.EXCEPTION_CODES;
 
 @RestController
 @RequestMapping("api/authen/")
-public class PublicAuthenticationAPIs {
+public class A1PublicAuthenticationAPIs {
 
 	@Autowired
 	UserAuthenticationController userAuthenticationController;

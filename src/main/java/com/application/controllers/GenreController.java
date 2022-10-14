@@ -1,5 +1,7 @@
 package com.application.controllers;
 
+import java.util.List;
+
 import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -102,6 +104,31 @@ public class GenreController {
 		GenresTracksModel newGenreTrack = new GenresTracksModel();
 		newGenreTrack.setId(new GenreTracksCompkey(targetTrack.getId(), targetGenre.getGenreId()));
 
+	}
+
+	// DB-V5 OK!
+	// Genres : AddGenreToTrack
+	public List<GenresTracksModel> addGenreToTrack(int trackId, List<GenreModel> incomingGenre) {
+		List<GenreModel> existingGenre = genreRepository.findGenreByTrackId(trackId);
+
+		// This will check if there is a removed genre.
+		for (int i = 0; i < existingGenre.size(); i++) {
+			GenreTracksCompkey id = new GenreTracksCompkey(trackId, existingGenre.get(i).getGenreId());
+			if (incomingGenre.contains(existingGenre.get(i))) {
+			} else {
+				genresTracksRepository.deleteById(id);
+			}
+		}
+
+		// This will add a genre that does not curently exist.
+		for (int i = 0; i < incomingGenre.size(); i++) {
+			GenreTracksCompkey id = new GenreTracksCompkey(trackId, incomingGenre.get(i).getGenreId());
+			if (!genresTracksRepository.existsById(id)) {
+				genresTracksRepository.insertNewGenreTrack(id.getTrackId(), id.getGenreId());
+				existingGenre.add(incomingGenre.get(i));
+			}
+		}
+		return genresTracksRepository.findAllByTrackId(trackId);
 	}
 
 	// RemoveGenreFromTrack

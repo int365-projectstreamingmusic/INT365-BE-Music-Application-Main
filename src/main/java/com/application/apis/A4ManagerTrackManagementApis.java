@@ -22,7 +22,7 @@ import com.application.entities.submittionforms.TrackForm;
 
 @RestController
 @RequestMapping("api/manager/track/")
-public class ManagerTrackManagementApis {
+public class A4ManagerTrackManagementApis {
 
 	@Autowired
 	private TrackManagerController trackManagerController;

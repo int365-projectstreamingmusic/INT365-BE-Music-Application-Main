@@ -1,5 +1,7 @@
 package com.application.repositories;
 
+import java.util.List;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -15,5 +17,8 @@ public interface GenreRepository extends JpaRepository<GenreModel, Integer> {
 	Page<GenreModel> findByGenreName(String genreName, Pageable pageable);
 	
 	boolean existsByGenreName(String genreName);
+	
+	@Query(nativeQuery = true, value = "SELECT g.* FROM genre g RIGHT JOIN genre_tracks t ON g.genre_id = t.genre_id WHERE t.track_id = :trackId")
+	List<GenreModel> findGenreByTrackId(int trackId);
 
 }

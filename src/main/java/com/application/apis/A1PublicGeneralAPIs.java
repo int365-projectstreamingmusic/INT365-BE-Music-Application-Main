@@ -21,7 +21,7 @@ import com.application.entities.models.TracksModel;
 
 @RestController
 @RequestMapping("api/public/general/")
-public class PublicGeneralAPIs {
+public class A1PublicGeneralAPIs {
 
 	@Autowired
 	private GenreController genreController;
