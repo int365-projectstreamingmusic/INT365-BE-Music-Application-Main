@@ -27,10 +27,10 @@ public interface TracksRepository extends JpaRepository<TracksModel, Integer> {
 	@Query(nativeQuery = true, value = "SELECT * FROM tracks WHERE account_id = :accountId AND track_name LIKE LOWER(CONCAT('%',:searchName,'%')) ORDER BY timestamp DESC")
 	Page<TracksModel> listMyTrackByName(int accountId, String searchName, Pageable pageable);
 
-	@Query(nativeQuery = true, value = "SELECT SUM(s.view_count) AS view_count, t.* FROM tracks t RIGHT JOIN track_count_statistic s ON t.track_id = s.track_id GROUP BY t.track_id ORDER BY view_count DESC LIMIT :numberOfTrack")
+	@Query(nativeQuery = true, value = "SELECT SUM(s.view_count) AS view_count, t.* FROM tracks t RIGHT JOIN track_count_statistic s ON t.track_id = s.track_id WHERE t.status_id = 1001 GROUP BY t.track_id ORDER BY view_count DESC LIMIT :numberOfTrack")
 	List<TracksModel> listTopTrack(int numberOfTrack);
 
-	@Query(nativeQuery = true, value = "SELECT SUM(s.view_count) AS view_count, t.* FROM tracks t RIGHT JOIN track_count_statistic s ON t.track_id = s.track_id WHERE s.view_count_date BETWEEN :from AND :to GROUP BY t.track_id ORDER BY view_count DESC LIMIT :numberOfTrack")
+	@Query(nativeQuery = true, value = "SELECT SUM(s.view_count) AS view_count, t.* FROM tracks t RIGHT JOIN track_count_statistic s ON t.track_id = s.track_id WHERE s.view_count_date BETWEEN :from AND :to AND t.status_id = 1001 GROUP BY t.track_id ORDER BY view_count DESC LIMIT :numberOfTrack ")
 	List<TracksModel> listTopTrack(int numberOfTrack, String from, String to);
 
 	@Query(value = "UPDATE TracksModel t SET t.trackFile = :trackName WHERE t.id = :trackId")
@@ -53,4 +53,14 @@ public interface TracksRepository extends JpaRepository<TracksModel, Integer> {
 	@Query(nativeQuery = true, value = "UPDATE tracks SET track_thumbnail = :thumbnail WHERE track_id = :trackId")
 	void updateTrackThumbnail(int trackId, String thumbnail);
 
+	// ▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬
+
+	@Query(nativeQuery = true, value = "SELECT t.* FROM tracks t RIGHT JOIN track_album a ON a.track_id = t.track_id WHERE a.album_id = :albumId AND LOWER(t.track_name) LIKE LOWER(CONCAT('%',:searchContent,'%')) AND t.status_id = 1001")
+	Page<TracksModel> listAllByAlbum(int albumId, String searchContent, Pageable pageable);
+	
+	@Query(nativeQuery = true, value = "SELECT t.* FROM tracks t RIGHT JOIN playlist_tracklist p ON p.track_id = t.track_id WHERE p.playlist_id = :playlist AND LOWER(t.track_name) LIKE LOWER(CONCAT('%',:searchContent,'%')) AND t.status_id = 1001")
+	Page<TracksModel> listAllByPlaylist(int playlist, String searchContent, Pageable pageable);
+
+	@Query(nativeQuery = true, value = "SELECT t.* FROM tracks t RIGHT JOIN playlist_tracklist p ON p.track_id = t.track_id WHERE p.playlist_id = :playlist AND LOWER(t.track_name) LIKE LOWER(CONCAT('%',:searchContent,'%'))")
+	Page<TracksModel> listAllByPlaylistOwner(int playlist, String searchContent, Pageable pageable);
 }

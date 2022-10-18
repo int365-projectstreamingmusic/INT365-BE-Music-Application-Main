@@ -48,7 +48,7 @@ public class FileLinkRelController {
 		minioStorageService.DeleteObjectFromMinIoByPathAndName(destination);
 		fileLinkRefRepository.delete(target);
 	}
-	
+
 	// DeleteTargetFileByTypeIdAndLinkRef
 	public void deleteTargetFileByTypeIdAndLinkRef(int typeId, int refId) {
 		FileLinkRefModel target = fileLinkRefRepository.findByTargetRefAndTypeId(typeId, refId);
@@ -74,6 +74,15 @@ public class FileLinkRelController {
 		FileLinkRefModel fileModel = fileLinkRefRepository.findByTargetRefAndTypeId(typeId, targetRef);
 		String targetFileInMinIo = fileModel.getFileType().getPathRel() + fileModel.getFileId();
 		return minioStorageService.getImageFromMinIoByNameLocation(targetFileInMinIo);
+	}
+
+	// isExistsInRecord
+	public boolean isExistsInRecord(String fileName) {
+		if (fileLinkRefRepository.existsById(fileName)) {
+			return true;
+		} else {
+			return false;
+		}
 	}
 
 }

@@ -19,7 +19,7 @@ import com.application.entities.models.UserAccountModel;
 import com.application.entities.submittionforms.TrackForm;
 import com.application.exceptons.ExceptionFoundation;
 import com.application.exceptons.ExceptionResponseModel.EXCEPTION_CODES;
-import com.application.repositories.PlayTrackRepository;
+import com.application.repositories.PlayTrackStatusRepository;
 import com.application.repositories.TracksRepository;
 import com.application.services.GeneralFunctionController;
 import com.application.utilities.MinioStorageService;
@@ -35,7 +35,7 @@ public class TrackController {
 	@Autowired
 	private TracksRepository tracksRepository;
 	@Autowired
-	private PlayTrackRepository playTrackRepository;
+	private PlayTrackStatusRepository playTrackStatusRepository;
 
 	@Autowired
 	private GenreController genreController;
@@ -62,7 +62,6 @@ public class TrackController {
 	// █████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████
 
 	// ▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬
-
 	// DB-V5 OK!
 	// ListTrackByPageAndName
 	public Page<TracksModel> listTrackByPageAndName(int page, int pageSize, String searchContent) {
@@ -88,6 +87,7 @@ public class TrackController {
 		return result;
 	}
 
+	// ▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬
 	// DB-V5 OK!
 	// getTrackById
 	public TracksModel getTrackById(int trackId) {
@@ -101,6 +101,7 @@ public class TrackController {
 		return track;
 	}
 
+	// ▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬
 	// DB-V5 OK!
 	// listLatestRelease
 	public List<TracksModel> listLatestRelease(int numberOfTracks) {
@@ -143,6 +144,54 @@ public class TrackController {
 		return result;
 	}
 
+	// ▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬
+	// DB-V5.1 OK!
+	// Get tracks in albums.
+	public Page<TracksModel> listTrackByAlbum(int albumId, int page, int pageSize, String searchContent) {
+		if (page < 0) {
+			page = 0;
+		}
+		if (pageSize < 1 || pageSize > trackMaxPageSize) {
+			pageSize = trackDefaultSize;
+		}
+
+		Pageable sendPageRequest = PageRequest.of(page, pageSize);
+		Page<TracksModel> result;
+
+		result = tracksRepository.listAllByAlbum(albumId, searchContent, sendPageRequest);
+		if (result.getTotalElements() <= 0) {
+			throw new ExceptionFoundation(EXCEPTION_CODES.SEARCH_NOT_FOUND, HttpStatus.NOT_FOUND,
+					"[ TrackController ] Found nothing here. Seems like there is no track here.");
+		}
+		return result;
+	}
+
+	// ▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬
+	// DB-V5.1 OK!
+	// Get list of track in playlist
+	public Page<TracksModel> listTrackByPlaylist(int playlistId, int page, int pageSize, String searchContent,
+			boolean isByPlaylistOwner) {
+		if (page < 0) {
+			page = 0;
+		}
+		if (pageSize < 1 || pageSize > trackMaxPageSize) {
+			pageSize = trackDefaultSize;
+		}
+
+		Pageable sendPageRequest = PageRequest.of(page, pageSize);
+		Page<TracksModel> result;
+		if (isByPlaylistOwner) {
+			result = tracksRepository.listAllByPlaylistOwner(playlistId, searchContent, sendPageRequest);
+		} else {
+			result = tracksRepository.listAllByPlaylist(playlistId, searchContent, sendPageRequest);
+		}
+		if (result.getTotalElements() <= 0) {
+			throw new ExceptionFoundation(EXCEPTION_CODES.SEARCH_NOT_FOUND, HttpStatus.NOT_FOUND,
+					"[ TrackController ] Found nothing here. Seems like there is no track here.");
+		}
+		return result;
+	}
+
 	// █████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████
 	//
 	// Management zone for creator only.
@@ -171,7 +220,7 @@ public class TrackController {
 		newTrack.setDuration(0);
 
 		// Track status is hiden when first uploaded.
-		newTrack.setPlayTrackStatus(playTrackRepository.findById(1002).get());
+		newTrack.setPlayTrackStatus(playTrackStatusRepository.findById(1002).get());
 
 		// Thinks to add later.
 		newTrack.setGenreTrack(null);
@@ -233,7 +282,9 @@ public class TrackController {
 						HttpStatus.NOT_FOUND, "[ BROWSE_NO_RECORD_EXISTS ] Track with this ID does not exist."));
 		generalFunctionController.checkOwnerShipForRecord(owner.getAccountId(), target.getAccountId());
 
-		fileLinkRelController.deleteTargetFileByName(target.getTrackThumbnail());
+		if (fileLinkRelController.isExistsInRecord(target.getTrackThumbnail())) {
+			fileLinkRelController.deleteTargetFileByName(target.getTrackThumbnail());
+		}
 		String trackThumbnailFileName = fileLinkRelController.insertNewTrackObjectLinkRel(imageFile, 201,
 				target.getId());
 		tracksRepository.updateTrackThumbnail(target.getId(), trackThumbnailFileName);
@@ -253,9 +304,12 @@ public class TrackController {
 		if (target.getPlayTrackStatus().getId() == 1001) {
 			tracksRepository.updateTrackStatus(trackId, 1002);
 			return "The track ID " + trackId + ":" + target.getTrackName() + " is now hiden.";
-		} else {
+		} else if (target.getPlayTrackStatus().getId() == 1002) {
 			tracksRepository.updateTrackStatus(trackId, 1001);
 			return "The track ID " + trackId + ":" + target.getTrackName() + " is now visible.";
+		} else {
+			throw new ExceptionFoundation(EXCEPTION_CODES.USER_SAVE_REJECTED, HttpStatus.I_AM_A_TEAPOT,
+					"[ USER_SAVE_REJECTED ] This playlise is marked as removed, or in breach of the agreement.");
 		}
 
 	}

@@ -1,24 +1,23 @@
 package com.application.entities.submittionforms;
 
-import java.util.List;
-
 import javax.persistence.Basic;
+
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Data
-@NoArgsConstructor
 @AllArgsConstructor
-public class PlaylistForm {
-
+@NoArgsConstructor
+public class AlbumForm {
+	
 	@Basic(optional = true)
 	private int id;
 	@Basic(optional = true)
-	private String playlistName;
+	private String name;
 	@Basic(optional = true)
-	private String playlistDesc;
+	private String desc;
 	@Basic(optional = true)
-	List<TrackListSub> trackLst;
-
+	private int statusId;
+	
 }

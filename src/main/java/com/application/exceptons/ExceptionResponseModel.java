@@ -85,6 +85,7 @@ public class ExceptionResponseModel {
 		USER_ACCOUNT_NOT_FOUND(30001),
 		USER_SEARCH_NOT_FOUND(30002),
 		USER_SAVE_REJECTED(30003),
+		USER_ILLEGAL_NAME(30004),
 		
 		// Browsing
 		BROWSE_NO_RECORD_EXISTS(40001),
@@ -93,7 +94,8 @@ public class ExceptionResponseModel {
 		
 		// Deleting
 		RECORD_ALREADY_GONE(50001),
-		RECORE_ALREADY_EXIST(50002);
+		RECORE_ALREADY_EXIST(50002),
+		RECORD_INVALID_STATUS(50003);
 		
 
 		private final int codeValue;
