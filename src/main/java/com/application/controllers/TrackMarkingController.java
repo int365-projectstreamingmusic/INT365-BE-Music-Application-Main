@@ -1,5 +1,7 @@
 package com.application.controllers;
 
+import java.util.List;
+
 import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,6 +30,19 @@ public class TrackMarkingController {
 	private UserTrackMarkingRepository userTrackMarkingRepository;
 	@Autowired
 	private GeneralFunctionController generalFunctionController;
+
+	// ▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬
+	//
+	// CheckIfFavorite
+	public boolean checkIfFavorite(int userId, int trackId) {
+		UserTrackMarkingCompkey id = new UserTrackMarkingCompkey(trackId, userId, 1001);
+		if (userTrackMarkingRepository.existsById(id)) {
+			return true;
+		} else {
+			return false;
+		}
+
+	}
 
 	// OK!
 	// AddNewTrackMarking
@@ -71,8 +86,8 @@ public class TrackMarkingController {
 
 	// OK!
 	// ListTrackByTrackMarkingAndUserAccountId
-	public Page<UserTrackMarkingModel> listTrackByTrackMarkingAndUserAccountId(int page, int pageSize, int trackMarkingId,
-			String searchContent, HttpServletRequest request) {
+	public Page<UserTrackMarkingModel> listTrackByTrackMarkingAndUserAccountId(int page, int pageSize,
+			int trackMarkingId, String searchContent, HttpServletRequest request) {
 		if (page < 0) {
 			page = 0;
 		}

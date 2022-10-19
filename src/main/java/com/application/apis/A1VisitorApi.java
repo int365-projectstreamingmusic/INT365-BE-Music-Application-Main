@@ -2,6 +2,7 @@ package com.application.apis;
 
 import java.util.List;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.websocket.server.PathParam;
 
 import org.simpleframework.xml.Path;
@@ -41,48 +42,54 @@ public class A1VisitorApi {
 	@Autowired
 	private AlbumController albumController;
 
+	// █████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████
+
 	// ▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬
-	// DB-V5 OK!
+	// DB-V5.1 OK! : HttpServeletRequest
 	// TRACK : Get track by page
 	@GetMapping("track")
 	public ResponseEntity<Page<TracksModel>> listTrackByPageAndName(@RequestParam(defaultValue = "0") int page,
-			@RequestParam(defaultValue = "15") int pageSize, @RequestParam(defaultValue = "") String searchContent) {
-		return ResponseEntity.ok().body(trackController.listTrackByPageAndName(page, pageSize, searchContent));
+			@RequestParam(defaultValue = "15") int pageSize, @RequestParam(defaultValue = "") String searchContent,
+			HttpServletRequest request) {
+		return ResponseEntity.ok().body(trackController.listTrackByPageAndName(page, pageSize, searchContent, request));
 	}
 
 	// ▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬
-	// DB-V5 OK!
+	// DB-V5.1 OK! : HttpServeletRequest
 	// TRACK : Get track by ID
 	@GetMapping("track/{id}")
-	public ResponseEntity<TracksModel> getTrackById(@PathVariable int id) {
-		return ResponseEntity.ok().body(trackController.getTrackById(id));
+	public ResponseEntity<TracksModel> getTrackById(@PathVariable int id, HttpServletRequest request) {
+		return ResponseEntity.ok().body(trackController.getTrackById(id, request));
 	}
 
 	// ▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬
-	// DB-V5 OK!
+	// DB-V5.1 OK!
 	// TRACK : Get latest X tracks.
 	@GetMapping("track/latest")
 	public ResponseEntity<List<TracksModel>> listLatestReleaseByNumber(
-			@RequestParam(defaultValue = "5") int numberOfTracks) {
-		return ResponseEntity.ok().body(trackController.listLatestRelease(numberOfTracks));
+			@RequestParam(defaultValue = "5") int numberOfTracks, HttpServletRequest request) {
+		return ResponseEntity.ok().body(trackController.listLatestRelease(numberOfTracks, request));
 	}
 
 	// ▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬
-	// DB-V5 OK!
+	// DB-V5.1 OK!
 	// TRACK : Get the top track people listen in the past week.
 	@GetMapping("track/topall")
-	public ResponseEntity<List<TracksModel>> getTopTracks(@RequestParam(defaultValue = "5") int numberOfTracks) {
-		return ResponseEntity.ok().body(trackController.getTopTrackOfNDay(numberOfTracks));
+	public ResponseEntity<List<TracksModel>> getTopTracks(@RequestParam(defaultValue = "5") int numberOfTracks,
+			HttpServletRequest request) {
+		return ResponseEntity.ok().body(trackController.getTopTrackOfNDay(numberOfTracks, request));
 	}
 
 	// ▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬
-	// DB-V5 OK!
+	// DB-V5.1 OK!
 	// TRACK : Get the top track people listen in the past week.
 	@GetMapping("track/top")
 	public ResponseEntity<List<TracksModel>> getTopTracks(@RequestParam(defaultValue = "7") int days,
-			@RequestParam(defaultValue = "5") int numberOfTracks) {
-		return ResponseEntity.ok().body(trackController.getTopTrackOfNDay(numberOfTracks, days));
+			@RequestParam(defaultValue = "5") int numberOfTracks, HttpServletRequest request) {
+		return ResponseEntity.ok().body(trackController.getTopTrackOfNDay(numberOfTracks, days, request));
 	}
+
+	// █████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████
 
 	// ▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬
 	// DB-V5 OK!
@@ -92,6 +99,8 @@ public class A1VisitorApi {
 			@RequestParam(defaultValue = "0") int pageSize, @RequestParam(defaultValue = "") String searchContent) {
 		return ResponseEntity.ok().body(genreController.listGenreListByPage(page, pageSize, searchContent));
 	}
+
+	// █████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████
 
 	/// ▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬
 	// DB-V5.1 OK!
@@ -110,6 +119,8 @@ public class A1VisitorApi {
 		return ResponseEntity.ok().body(moodController.getMoodById(id));
 	}
 
+	// █████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████
+
 	// ▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬
 	// DB-V5 OK!
 	// ALBUM : Get all album.
@@ -124,9 +135,12 @@ public class A1VisitorApi {
 	// ALBUM : Get track in album.
 	@GetMapping("album/{id}")
 	public ResponseEntity<Page<TracksModel>> listAlbum(@PathVariable int id, @RequestParam(defaultValue = "0") int page,
-			@RequestParam(defaultValue = "50") int pageSize, @RequestParam(defaultValue = "") String searchContent) {
-		return ResponseEntity.ok().body(trackController.listTrackByAlbum(id, page, pageSize, searchContent));
+			@RequestParam(defaultValue = "50") int pageSize, @RequestParam(defaultValue = "") String searchContent,
+			HttpServletRequest request) {
+		return ResponseEntity.ok().body(trackController.listTrackByAlbum(id, page, pageSize, searchContent, request));
 	}
+
+	// █████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████
 
 	// ▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬
 	// DB-V5 OK!
@@ -151,7 +165,10 @@ public class A1VisitorApi {
 	// PLAYLIST : Get playlist by ID and its tracks
 	@GetMapping("playlist/{id}")
 	public ResponseEntity<PlaylistOutput> getPlaylist(@PathVariable int id, @RequestParam(defaultValue = "0") int page,
-			@RequestParam(defaultValue = "15") int pageSize, @RequestParam(defaultValue = "") String searchContent) {
-		return ResponseEntity.ok().body(playlistController.getPlaylistByID(id, page, pageSize, searchContent));
+			@RequestParam(defaultValue = "15") int pageSize, @RequestParam(defaultValue = "") String searchContent,
+			HttpServletRequest request) {
+		return ResponseEntity.ok().body(playlistController.getPlaylistByID(id, page, pageSize, searchContent, request));
 	}
+
+	// █████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████
 }

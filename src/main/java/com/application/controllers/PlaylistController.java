@@ -93,7 +93,8 @@ public class PlaylistController {
 	// ▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬
 	// DB-V5.1 OK!
 	// GetPlaylistByID
-	public PlaylistOutput getPlaylistByID(int playlistId, int page, int pageSize, String searchContent) {
+	public PlaylistOutput getPlaylistByID(int playlistId, int page, int pageSize, String searchContent,
+			HttpServletRequest request) {
 		PlaylistOutput result = new PlaylistOutput();
 		result.setPlaylist(playlistRepository.findById(playlistId).orElseThrow(
 				() -> new ExceptionFoundation(EXCEPTION_CODES.BROWSE_NO_RECORD_EXISTS, HttpStatus.NOT_FOUND,
@@ -103,27 +104,8 @@ public class PlaylistController {
 					"[ BROWSE_FORBIDDEN ] The playlist ID" + playlistId + " is marked hiden from public.");
 		}
 		try {
-			result.setTracks(trackController.listTrackByPlaylist(playlistId, page, pageSize, searchContent, false));
-		} catch (Exception exc) {
-			result.setTracks(null);
-		}
-		return result;
-	}
-
-	// ▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬
-	// DB-V5.1 OK!
-	// GetPlaylistByID : For playlist owner.
-	public PlaylistOutput getPlaylistByID(int playlistId, int page, int pageSize, String searchContent,
-			HttpServletRequest request) {
-		UserAccountModel owner = generalFunctionController.getUserAccount(request);
-		PlaylistOutput result = new PlaylistOutput();
-		result.setPlaylist(playlistRepository.findById(playlistId).orElseThrow(
-				() -> new ExceptionFoundation(EXCEPTION_CODES.BROWSE_NO_RECORD_EXISTS, HttpStatus.NOT_FOUND,
-						"[ BROWSE_NO_RECORD_EXISTS ] The playlist ID " + playlistId + " does not exist.")));
-		generalFunctionController.checkOwnerShipForRecord(owner.getAccountId(),
-				result.getPlaylist().getUserAccountModel().getAccountId());
-		try {
-			result.setTracks(trackController.listTrackByPlaylist(playlistId, page, pageSize, searchContent, true));
+			result.setTracks(
+					trackController.listTrackByPlaylist(playlistId, page, pageSize, searchContent, false, request));
 		} catch (Exception exc) {
 			result.setTracks(null);
 		}

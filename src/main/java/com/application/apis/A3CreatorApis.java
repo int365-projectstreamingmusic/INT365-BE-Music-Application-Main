@@ -114,20 +114,11 @@ public class A3CreatorApis {
 
 	// DB-V5 OK!
 	@PutMapping("track/edit")
-	public ResponseEntity<TracksModel> editTrack(@RequestBody TrackForm track, HttpServletRequest request) {
+	public ResponseEntity<TracksModel> editTrack(@RequestPart TrackForm track, @RequestPart MultipartFile image,
+			HttpServletRequest request) {
 		URI uri = URI
 				.create(ServletUriComponentsBuilder.fromCurrentContextPath().path(mapping + "track/edit").toString());
-		return ResponseEntity.created(uri).body(trackController.editTrack(track, request));
-	}
-
-	// DB-V5 OK!
-	@PutMapping("track/thumbnail/{trackId}")
-	public ResponseEntity<String> uploadThumbnail(@PathVariable(required = true) int trackId,
-			@RequestPart MultipartFile image, HttpServletRequest request) {
-		URI uri = URI.create(
-				ServletUriComponentsBuilder.fromCurrentContextPath().path(mapping + "track/thumbnail").toString());
-		trackController.uploadNewThumbnail(trackId, image, request);
-		return ResponseEntity.created(uri).body("Thumbnail changes!");
+		return ResponseEntity.created(uri).body(trackController.editTrack(track, image, request));
 	}
 
 	// DB-V5 OK!
