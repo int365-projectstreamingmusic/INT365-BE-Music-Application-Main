@@ -248,8 +248,12 @@ public class TrackController {
 		newTrack = tracksRepository.save(newTrack);
 
 		// Adding genre to the track
-		if (newTrackForm.getGenreList() != null) {
+		if (newTrackForm.getGenreList() != null && newTrackForm.getGenreList().size() <= 0) {
 			newTrack.setGenreTrack(genreController.addGenreToTrack(newTrack.getId(), newTrackForm.getGenreList()));
+		}
+
+		if (newTrackForm.getMoodList() != null && newTrackForm.getMoodList().size() <= 0) {
+
 		}
 
 		// Save image and track file.
@@ -290,7 +294,7 @@ public class TrackController {
 		}
 
 		// If with image, do the following.
-		if(image != null) {
+		if (image != null) {
 			if (fileLinkRelController.isExistsInRecord(target.getTrackThumbnail())) {
 				fileLinkRelController.deleteTargetFileByName(target.getTrackThumbnail());
 			}

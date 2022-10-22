@@ -86,5 +86,7 @@ public class TracksModel {
 	private boolean isFavorite;
 	@Transient
 	private boolean isPlayground;
+	@Transient
+	private boolean isInHistory;
 
 }
