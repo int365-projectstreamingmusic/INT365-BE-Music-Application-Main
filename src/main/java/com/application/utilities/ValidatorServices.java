@@ -12,6 +12,8 @@ public class ValidatorServices {
 	Pattern passwordPattern = Pattern.compile("^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9]).{8,128}$");
 	Pattern phoneNumberPattern = Pattern.compile("^[0]\\\\d{1,10}$");
 	Pattern usernamePattern = Pattern.compile("^[a-zA-Z0-9_-]{6,45}$");
+	
+	Pattern playlistNamePattern = Pattern.compile("^[*]{4,100}$");
 
 	public boolean validateEmail(String email) {
 		return emailPattern.matcher(email).matches();
@@ -27,5 +29,13 @@ public class ValidatorServices {
 
 	public boolean validateUsername(String username) {
 		return usernamePattern.matcher(username).matches();
+	}
+	
+	public boolean validatePlaylistName(String name) {
+		if(name.length() < 4 || name.length() > 100) {
+			return false;
+		} else {
+			return true;
+		}
 	}
 }

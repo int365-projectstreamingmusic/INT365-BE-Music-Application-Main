@@ -6,6 +6,6 @@ import org.springframework.stereotype.Repository;
 import com.application.entities.models.PlayTrackStatusModel;
 
 @Repository
-public interface PlayTrackRepository extends JpaRepository<PlayTrackStatusModel, Integer> {
+public interface PlayTrackStatusRepository extends JpaRepository<PlayTrackStatusModel, Integer> {
 
 }

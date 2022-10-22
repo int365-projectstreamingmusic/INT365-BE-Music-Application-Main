@@ -1,5 +1,8 @@
 package com.application.services;
 
+import java.sql.Timestamp;
+import java.util.Calendar;
+
 import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,6 +20,9 @@ public class GeneralFunctionController {
 
 	@Autowired
 	private UserAccountRepository userAccountRepository;
+
+	public final long TIME_DIF_DAY = 86400000;
+	public final long TIME_DIF = 25200000;
 
 	public UserAccountModel getUserAccount(HttpServletRequest request) {
 		UserAccountModel userProfile = userAccountRepository
@@ -40,5 +46,19 @@ public class GeneralFunctionController {
 					"[ AUTHEN_NOT_THE_OWNER ] This user is not the owner of this recode, therefore, no change is mage.");
 		}
 
+	}
+
+	// GetTimestampToday
+	public Timestamp getTimestampToday() {
+		long currentTimeMili = Calendar.getInstance().getTimeInMillis();
+		long currentTimeRecord = currentTimeMili - (currentTimeMili % TIME_DIF_DAY) - TIME_DIF;
+		Timestamp timeStamp = new Timestamp(currentTimeRecord);
+		return timeStamp;
+	}
+
+	// GetTimeStampFromMilisecond
+	public Timestamp getTimeStampFromMilisecond(long miliSecond) {
+		Timestamp timestamp = new Timestamp(miliSecond);
+		return timestamp;
 	}
 }

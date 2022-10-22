@@ -32,7 +32,11 @@ public class AlbumModel {
 	private String albumDescription;
 	
 	@ManyToOne
-	@JoinColumn(name = "status_id", updatable = false, insertable = false)
+	@JoinColumn(name = "status_id", referencedColumnName = "status_id")
 	private PlayTrackStatusModel status;
+	
+	@ManyToOne
+	@JoinColumn(name = "account_id", referencedColumnName = "account_id")
+	private UserAccountModel owner;
 
 }

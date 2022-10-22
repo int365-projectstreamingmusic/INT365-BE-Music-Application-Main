@@ -4,7 +4,10 @@ import java.util.List;
 
 import javax.persistence.Basic;
 
+import org.springframework.retry.annotation.Backoff;
+
 import com.application.entities.models.GenreModel;
+import com.application.entities.models.MoodModel;
 import com.application.entities.models.PlayTrackStatusModel;
 
 import lombok.AllArgsConstructor;
@@ -29,5 +32,12 @@ public class TrackForm {
 	@Basic(optional = true)
 	private List<GenreModel> genreList;
 	@Basic(optional = true)
-	private PlayTrackStatusModel status;
+	private List<MoodModel> moodList;
+	@Basic(optional = true)
+	private String albumName;
+	@Basic(optional = true)
+	private String artist;
+
+	@Basic(optional = true)
+	private int statusId;
 }

@@ -22,14 +22,17 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
+import com.application.controllers.AlbumController;
 import com.application.controllers.ArtistController;
 import com.application.controllers.TrackController;
 import com.application.controllers.TrackCountController;
 import com.application.controllers.TrackGeneralController;
 import com.application.controllers.TrackMarkingController;
+import com.application.entities.models.AlbumModel;
 import com.application.entities.models.ArtistsModel;
 import com.application.entities.models.ArtistsTrackModel;
 import com.application.entities.models.TracksModel;
+import com.application.entities.submittionforms.AlbumForm;
 import com.application.entities.submittionforms.ArtistTrackForm;
 import com.application.entities.submittionforms.ArtistsEditForm;
 import com.application.entities.submittionforms.TrackForm;
@@ -38,6 +41,9 @@ import com.application.utilities.ValidatorServices;
 @RestController
 @RequestMapping("/api/artist/")
 public class A3CreatorApis {
+
+	@Autowired
+	private AlbumController albumController;
 	@Autowired
 	private TrackGeneralController trackGeneralController;
 	@Autowired
@@ -47,6 +53,45 @@ public class A3CreatorApis {
 
 	private static String mapping = "/api/artist/";
 
+	// ▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬
+	// DB-V5.1 OK!
+	// ALBUM : List my created album.
+	@GetMapping("album")
+	public ResponseEntity<Page<AlbumModel>> getMyAlbum(@RequestParam(defaultValue = "0") int page,
+			@RequestParam(defaultValue = "10") int pageSize, @RequestParam(defaultValue = "") String searchContent,
+			HttpServletRequest request) {
+		return ResponseEntity.ok().body(albumController.myAlbum(page, pageSize, searchContent, request));
+	}
+
+	// ▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬
+	// DB-V5.1 OK!
+	// ALBUM : Create album
+	@PostMapping("album")
+	public ResponseEntity<AlbumModel> createAlbum(@RequestBody AlbumForm form, HttpServletRequest request) {
+		URI uri = URI.create(ServletUriComponentsBuilder.fromCurrentContextPath().path(mapping + "album").toString());
+		return ResponseEntity.created(uri).body(albumController.createAlbum(form, request));
+	}
+
+	// ▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬
+	// DB-V5.1 OK!
+	// ALBUM : Edit album
+	@PutMapping("album")
+	public ResponseEntity<AlbumModel> editAlbum(@RequestBody AlbumForm form, HttpServletRequest request) {
+		URI uri = URI.create(ServletUriComponentsBuilder.fromCurrentContextPath().path(mapping + "album").toString());
+		return ResponseEntity.created(uri).body(albumController.editAlbum(form, request));
+	}
+
+	// ▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬
+	// DB-V5.1 OK!
+	// ALBUM : Delete album
+	@DeleteMapping("album")
+	public ResponseEntity<HttpStatus> deleteAlbum(@RequestParam(required = true) int albumId,
+			HttpServletRequest request) {
+		albumController.deleteAlbum(albumId, request);
+		URI uri = URI.create(ServletUriComponentsBuilder.fromCurrentContextPath().path(mapping + "album").toString());
+		return ResponseEntity.created(uri).body(HttpStatus.CREATED);
+	}
+
 	// --------------------
 	// Track
 	// --------------------
@@ -54,7 +99,7 @@ public class A3CreatorApis {
 	// DB-V5 OK!
 	@GetMapping("track")
 	public ResponseEntity<Page<TracksModel>> getMyTrack(@RequestParam(defaultValue = "0") int page,
-			@RequestParam(defaultValue = "0") int pageSize, @RequestParam(defaultValue = "") String searchContent,
+			@RequestParam(defaultValue = "10") int pageSize, @RequestParam(defaultValue = "") String searchContent,
 			HttpServletRequest request) {
 		return ResponseEntity.ok().body(trackGeneralController.listMyTrack(page, pageSize, searchContent, request));
 	}
@@ -69,20 +114,11 @@ public class A3CreatorApis {
 
 	// DB-V5 OK!
 	@PutMapping("track/edit")
-	public ResponseEntity<TracksModel> editTrack(@RequestBody TrackForm track, HttpServletRequest request) {
+	public ResponseEntity<TracksModel> editTrack(@RequestPart TrackForm track, @RequestPart MultipartFile image,
+			HttpServletRequest request) {
 		URI uri = URI
 				.create(ServletUriComponentsBuilder.fromCurrentContextPath().path(mapping + "track/edit").toString());
-		return ResponseEntity.created(uri).body(trackController.editTrack(track, request));
-	}
-
-	// DB-V5 OK!
-	@PutMapping("track/thumbnail/{trackId}")
-	public ResponseEntity<String> uploadThumbnail(@PathVariable(required = true) int trackId,
-			@RequestPart MultipartFile image, HttpServletRequest request) {
-		URI uri = URI.create(
-				ServletUriComponentsBuilder.fromCurrentContextPath().path(mapping + "track/thumbnail").toString());
-		trackController.uploadNewThumbnail(trackId, image, request);
-		return ResponseEntity.created(uri).body("Thumbnail changes!");
+		return ResponseEntity.created(uri).body(trackController.editTrack(track, image, request));
 	}
 
 	// DB-V5 OK!

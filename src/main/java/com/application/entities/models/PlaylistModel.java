@@ -29,22 +29,22 @@ public class PlaylistModel {
 
 	@Column(name = "playlist_name")
 	private String playlistName;
+	
+	@Column(name = "playlist_desc")
+	private String playlistDesc;
 
 	@JsonFormat(pattern = "yyyy-MM-dd")
 	@Column(name = "created_date")
 	private String createdDate;
 
-	@Column(name = "playlist_desc")
-	private String playlistDesc;
-
 	private String thumbnail;
 
 	@ManyToOne
-	@JoinColumn(name = "account_id", updatable = false, insertable = false)
+	@JoinColumn(name = "account_id", referencedColumnName = "account_id")
 	private UserAccountModel userAccountModel;
 
 	@ManyToOne
-	@JoinColumn(name = "status_id", updatable = false, insertable = false)
+	@JoinColumn(name = "status_id", referencedColumnName = "status_id")
 	private PlayTrackStatusModel playTrackStatus;
-
+	
 }
