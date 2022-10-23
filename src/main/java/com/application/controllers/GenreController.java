@@ -1,5 +1,6 @@
 package com.application.controllers;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
@@ -12,14 +13,17 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import com.application.entities.copmskeys.GenreTracksCompkey;
+import com.application.entities.copmskeys.PlaylistGenreCompKey;
 import com.application.entities.models.GenreModel;
 import com.application.entities.models.GenresTracksModel;
+import com.application.entities.models.PlaylistGenreModel;
 import com.application.entities.models.TracksModel;
 import com.application.entities.models.UserAccountModel;
 import com.application.exceptons.ExceptionFoundation;
 import com.application.exceptons.ExceptionResponseModel.EXCEPTION_CODES;
 import com.application.repositories.GenreRepository;
 import com.application.repositories.GenresTracksRepository;
+import com.application.repositories.PlaylistGenreRepository;
 import com.application.repositories.TracksRepository;
 import com.application.repositories.UserAccountRepository;
 import com.application.utilities.JwtTokenUtills;
@@ -38,6 +42,8 @@ public class GenreController {
 	private GenreRepository genreRepository;
 	@Autowired
 	private GenresTracksRepository genresTracksRepository;
+	@Autowired
+	private PlaylistGenreRepository playlistGenreRepository;
 
 	// ListGenreListByPage
 	public Page<GenreModel> listGenreListByPage(int page, int size, String searchContent) {
@@ -106,7 +112,7 @@ public class GenreController {
 
 	}
 
-	// DB-V5 OK!
+	// DB-V5.1 OK!
 	// Genres : AddGenreToTrack
 	public List<GenresTracksModel> addGenreToTrack(int trackId, List<GenreModel> incomingGenre) {
 		List<GenreModel> existingGenre = genreRepository.findGenreByTrackId(trackId);
@@ -141,6 +147,26 @@ public class GenreController {
 
 		genresTracksRepository.delete(target);
 
+	}
+
+	// Add genre into playlist
+	public List<PlaylistGenreModel> addPlaylistGenre(int playlistId, List<GenreModel> incomingGenreList) {
+		List<GenreModel> existingGenre = genreRepository.fineGenreByPlaylistId(playlistId);
+		List<PlaylistGenreModel> genreList = new ArrayList<>();
+		for (int i = 0; i < incomingGenreList.size(); i++) {
+			if (!existingGenre.contains(incomingGenreList.get(i))) {
+				PlaylistGenreModel playlistGenre = new PlaylistGenreModel();
+				playlistGenre.setId(new PlaylistGenreCompKey(playlistId, incomingGenreList.get(i).getGenreId()));
+				genreList.add(playlistGenre);
+				try {
+					playlistGenreRepository.save(playlistGenre);
+				} catch (Exception exc) {
+					System.out.println("[ WARN ] Genre ID is invlid.");
+				}
+			}
+
+		}
+		return genreList;
 	}
 
 }

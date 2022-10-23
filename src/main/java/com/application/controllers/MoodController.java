@@ -126,14 +126,25 @@ public class MoodController {
 	}
 
 	// Insert mood into playlist
-	public MoodPlaylistModel addMoodToPlaylist(int moodId, PlaylistModel playlist) {
-		MoodModel targetMood = getMoodById(moodId);
-		MoodPlaylistModel newMood = new MoodPlaylistModel();
-		newMood.setId(new MoodPlaylistCompKey(targetMood.getId(), playlist.getId()));
-		newMood.setRatio(1.0);
-		newMood.setCount(1);
-		moodPlaylistRepository.save(newMood);
-		return newMood;
+	public List<MoodPlaylistModel> addMoodToPlaylist(int playlistId, List<MoodModel> moodList) {
+		List<MoodModel> existingMoods = moodRepository.listMoodByPlaylist(playlistId);
+		List<MoodPlaylistModel> playlistMood = new ArrayList<>();
+
+		for (int i = 0; i < moodList.size(); i++) {
+			if (!existingMoods.contains(moodList.get(i))) {
+				MoodPlaylistModel newMood = new MoodPlaylistModel();
+				newMood.setId(new MoodPlaylistCompKey(playlistId, moodList.get(i).getId()));
+				newMood.setCount(1);
+				newMood.setRatio(1.0);
+				try {
+					newMood = moodPlaylistRepository.save(newMood);
+					playlistMood.add(newMood);
+				} catch (Exception e) {
+					System.out.println("[ WARNING ] No mood or user found. Skip adding mood to user.");
+				}
+			}
+		}
+		return playlistMood;
 	}
 
 }

@@ -22,9 +22,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
 
 @Entity
 @Data
@@ -71,7 +69,7 @@ public class TracksModel {
 	@JoinColumn(name = "track_id", referencedColumnName = "track_id")
 	@OnDelete(action = OnDeleteAction.CASCADE)
 	private List<GenresTracksModel> genreTrack;
-	
+		
 	@OneToMany
 	@JoinColumn(name = "track_id", referencedColumnName = "track_id")
 	@OnDelete(action = OnDeleteAction.CASCADE)
