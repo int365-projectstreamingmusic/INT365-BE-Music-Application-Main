@@ -35,10 +35,10 @@ public class A1PublicFileRetrievalAPIs {
 	// streamContent
 	@GetMapping("getContent/{track}")
 	public Mono<ResponseEntity<byte[]>> getContent(
-			@RequestHeader(value = "Range", required = false) String httpByteRange, @PathVariable("track") String track,
-			HttpServletRequest request) {
+			@RequestHeader(value = "Range", required = false) String httpByteRange,
+			@PathVariable("track") String trackFile, HttpServletRequest request) {
 		try {
-			return Mono.just(musicStreamingController.getTrack(track, httpByteRange));
+			return Mono.just(musicStreamingController.getTrack(trackFile, httpByteRange, request));
 		} catch (Exception exc) {
 			throw new ExceptionFoundation(EXCEPTION_CODES.FEATURE_MISS_USED, HttpStatus.BAD_REQUEST,
 					"[ getContent ] This function works as normal but you must call it on your media player, not directly called to an API like this. ");

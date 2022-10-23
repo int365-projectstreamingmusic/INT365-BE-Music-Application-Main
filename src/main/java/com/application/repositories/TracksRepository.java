@@ -33,6 +33,9 @@ public interface TracksRepository extends JpaRepository<TracksModel, Integer> {
 	@Query(nativeQuery = true, value = "SELECT SUM(s.view_count) AS view_count, t.* FROM tracks t RIGHT JOIN track_count_statistic s ON t.track_id = s.track_id WHERE s.view_count_date BETWEEN :from AND :to AND t.status_id = 1001 GROUP BY t.track_id ORDER BY view_count DESC LIMIT :numberOfTrack ")
 	List<TracksModel> listTopTrack(int numberOfTrack, String from, String to);
 
+	@Query(nativeQuery = true, value = "SELECT track_id FROM tracks WHERE track_file = :file")
+	int getIdFromFileName(String file);
+
 	@Query(value = "UPDATE TracksModel t SET t.trackFile = :trackName WHERE t.id = :trackId")
 	@Transactional
 	@Modifying
@@ -57,7 +60,7 @@ public interface TracksRepository extends JpaRepository<TracksModel, Integer> {
 
 	@Query(nativeQuery = true, value = "SELECT t.* FROM tracks t RIGHT JOIN track_album a ON a.track_id = t.track_id WHERE a.album_id = :albumId AND LOWER(t.track_name) LIKE LOWER(CONCAT('%',:searchContent,'%')) AND t.status_id = 1001")
 	Page<TracksModel> listAllByAlbum(int albumId, String searchContent, Pageable pageable);
-	
+
 	@Query(nativeQuery = true, value = "SELECT t.* FROM tracks t RIGHT JOIN playlist_tracklist p ON p.track_id = t.track_id WHERE p.playlist_id = :playlist AND LOWER(t.track_name) LIKE LOWER(CONCAT('%',:searchContent,'%')) AND t.status_id = 1001")
 	Page<TracksModel> listAllByPlaylist(int playlist, String searchContent, Pageable pageable);
 

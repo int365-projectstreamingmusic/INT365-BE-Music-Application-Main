@@ -94,13 +94,13 @@ public class PlayHistoryController {
 	// OK!
 	// AUTOMATION METHOD
 	// InsertNewHistoryByUserId
-	public void insertNewHistoryByUserId(int userId, int trackId) {
-		if (playHistoryRepository.isExistedRecord(userId, trackId) == 1) {
-			throw new ExceptionFoundation(EXCEPTION_CODES.USER_SAVE_REJECTED, HttpStatus.I_AM_A_TEAPOT,
-					"[ USER_SAVE_REJECTED ] This record is already exist.");
+	public void InsertOrUpdateHistory(int userId, int trackId) {
+		if (!(playHistoryRepository.isExistedRecord(userId, trackId) == 1)) {
+			playHistoryRepository.insertNewPlayHistory(userId, trackId,
+					new Timestamp(System.currentTimeMillis()).toString());
+		} else {
+			playHistoryRepository.updateTimeStamp(new Timestamp(System.currentTimeMillis()), userId, trackId);
 		}
-		playHistoryRepository.insertNewPlayHistory(userId, trackId,
-				new Timestamp(System.currentTimeMillis()).toString());
 	}
 
 	// OK!

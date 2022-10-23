@@ -21,7 +21,10 @@ public interface UserAccountRepository extends JpaRepository<UserAccountModel, I
 	boolean existsByEmailIgnoreCase(String email);
 
 	boolean existsByUsernameIgnoreCase(String username);
-
+	
+	@Query(nativeQuery = true, value = "SELECT account_id FROM user_accounts WHERE username = ':username'")
+	int getUserIdFromUserName(String username);
+	
 	@Query(value = "SELECT CASE WHEN count(u) > 0 THEN true ELSE false END FROM UserAccountModel u WHERE LOWER(u.firstName) LIKE LOWER(concat('%',:firstName,'%')) AND LOWER(u.lastName) LIKE LOWER(CONCAT('%',:lastName,'%'))")
 	boolean existByFirstnameOrLastname(String firstName, String lastName);
 

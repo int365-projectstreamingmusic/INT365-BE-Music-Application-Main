@@ -18,4 +18,7 @@ public interface MoodRepository extends JpaRepository<MoodModel, Integer> {
 
 	@Query(nativeQuery = true, value = "SELECT m.* FROM mood m RIGHT JOIN mood_playlist a ON m.id = a.mood_id WHERE a.playlist_id = :playlistId")
 	List<MoodModel> listMoodByPlaylist(int playlistId);
+
+	@Query(nativeQuery = true, value = "SELECT m.* FROM mood m RIGHT JOIN mood_track a ON m.id = a.mood_id WHERE a.track_id = :trackId")
+	List<MoodModel> listMoodByTrack(int trackId);
 }

@@ -3,6 +3,8 @@ package com.application.controllers;
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.servlet.http.HttpServletRequest;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.PropertySource;
@@ -12,6 +14,9 @@ import org.springframework.stereotype.Service;
 
 import com.application.exceptons.ExceptionFoundation;
 import com.application.exceptons.ExceptionResponseModel.EXCEPTION_CODES;
+import com.application.repositories.TracksRepository;
+import com.application.repositories.UserAccountRepository;
+import com.application.utilities.JwtTokenUtills;
 import com.application.utilities.MinioStorageService;
 
 import io.minio.StatObjectResponse;
@@ -25,15 +30,32 @@ public class MusicStreamingController {
 	@Autowired
 	private MinioStorageService minioStorageService;
 
+	@Autowired
+	private PlayHistoryController playHistoryController;
+
+	@Autowired
+	private UserAccountRepository userAccountRepository;
+	@Autowired
+	private TracksRepository tracksRepository;
+
 	@Value("${minio.storage.track.music}")
 	private String trackMusicLocation;
 
 	@Value("${minio.storage.track.sound}")
 	private String trackSoundLocation;
 
-	// OK!
-	public ResponseEntity<byte[]> getTrack(String track, String range) {
-		return getTrackContentByRange("tracks/musics/" + track, range);
+	// This will call a track file and send it to the user.
+	// This will also save a history if there is a token.
+	public ResponseEntity<byte[]> getTrack(String trackFile, String range, HttpServletRequest request) {
+		long byteRangeStart = Long.parseLong(range.split("-")[0].substring(6));
+		if (byteRangeStart <= 0) {
+			if (request.getHeader("Authorization") != null) {
+				int userId = userAccountRepository.getUserIdFromUserName(JwtTokenUtills.getUserNameFromToken(request));
+				int trackId = tracksRepository.getIdFromFileName(trackFile);
+				playHistoryController.InsertOrUpdateHistory(userId, trackId);
+			}
+		}
+		return getTrackContentByRange("tracks/musics/" + trackFile, range);
 	}
 
 	// OK!
@@ -96,7 +118,7 @@ public class MusicStreamingController {
 			return ResponseEntity.status(HttpStatus.PARTIAL_CONTENT).header("Content-Type", "audio/" + fileType)
 					.header("Accept-Ranges", "bytes").header("Content-Length", contentLength)
 					.header("Content-Range", "bytes " + byteRangeStart + "-" + byteRangeEnd + "/" + trackSize)
-					.body(requestedByteRange);
+					.header("Current-bytes", "" + byteRangeStart).body(requestedByteRange);
 		} catch (Exception exc) {
 			throw new ExceptionFoundation(EXCEPTION_CODES.CORE_METHOD_FAILED, HttpStatus.INTERNAL_SERVER_ERROR,
 					"[ getTrackContentByRange ] Streaming failed.");

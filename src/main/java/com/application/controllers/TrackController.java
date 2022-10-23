@@ -236,7 +236,7 @@ public class TrackController {
 		newTrack.setTrackDesc(newTrackForm.getTrackDesc());
 		newTrack.setTrackName(newTrackForm.getTrackName());
 
-		// No view or favorite at the begining. 
+		// No view or favorite at the begining.
 		newTrack.setViewCount(0);
 		newTrack.setFavoriteCount(0);
 		newTrack.setDuration(0);
@@ -257,7 +257,7 @@ public class TrackController {
 			newTrack.setGenreTrack(genreController.addGenreToTrack(newTrack.getId(), newTrackForm.getGenreList()));
 		}
 		if (newTrackForm.getMoodList() != null && !(newTrackForm.getMoodList().size() <= 0)) {
-			newTrack.setMoods(moodController.addMoodToTrack(newTrackForm.getMoodList(), newTrack));
+			newTrack.setMoods(moodController.addMoodToTrack(newTrack.getId(), newTrackForm.getMoodList()));
 		}
 
 		// Save image and track file.
