@@ -114,7 +114,7 @@ public class GenreController {
 		// This will check if there is a removed genre.
 		for (int i = 0; i < existingGenre.size(); i++) {
 			GenreTracksCompkey id = new GenreTracksCompkey(trackId, existingGenre.get(i).getGenreId());
-			if (incomingGenre.contains(existingGenre.get(i))) {
+			if (!incomingGenre.contains(existingGenre.get(i))) {
 			} else {
 				genresTracksRepository.deleteById(id);
 			}

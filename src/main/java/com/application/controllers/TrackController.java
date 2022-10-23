@@ -52,6 +52,8 @@ public class TrackController {
 	private GeneralFunctionController generalFunctionController;
 	@Autowired
 	private TrackCountController trackCountController;
+	@Autowired
+	private MoodController moodController;
 
 	@Value("${minio.storage.track.music}")
 	String minioTrackLocation;
@@ -240,20 +242,23 @@ public class TrackController {
 		newTrack.setDuration(0);
 
 		// Track status is hiden when first uploaded.
-		newTrack.setPlayTrackStatus(playTrackStatusRepository.findById(1002).get());
+		newTrack.setPlayTrackStatus(playTrackStatusRepository.findById(newTrackForm.getStatusId())
+				.orElseThrow(() -> new ExceptionFoundation(EXCEPTION_CODES.SAVE_FILE_INVALID, HttpStatus.I_AM_A_TEAPOT,
+						"[ SAVE_FILE_INVALID ] Invalid track status ID.")));
 
 		// Thinks to add later.
 		newTrack.setGenreTrack(null);
+		newTrack.setMoods(null);
 		newTrack.setTrackFile("-");
 		newTrack = tracksRepository.save(newTrack);
+		System.out.println(newTrack.getId());
 
 		// Adding genre to the track
-		if (newTrackForm.getGenreList() != null && newTrackForm.getGenreList().size() <= 0) {
+		if (newTrackForm.getGenreList() != null && !(newTrackForm.getGenreList().size() <= 0)) {
 			newTrack.setGenreTrack(genreController.addGenreToTrack(newTrack.getId(), newTrackForm.getGenreList()));
 		}
-
-		if (newTrackForm.getMoodList() != null && newTrackForm.getMoodList().size() <= 0) {
-
+		if (newTrackForm.getMoodList() != null && !(newTrackForm.getMoodList().size() <= 0)) {
+			newTrack.setMoods(moodController.addMoodToTrack(newTrackForm.getMoodList(), newTrack));
 		}
 
 		// Save image and track file.

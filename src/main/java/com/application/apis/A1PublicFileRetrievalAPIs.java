@@ -2,6 +2,8 @@ package com.application.apis;
 
 import java.util.Map;
 
+import javax.servlet.http.HttpServletRequest;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpStatus;
@@ -33,7 +35,8 @@ public class A1PublicFileRetrievalAPIs {
 	// streamContent
 	@GetMapping("getContent/{track}")
 	public Mono<ResponseEntity<byte[]>> getContent(
-			@RequestHeader(value = "Range", required = false) String httpByteRange, @PathVariable("track") String track) {
+			@RequestHeader(value = "Range", required = false) String httpByteRange, @PathVariable("track") String track,
+			HttpServletRequest request) {
 		try {
 			return Mono.just(musicStreamingController.getTrack(track, httpByteRange));
 		} catch (Exception exc) {

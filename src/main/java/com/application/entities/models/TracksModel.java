@@ -71,6 +71,11 @@ public class TracksModel {
 	@JoinColumn(name = "track_id", referencedColumnName = "track_id")
 	@OnDelete(action = OnDeleteAction.CASCADE)
 	private List<GenresTracksModel> genreTrack;
+	
+	@OneToMany
+	@JoinColumn(name = "track_id", referencedColumnName = "track_id")
+	@OnDelete(action = OnDeleteAction.CASCADE)
+	private List<MoodTrackModel> moods;
 
 	@OneToMany
 	@JoinColumn(name = "track_id", referencedColumnName = "track_id")
