@@ -17,6 +17,7 @@ import com.application.entities.models.UserAccountModel;
 import com.application.exceptons.ExceptionFoundation;
 import com.application.exceptons.ExceptionResponseModel.EXCEPTION_CODES;
 import com.application.repositories.PlayHistoryRepository;
+import com.application.repositories.TracksRepository;
 import com.application.repositories.UserAccountRepository;
 import com.application.services.GeneralFunctionController;
 
@@ -27,6 +28,8 @@ public class PlayHistoryController {
 	private PlayHistoryRepository playHistoryRepository;
 	@Autowired
 	private UserAccountRepository userAccountRepository;
+	@Autowired
+	private TracksRepository tracksRepository;
 
 	@Autowired
 	private GeneralFunctionController generalFunctionController;
@@ -69,7 +72,7 @@ public class PlayHistoryController {
 					sendPageRequest);
 		}
 		if (result.getTotalElements() <= 0) {
-			throw new ExceptionFoundation(EXCEPTION_CODES.BROWSE_NO_RECORD_EXISTS, HttpStatus.NOT_FOUND,
+			throw new ExceptionFoundation(EXCEPTION_CODES.BROWSE_NO_RECORD_EXISTS, HttpStatus.I_AM_A_TEAPOT,
 					"[ BROWSE_NO_RECORD_EXISTS ] No record found.");
 		}
 
@@ -84,7 +87,7 @@ public class PlayHistoryController {
 		PlayHistoryModel playHistoryModel = playHistoryRepository
 				.findRecordByUserIdAndTrackId(requestedBy.getAccountId(), trackId);
 		if (playHistoryModel == null) {
-			throw new ExceptionFoundation(EXCEPTION_CODES.BROWSE_NO_RECORD_EXISTS, HttpStatus.NOT_FOUND,
+			throw new ExceptionFoundation(EXCEPTION_CODES.BROWSE_NO_RECORD_EXISTS, HttpStatus.I_AM_A_TEAPOT,
 					"[ BROWSE_NO_RECORD_EXISTS ] This record does not exist.");
 		}
 		return playHistoryModel;
@@ -98,6 +101,7 @@ public class PlayHistoryController {
 		if (!(playHistoryRepository.isExistedRecord(userId, trackId) == 1)) {
 			playHistoryRepository.insertNewPlayHistory(userId, trackId,
 					new Timestamp(System.currentTimeMillis()).toString());
+			tracksRepository.increaseViewCount(trackId);
 		} else {
 			playHistoryRepository.updateTimeStamp(new Timestamp(System.currentTimeMillis()), userId, trackId);
 		}

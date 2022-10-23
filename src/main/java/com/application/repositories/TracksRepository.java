@@ -56,6 +56,21 @@ public interface TracksRepository extends JpaRepository<TracksModel, Integer> {
 	@Query(nativeQuery = true, value = "UPDATE tracks SET track_thumbnail = :thumbnail WHERE track_id = :trackId")
 	void updateTrackThumbnail(int trackId, String thumbnail);
 
+	@Transactional
+	@Modifying
+	@Query(nativeQuery = true, value = "UPDATE tracks SET view_count = view_count + 1 WHERE track_id = :id")
+	void increaseViewCount(int id);
+
+	@Transactional
+	@Modifying
+	@Query(nativeQuery = true, value = "UPDATE tracks SET favorite_count = favorite_count + 1 WHERE track_id = :id")
+	void increaseFavoriteCount(int id);
+
+	@Transactional
+	@Modifying
+	@Query(nativeQuery = true, value = "UPDATE tracks SET favorite_count = favorite_count - 1 WHERE track_id = :id")
+	void decreaseFavoriteCount(int id);
+
 	// ▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬
 
 	@Query(nativeQuery = true, value = "SELECT t.* FROM tracks t RIGHT JOIN track_album a ON a.track_id = t.track_id WHERE a.album_id = :albumId AND LOWER(t.track_name) LIKE LOWER(CONCAT('%',:searchContent,'%')) AND t.status_id = 1001")

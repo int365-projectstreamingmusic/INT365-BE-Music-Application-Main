@@ -23,7 +23,7 @@ import com.application.repositories.TracksRepository;
 import com.application.repositories.TrackCountStatisticRepository;
 
 @Service
-public class TrackCountController {
+public class TrackStatisticController {
 
 	@Autowired
 	private TracksRepository tracksRepository;
@@ -33,7 +33,9 @@ public class TrackCountController {
 	public final long TIME_DIF_DAY = 86400000;
 	public final long TIME_DIF = 25200000;
 
-	// GetViewCountInPassDays
+	// ▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬
+	// DB-V5.1 OK!
+	// Get view count in the pass X days.
 	public int getViewCountInPassDays(int trackId, int numberOfDay) {
 		String timesTampTo = getTimestampToday().toString();
 		String timesTampFrom = getTimeStampFromMilisecond(getTimestampToday().getTime() - (numberOfDay * TIME_DIF_DAY))
@@ -41,7 +43,9 @@ public class TrackCountController {
 		return trackCountRepository.getAllViewCountFromTrackIdBetween(trackId, timesTampFrom, timesTampTo);
 	}
 
-	// GetViewCount
+	// ▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬
+	// DB-V5.1 OK!
+	// Get total view count. ( Should use track repository, it is better. )
 	public int getViewCount(int trackId) {
 		if (!tracksRepository.existsById(trackId)) {
 			throw new ExceptionFoundation(EXCEPTION_CODES.BROWSE_NO_RECORD_EXISTS, HttpStatus.NOT_FOUND,
@@ -52,7 +56,9 @@ public class TrackCountController {
 
 	}
 
-	// getAllFavouriteCount
+	// ▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬
+	// DB-V5.1 OK!
+	// Get favorite count. ( Also should use track repository, it is better. )
 	public int getAllFavouriteCount(int trackId) {
 		if (!tracksRepository.existsById(trackId)) {
 			throw new ExceptionFoundation(EXCEPTION_CODES.BROWSE_NO_RECORD_EXISTS, HttpStatus.NOT_FOUND,
@@ -66,30 +72,38 @@ public class TrackCountController {
 	// Adding and deleting view count or favorite count
 	// --------------------------------
 
+	// ▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬
+	// DB-V5.1 OK!
 	// NO API
-	// increateViewCount
+	// Increast view count by 1
 	public void increateViewCount(int trackId) {
 		TrackCountCompKey id = new TrackCountCompKey(trackId, getTimestampToday().toString());
 		TrackCountModel trackCount = trackCountRepository.findById(id).orElse(null);
 		if (trackCount == null) {
 			trackCount = createNewTrackCountRecordForToday(trackId);
 		}
-		trackCountRepository.updateViewCount(trackCount.getViewCount() + 1, id);
+		trackCountRepository.updateViewCount(id);
+		tracksRepository.increaseViewCount(trackId);
 	}
 
+	// ▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬
+	// DB-V5.1 OK!
 	// NO API
-	// IncreaseFavouriteCount
+	// Increast favorite count by 1
 	public void increaseFavouriteCount(int trackId) {
 		TrackCountCompKey id = new TrackCountCompKey(trackId, getTimestampToday().toString());
 		TrackCountModel trackCount = trackCountRepository.findById(id).orElse(null);
 		if (trackCount == null) {
 			trackCount = createNewTrackCountRecordForToday(trackId);
 		}
-		trackCountRepository.updateFavoriteCount(trackCount.getFavoriteCount() + 1, id);
+		trackCountRepository.updateFavoriteCount(id);
+		tracksRepository.increaseFavoriteCount(trackId);
 	}
 
+	// ▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬
+	// DB-V5.1 OK!
 	// NO API
-	// DecreaseFavouriteCount
+	// Deduct favorite count by 1
 	public void decreaseFavouriteCount(int trackId) {
 		TrackCountCompKey id = new TrackCountCompKey(trackId, getTimestampToday().toString());
 		TrackCountModel trackCount = trackCountRepository.findById(id).orElse(null);
@@ -97,14 +111,17 @@ public class TrackCountController {
 			createNewTrackCountRecordForToday(trackId);
 		}
 		trackCountRepository.updateFavoriteCount(trackCount.getFavoriteCount() - 1, id);
+		tracksRepository.decreaseFavoriteCount(trackId);
 	}
 
 	// ---------------
 	// PRIVATE or AUTOMATION
 	// ---------------
 
+	// ▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬
+	// DB-V5.1 OK!
 	// PRIVATE
-	// GetTimestampToday
+	// Get time stamp for today. Will set hour to zero.
 	public Timestamp getTimestampToday() {
 		long currentTimeMili = Calendar.getInstance().getTimeInMillis();
 		long currentTimeRecord = currentTimeMili - (currentTimeMili % TIME_DIF_DAY) - TIME_DIF;
@@ -112,6 +129,8 @@ public class TrackCountController {
 		return timeStamp;
 	}
 
+	// ▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬
+	// DB-V5.1 OK!
 	// PRIVATE
 	// GetTimeStampFromMilisecond
 	public Timestamp getTimeStampFromMilisecond(long miliSecond) {
@@ -119,8 +138,10 @@ public class TrackCountController {
 		return timestamp;
 	}
 
+	// ▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬
+	// DB-V5.1 OK!
 	// PRIVATE
-	// CreateNewTrackCountRecordForToday
+	// Create new record for statistic if none exist.
 	private TrackCountModel createNewTrackCountRecordForToday(int trackId) {
 		long currentTimeMili = Calendar.getInstance().getTimeInMillis();
 		long currentTimeRecord = currentTimeMili - (currentTimeMili % TIME_DIF_DAY) - TIME_DIF;
@@ -140,7 +161,9 @@ public class TrackCountController {
 	// !! TESTING FUNCTION !!
 	// ---------------
 
-	// AddCuctomVIewCount
+	// ▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬
+	// DB-V5.1 OK!
+	// Add custom view count. Only for testing.
 	public List<TrackCountModel> addCustomViewCount(int trackId, int numberOfWeek) {
 		tracksRepository.findById(trackId)
 				.orElseThrow(() -> new ExceptionFoundation(EXCEPTION_CODES.BROWSE_NO_RECORD_EXISTS,

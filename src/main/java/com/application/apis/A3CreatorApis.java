@@ -25,7 +25,7 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import com.application.controllers.AlbumController;
 import com.application.controllers.ArtistController;
 import com.application.controllers.TrackController;
-import com.application.controllers.TrackCountController;
+import com.application.controllers.TrackStatisticController;
 import com.application.controllers.TrackGeneralController;
 import com.application.controllers.TrackMarkingController;
 import com.application.entities.models.AlbumModel;

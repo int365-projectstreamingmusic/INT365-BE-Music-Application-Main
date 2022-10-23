@@ -18,7 +18,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import com.application.controllers.AlbumController;
-import com.application.controllers.TrackCountController;
+import com.application.controllers.TrackStatisticController;
 import com.application.entities.models.TrackCountModel;
 import com.application.services.GeneralFunctionController;
 
@@ -27,7 +27,7 @@ import com.application.services.GeneralFunctionController;
 public class A0TestingApis {
 
 	@Autowired
-	private TrackCountController trackCountController;
+	private TrackStatisticController trackCountController;
 	@Autowired
 	private AlbumController albumController;
 

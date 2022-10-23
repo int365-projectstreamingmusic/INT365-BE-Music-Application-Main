@@ -32,6 +32,8 @@ public class MusicStreamingController {
 
 	@Autowired
 	private PlayHistoryController playHistoryController;
+	@Autowired
+	private TrackStatisticController trackStatisticController;
 
 	@Autowired
 	private UserAccountRepository userAccountRepository;
@@ -53,6 +55,7 @@ public class MusicStreamingController {
 				int userId = userAccountRepository.getUserIdFromUserName(JwtTokenUtills.getUserNameFromToken(request));
 				int trackId = tracksRepository.getIdFromFileName(trackFile);
 				playHistoryController.InsertOrUpdateHistory(userId, trackId);
+				trackStatisticController.increateViewCount(trackId);
 			}
 		}
 		return getTrackContentByRange("tracks/musics/" + trackFile, range);

@@ -51,7 +51,7 @@ public class TrackController {
 	@Autowired
 	private GeneralFunctionController generalFunctionController;
 	@Autowired
-	private TrackCountController trackCountController;
+	private TrackStatisticController trackCountController;
 	@Autowired
 	private MoodController moodController;
 
