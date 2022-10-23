@@ -49,6 +49,10 @@ public class PlaylistController {
 	private ValidatorServices validatorServices;
 	@Autowired
 	private FileLinkRelController fileLinkRelController;
+	@Autowired
+	private GenreController genreController;
+	@Autowired
+	private MoodController moodController;
 
 	public static int defaultPlaylistPerPage = 50;
 	public static int maxPlaylistPerPage = 250;
@@ -161,6 +165,17 @@ public class PlaylistController {
 		newPlaylist.setThumbnail("");
 
 		newPlaylist = playlistRepository.save(newPlaylist);
+
+		if (newPlaylistForm.getGenres() != null && !(newPlaylistForm.getGenres().size() <= 0)) {
+			newPlaylist.setGenres(genreController.addPlaylistGenre(newPlaylist.getId(), newPlaylistForm.getGenres()));
+		}
+		if (newPlaylistForm.getMoods() != null && !(newPlaylistForm.getMoods().size() <= 0)) {
+			newPlaylist.setMoods(moodController.addMoodToPlaylist(newPlaylist.getId(), newPlaylistForm.getMoods()));
+		}
+		if (newPlaylistForm.isAutoAddMusic()) {
+
+		}
+
 		if (imageFile != null) {
 			String playlistThumbnailFileName = fileLinkRelController.insertNewTrackObjectLinkRel(imageFile, 301,
 					newPlaylist.getId());

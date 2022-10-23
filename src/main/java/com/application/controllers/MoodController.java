@@ -3,8 +3,6 @@ package com.application.controllers;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.servlet.http.HttpServletRequest;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -19,8 +17,6 @@ import com.application.entities.models.MoodModel;
 import com.application.entities.models.MoodPlaylistModel;
 import com.application.entities.models.MoodTrackModel;
 import com.application.entities.models.MoodUserModel;
-import com.application.entities.models.PlaylistModel;
-import com.application.entities.models.TracksModel;
 import com.application.entities.models.UserAccountModel;
 import com.application.exceptons.ExceptionFoundation;
 import com.application.exceptons.ExceptionResponseModel.EXCEPTION_CODES;
@@ -89,7 +85,7 @@ public class MoodController {
 
 	// Insert new mood into user
 	public List<MoodUserModel> addMoodToUser(List<MoodModel> moods, UserAccountModel user) {
-		int numberOfEntiry = moods.size();
+		// int numberOfEntiry = moods.size();
 		List<MoodUserModel> newMoodList = new ArrayList<>();
 		for (int i = 0; i < moods.size(); i++) {
 			MoodUserModel newMood = new MoodUserModel();
@@ -103,30 +99,52 @@ public class MoodController {
 				System.out.println("[ WARNING ] No mood or user found. Skip adding mood to user.");
 			}
 		}
-
 		return newMoodList;
 	}
 
 	// Insert mood into track
-	public MoodTrackModel addMoodToTrack(int moodId, TracksModel track) {
-		MoodModel targetMood = getMoodById(moodId);
-		MoodTrackModel newMood = new MoodTrackModel();
-		newMood.setId(new MoodTrackCompKey(targetMood.getId(), track.getId()));
-		newMood.setRatio(1.0);
-		newMood.setCount(1);
-		moodTrackRepository.save(newMood);
-		return newMood;
+	public List<MoodTrackModel> addMoodToTrack(int trackId, List<MoodModel> moods) {
+		List<MoodModel> existingMoods = moodRepository.listMoodByTrack(trackId);
+		List<MoodTrackModel> trackMood = new ArrayList<>();
+		for (int i = 0; i < moods.size(); i++) {
+			if (!existingMoods.contains(moods.get(i))) {
+				MoodTrackModel newMood = new MoodTrackModel();
+				newMood.setId(new MoodTrackCompKey(trackId, moods.get(i).getId()));
+				newMood.setRatio(1.0);
+				newMood.setCount(1);
+				try {
+					newMood = moodTrackRepository.save(newMood);
+					trackMood.add(newMood);
+				} catch (Exception e) {
+					System.out.println("[ WARNING ] No mood or user found. Skip adding mood to user.");
+				}
+			}
+		}
+		return trackMood;
 	}
 
+	// ▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬
+	// DB-V5.1 OK!
 	// Insert mood into playlist
-	public MoodPlaylistModel addMoodToPlaylist(int moodId, PlaylistModel playlist) {
-		MoodModel targetMood = getMoodById(moodId);
-		MoodPlaylistModel newMood = new MoodPlaylistModel();
-		newMood.setId(new MoodPlaylistCompKey(targetMood.getId(), playlist.getId()));
-		newMood.setRatio(1.0);
-		newMood.setCount(1);
-		moodPlaylistRepository.save(newMood);
-		return newMood;
+	public List<MoodPlaylistModel> addMoodToPlaylist(int playlistId, List<MoodModel> moodList) {
+		List<MoodModel> existingMoods = moodRepository.listMoodByPlaylist(playlistId);
+		List<MoodPlaylistModel> playlistMood = new ArrayList<>();
+
+		for (int i = 0; i < moodList.size(); i++) {
+			if (!existingMoods.contains(moodList.get(i))) {
+				MoodPlaylistModel newMood = new MoodPlaylistModel();
+				newMood.setId(new MoodPlaylistCompKey(playlistId, moodList.get(i).getId()));
+				newMood.setCount(1);
+				newMood.setRatio(1.0);
+				try {
+					newMood = moodPlaylistRepository.save(newMood);
+					playlistMood.add(newMood);
+				} catch (Exception e) {
+					System.out.println("[ WARNING ] No mood or user found. Skip adding mood to user.");
+				}
+			}
+		}
+		return playlistMood;
 	}
 
 }
