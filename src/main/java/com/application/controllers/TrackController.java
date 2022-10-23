@@ -236,7 +236,7 @@ public class TrackController {
 		newTrack.setTrackDesc(newTrackForm.getTrackDesc());
 		newTrack.setTrackName(newTrackForm.getTrackName());
 
-		// No view or favorite at the begining.
+		// No view or favorite at the begining. 
 		newTrack.setViewCount(0);
 		newTrack.setFavoriteCount(0);
 		newTrack.setDuration(0);
@@ -251,7 +251,6 @@ public class TrackController {
 		newTrack.setMoods(null);
 		newTrack.setTrackFile("-");
 		newTrack = tracksRepository.save(newTrack);
-		System.out.println(newTrack.getId());
 
 		// Adding genre to the track
 		if (newTrackForm.getGenreList() != null && !(newTrackForm.getGenreList().size() <= 0)) {
