@@ -148,8 +148,6 @@ public class TrackStatisticController {
 		Timestamp timeStamp = new Timestamp(currentTimeRecord);
 		TrackCountModel newTrackCount = new TrackCountModel();
 
-		System.out.println(timeStamp.toString());
-
 		newTrackCount.setViewCount(0);
 		newTrackCount.setFavoriteCount(0);
 		newTrackCount.setId(new TrackCountCompKey(trackId, timeStamp.toString()));

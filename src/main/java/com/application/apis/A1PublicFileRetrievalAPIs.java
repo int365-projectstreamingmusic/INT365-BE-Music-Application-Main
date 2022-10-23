@@ -31,6 +31,13 @@ public class A1PublicFileRetrievalAPIs {
 	@Autowired
 	private FileLinkRelController fileLinkRelController;
 
+	// Ok!
+	// will add the history and count to the user if the token exist.
+	@GetMapping("entrance/{track}")
+	public void entrance(@PathVariable String track, HttpServletRequest request) {
+		musicStreamingController.trackEntrance(track, request);
+	}
+
 	// OK!
 	// streamContent
 	@GetMapping("getContent/{track}")

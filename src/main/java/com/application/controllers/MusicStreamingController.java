@@ -34,6 +34,8 @@ public class MusicStreamingController {
 	private PlayHistoryController playHistoryController;
 	@Autowired
 	private TrackStatisticController trackStatisticController;
+	@Autowired
+	private JwtTokenUtills tokenUtills;
 
 	@Autowired
 	private UserAccountRepository userAccountRepository;
@@ -46,18 +48,19 @@ public class MusicStreamingController {
 	@Value("${minio.storage.track.sound}")
 	private String trackSoundLocation;
 
+	// This will give user a history and view count when entered the track.
+	public void trackEntrance(String trackFile, HttpServletRequest request) {
+		int trackId = tracksRepository.getIdFromFileName(trackFile);
+		if (request.getHeader("Authorization") != null) {
+			int userId = tokenUtills.getUserAccountFromToken(request).getAccountId();
+			playHistoryController.InsertOrUpdateHistory(userId, trackId);
+		}
+		trackStatisticController.increateViewCount(trackId);
+	}
+
 	// This will call a track file and send it to the user.
 	// This will also save a history if there is a token.
 	public ResponseEntity<byte[]> getTrack(String trackFile, String range, HttpServletRequest request) {
-		long byteRangeStart = Long.parseLong(range.split("-")[0].substring(6));
-		if (byteRangeStart <= 0) {
-			if (request.getHeader("Authorization") != null) {
-				int userId = userAccountRepository.getUserIdFromUserName(JwtTokenUtills.getUserNameFromToken(request));
-				int trackId = tracksRepository.getIdFromFileName(trackFile);
-				playHistoryController.InsertOrUpdateHistory(userId, trackId);
-				trackStatisticController.increateViewCount(trackId);
-			}
-		}
 		return getTrackContentByRange("tracks/musics/" + trackFile, range);
 	}
 
