@@ -17,6 +17,7 @@ import com.application.entities.models.UserAccountModel;
 import com.application.exceptons.ExceptionFoundation;
 import com.application.exceptons.ExceptionResponseModel.EXCEPTION_CODES;
 import com.application.repositories.PlayHistoryRepository;
+import com.application.repositories.TracksRepository;
 import com.application.repositories.UserAccountRepository;
 import com.application.services.GeneralFunctionController;
 
@@ -27,6 +28,8 @@ public class PlayHistoryController {
 	private PlayHistoryRepository playHistoryRepository;
 	@Autowired
 	private UserAccountRepository userAccountRepository;
+	@Autowired
+	private TracksRepository tracksRepository;
 
 	@Autowired
 	private GeneralFunctionController generalFunctionController;
@@ -34,7 +37,8 @@ public class PlayHistoryController {
 	private static int maxHistoryPageSize = 250;
 	private static int defaultHistoryPageSize = 50;
 
-	// OK!
+	// ▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬
+	// DB-V5.1 OK!
 	// listMyLastVisit
 	public List<PlayHistoryModel> listMyLastVisit(int numberOfRecord, HttpServletRequest request) {
 		UserAccountModel requestedBy = generalFunctionController.getUserAccount(request);
@@ -46,7 +50,8 @@ public class PlayHistoryController {
 		return result;
 	}
 
-	// OK!
+	// ▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬
+	// DB-V5.1 OK!
 	// GetMyHistory
 	public Page<PlayHistoryModel> getMyHistory(int page, int pageSize, String searchContent,
 			HttpServletRequest request) {
@@ -69,14 +74,15 @@ public class PlayHistoryController {
 					sendPageRequest);
 		}
 		if (result.getTotalElements() <= 0) {
-			throw new ExceptionFoundation(EXCEPTION_CODES.BROWSE_NO_RECORD_EXISTS, HttpStatus.NOT_FOUND,
+			throw new ExceptionFoundation(EXCEPTION_CODES.BROWSE_NO_RECORD_EXISTS, HttpStatus.I_AM_A_TEAPOT,
 					"[ BROWSE_NO_RECORD_EXISTS ] No record found.");
 		}
 
 		return result;
 	}
 
-	// OK!
+	// ▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬
+	// DB-V5.1 OK!
 	// GetRecordsByUserIdAndTrackId
 	public PlayHistoryModel getRecordsByUserIdAndTrackId(int trackId, HttpServletRequest request) {
 		UserAccountModel requestedBy = generalFunctionController.getUserAccount(request);
@@ -84,26 +90,29 @@ public class PlayHistoryController {
 		PlayHistoryModel playHistoryModel = playHistoryRepository
 				.findRecordByUserIdAndTrackId(requestedBy.getAccountId(), trackId);
 		if (playHistoryModel == null) {
-			throw new ExceptionFoundation(EXCEPTION_CODES.BROWSE_NO_RECORD_EXISTS, HttpStatus.NOT_FOUND,
+			throw new ExceptionFoundation(EXCEPTION_CODES.BROWSE_NO_RECORD_EXISTS, HttpStatus.I_AM_A_TEAPOT,
 					"[ BROWSE_NO_RECORD_EXISTS ] This record does not exist.");
 		}
 		return playHistoryModel;
 
 	}
 
-	// OK!
+	// ▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬
+	// DB-V5.1 OK!
 	// AUTOMATION METHOD
 	// InsertNewHistoryByUserId
 	public void InsertOrUpdateHistory(int userId, int trackId) {
 		if (!(playHistoryRepository.isExistedRecord(userId, trackId) == 1)) {
 			playHistoryRepository.insertNewPlayHistory(userId, trackId,
 					new Timestamp(System.currentTimeMillis()).toString());
+			tracksRepository.increaseViewCount(trackId);
 		} else {
 			playHistoryRepository.updateTimeStamp(new Timestamp(System.currentTimeMillis()), userId, trackId);
 		}
 	}
 
-	// OK!
+	// ▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬
+	// DB-V5.1 OK!
 	// ClearHistory
 	public void clearHistory(HttpServletRequest request) {
 		UserAccountModel requestedBy = generalFunctionController.getUserAccount(request);
@@ -117,7 +126,8 @@ public class PlayHistoryController {
 
 	}
 
-	// OK!
+	// ▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬
+	// DB-V5.1 OK!
 	// ClearHistoryInThePassHoures
 	public void clearHistoryInThePassHoures(HttpServletRequest request, int inTheLastXMinute) {
 		UserAccountModel requestedBy = generalFunctionController.getUserAccount(request);
@@ -135,7 +145,8 @@ public class PlayHistoryController {
 
 	}
 
-	// OK!
+	// ▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬
+	// DB-V5.1 OK!
 	// DeleteRecordById
 	public void deleteRecordById(int historyId, HttpServletRequest request) {
 		UserAccountModel requestedBy = generalFunctionController.getUserAccount(request);
@@ -153,7 +164,8 @@ public class PlayHistoryController {
 
 	}
 
-	// OK!
+	// ▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬
+	// DB-V5.1 OK!
 	// DeleteRecordByUserIdAndTrackId
 	public void deleteRecordByUserIdAndTrackId(int trackId, HttpServletRequest request) {
 		UserAccountModel requestedBy = generalFunctionController.getUserAccount(request);
@@ -167,7 +179,8 @@ public class PlayHistoryController {
 
 	}
 
-	// OK!
+	// ▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬
+	// DB-V5.1 OK!
 	// AUTIMATION METHOD
 	// CheckAndUpdateRepeatedHistoryByUserToken
 	public void checkAndUpdateRepeatedHistoryByUserToken(int trackId, HttpServletRequest request) {
@@ -183,7 +196,8 @@ public class PlayHistoryController {
 
 	}
 
-	// OK!
+	// ▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬
+	// DB-V5.1 OK!
 	// AUTIMATION METHOD
 	// CheckAndUpdateRepeatedHistoryByUserId
 	public void checkAndUpdateRepeatedHistoryByUserId(int userId, int trackId) {

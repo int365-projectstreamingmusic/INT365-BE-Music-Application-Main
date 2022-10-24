@@ -38,4 +38,15 @@ public interface TrackCountStatisticRepository extends JpaRepository<TrackCountM
 	@Query(value = "UPDATE TrackCountModel v SET v.favoriteCount = :newFavoriteCount WHERE v.id = :id ")
 	void updateFavoriteCount(int newFavoriteCount, TrackCountCompKey id);
 
+	// UpdateViewCount
+	@Modifying
+	@Transactional
+	@Query(value = "UPDATE TrackCountModel v SET v.viewCount = v.viewCount + 1 WHERE v.id = :id ")
+	void updateViewCount(TrackCountCompKey id);
+
+	// UpdateFavoriteCountByOne
+	@Modifying
+	@Transactional
+	@Query(value = "UPDATE TrackCountModel v SET v.favoriteCount = v.favoriteCount + 1 WHERE v.id = :id ")
+	void updateFavoriteCount(TrackCountCompKey id);
 }

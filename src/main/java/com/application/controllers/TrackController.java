@@ -16,11 +16,13 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.application.entities.models.AlbumModel;
 import com.application.entities.models.TracksModel;
 import com.application.entities.models.UserAccountModel;
 import com.application.entities.submittionforms.TrackForm;
 import com.application.exceptons.ExceptionFoundation;
 import com.application.exceptons.ExceptionResponseModel.EXCEPTION_CODES;
+import com.application.repositories.AlbumRepository;
 import com.application.repositories.PlayTrackStatusRepository;
 import com.application.repositories.TracksRepository;
 import com.application.services.GeneralFunctionController;
@@ -38,6 +40,8 @@ public class TrackController {
 	private TracksRepository tracksRepository;
 	@Autowired
 	private PlayTrackStatusRepository playTrackStatusRepository;
+	@Autowired
+	private AlbumRepository albumRepository;
 
 	@Autowired
 	private GenreController genreController;
@@ -51,7 +55,7 @@ public class TrackController {
 	@Autowired
 	private GeneralFunctionController generalFunctionController;
 	@Autowired
-	private TrackCountController trackCountController;
+	private TrackStatisticController trackCountController;
 	@Autowired
 	private MoodController moodController;
 
@@ -250,6 +254,7 @@ public class TrackController {
 		newTrack.setGenreTrack(null);
 		newTrack.setMoods(null);
 		newTrack.setTrackFile("-");
+		newTrack.setAlbums(null);
 		newTrack = tracksRepository.save(newTrack);
 
 		// Adding genre to the track
@@ -258,6 +263,23 @@ public class TrackController {
 		}
 		if (newTrackForm.getMoodList() != null && !(newTrackForm.getMoodList().size() <= 0)) {
 			newTrack.setMoods(moodController.addMoodToTrack(newTrack.getId(), newTrackForm.getMoodList()));
+		}
+
+		// Saving new album
+		if (newTrackForm.getAlbumName() != null && newTrackForm.getAlbumName() != "") {
+			if (albumRepository.existsByAlbumName(newTrackForm.getAlbumName())) {
+				newTrack.setAlbums(albumRepository.findByAlbumName(newTrackForm.getAlbumName()));
+				tracksRepository.updateTrackAlbum(newTrack.getId(), newTrack.getAlbums().getId());
+			} else {
+				AlbumModel newAlbum = new AlbumModel();
+				newAlbum.setAlbumName(newTrackForm.getAlbumName());
+				newAlbum.setAlbumDescription(
+						"The album " + newTrackForm.getAlbumName() + " is created by " + requestedBy.getUsername());
+				newAlbum.setStatus(playTrackStatusRepository.findById(3001).orElse(null));
+				newAlbum.setOwner(requestedBy);
+				albumRepository.save(newAlbum);
+				newTrack.setAlbums(newAlbum);
+			}
 		}
 
 		// Save image and track file.
@@ -296,6 +318,9 @@ public class TrackController {
 		if (trackInfo.getGenreList() != null) {
 			target.setGenreTrack(genreController.addGenreToTrack(target.getId(), trackInfo.getGenreList()));
 		}
+
+		// if(trackInfo.getAlbumName() != null ||
+		// trackInfo.getAlbumName().equals(target.getA))
 
 		// If with image, do the following.
 		if (image != null) {
