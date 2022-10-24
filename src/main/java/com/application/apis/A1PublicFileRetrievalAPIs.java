@@ -11,7 +11,6 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -35,7 +34,7 @@ public class A1PublicFileRetrievalAPIs {
 
 	// Ok!
 	// will add the history and count to the user if the token exist.
-	@PostMapping("entrance/{track}")
+	@PutMapping("entrance/{track}")
 	public void entrance(@PathVariable String track, HttpServletRequest request) {
 		musicStreamingController.trackEntrance(track, request);
 	}
