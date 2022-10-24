@@ -37,7 +37,8 @@ public class PlayHistoryController {
 	private static int maxHistoryPageSize = 250;
 	private static int defaultHistoryPageSize = 50;
 
-	// OK!
+	// ▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬
+	// DB-V5.1 OK!
 	// listMyLastVisit
 	public List<PlayHistoryModel> listMyLastVisit(int numberOfRecord, HttpServletRequest request) {
 		UserAccountModel requestedBy = generalFunctionController.getUserAccount(request);
@@ -49,7 +50,8 @@ public class PlayHistoryController {
 		return result;
 	}
 
-	// OK!
+	// ▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬
+	// DB-V5.1 OK!
 	// GetMyHistory
 	public Page<PlayHistoryModel> getMyHistory(int page, int pageSize, String searchContent,
 			HttpServletRequest request) {
@@ -79,7 +81,8 @@ public class PlayHistoryController {
 		return result;
 	}
 
-	// OK!
+	// ▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬
+	// DB-V5.1 OK!
 	// GetRecordsByUserIdAndTrackId
 	public PlayHistoryModel getRecordsByUserIdAndTrackId(int trackId, HttpServletRequest request) {
 		UserAccountModel requestedBy = generalFunctionController.getUserAccount(request);
@@ -94,7 +97,8 @@ public class PlayHistoryController {
 
 	}
 
-	// OK!
+	// ▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬
+	// DB-V5.1 OK!
 	// AUTOMATION METHOD
 	// InsertNewHistoryByUserId
 	public void InsertOrUpdateHistory(int userId, int trackId) {
@@ -107,7 +111,8 @@ public class PlayHistoryController {
 		}
 	}
 
-	// OK!
+	// ▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬
+	// DB-V5.1 OK!
 	// ClearHistory
 	public void clearHistory(HttpServletRequest request) {
 		UserAccountModel requestedBy = generalFunctionController.getUserAccount(request);
@@ -121,7 +126,8 @@ public class PlayHistoryController {
 
 	}
 
-	// OK!
+	// ▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬
+	// DB-V5.1 OK!
 	// ClearHistoryInThePassHoures
 	public void clearHistoryInThePassHoures(HttpServletRequest request, int inTheLastXMinute) {
 		UserAccountModel requestedBy = generalFunctionController.getUserAccount(request);
@@ -139,7 +145,8 @@ public class PlayHistoryController {
 
 	}
 
-	// OK!
+	// ▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬
+	// DB-V5.1 OK!
 	// DeleteRecordById
 	public void deleteRecordById(int historyId, HttpServletRequest request) {
 		UserAccountModel requestedBy = generalFunctionController.getUserAccount(request);
@@ -157,7 +164,8 @@ public class PlayHistoryController {
 
 	}
 
-	// OK!
+	// ▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬
+	// DB-V5.1 OK!
 	// DeleteRecordByUserIdAndTrackId
 	public void deleteRecordByUserIdAndTrackId(int trackId, HttpServletRequest request) {
 		UserAccountModel requestedBy = generalFunctionController.getUserAccount(request);
@@ -171,7 +179,8 @@ public class PlayHistoryController {
 
 	}
 
-	// OK!
+	// ▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬
+	// DB-V5.1 OK!
 	// AUTIMATION METHOD
 	// CheckAndUpdateRepeatedHistoryByUserToken
 	public void checkAndUpdateRepeatedHistoryByUserToken(int trackId, HttpServletRequest request) {
@@ -187,7 +196,8 @@ public class PlayHistoryController {
 
 	}
 
-	// OK!
+	// ▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬
+	// DB-V5.1 OK!
 	// AUTIMATION METHOD
 	// CheckAndUpdateRepeatedHistoryByUserId
 	public void checkAndUpdateRepeatedHistoryByUserId(int userId, int trackId) {

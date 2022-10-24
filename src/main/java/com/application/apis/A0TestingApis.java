@@ -19,7 +19,9 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import com.application.controllers.AlbumController;
 import com.application.controllers.TrackStatisticController;
+import com.application.entities.models.AlbumModel;
 import com.application.entities.models.TrackCountModel;
+import com.application.repositories.AlbumRepository;
 import com.application.services.GeneralFunctionController;
 
 @RestController
@@ -30,6 +32,9 @@ public class A0TestingApis {
 	private TrackStatisticController trackCountController;
 	@Autowired
 	private AlbumController albumController;
+	
+	@Autowired
+	private AlbumRepository albumRepository;
 
 	@Autowired
 	private GeneralFunctionController generalFunctionController;
@@ -38,6 +43,11 @@ public class A0TestingApis {
 	// -----------------------
 	// VIEW COUNT
 	// -----------------------
+	
+	@GetMapping("1")
+	public ResponseEntity<List<AlbumModel>> getAlbums(){
+		return ResponseEntity.ok().body(albumRepository.findAll());
+	}
 
 	@PostMapping("testAlbum")
 	public ResponseEntity<HttpStatus> addNewAlbum(@RequestParam String name, HttpServletRequest request) {

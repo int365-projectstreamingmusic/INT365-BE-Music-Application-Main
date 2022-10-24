@@ -2,6 +2,7 @@ package com.application.entities.models;
 
 import java.util.List;
 
+import javax.annotation.Nullable;
 import javax.persistence.Basic;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -65,11 +66,17 @@ public class TracksModel {
 	@JoinColumn(name = "status_id", referencedColumnName = "status_id")
 	private PlayTrackStatusModel playTrackStatus;
 
+	@ManyToOne
+	@Nullable
+	@Basic(optional = true)
+	@JoinColumn(name = "album_id", referencedColumnName = "album_id")
+	private AlbumModel albums;
+
 	@OneToMany
 	@JoinColumn(name = "track_id", referencedColumnName = "track_id")
 	@OnDelete(action = OnDeleteAction.CASCADE)
 	private List<GenresTracksModel> genreTrack;
-		
+
 	@OneToMany
 	@JoinColumn(name = "track_id", referencedColumnName = "track_id")
 	@OnDelete(action = OnDeleteAction.CASCADE)
