@@ -76,22 +76,22 @@ public class A2UserApis {
 	// DB-V5.1 OK!
 	// PLAYLIST : Create Playlist
 	@PostMapping("playlist")
-	public ResponseEntity<PlaylistModel> createNewPlaylist(@RequestPart(required = true) PlaylistForm newPlaylist,
-			@RequestPart(required = false) MultipartFile imageFile, HttpServletRequest request) {
+	public ResponseEntity<PlaylistModel> createNewPlaylist(@RequestPart(required = true) PlaylistForm form,
+			@RequestPart(required = false) MultipartFile image, HttpServletRequest request) {
 		URI uri = URI
 				.create(ServletUriComponentsBuilder.fromCurrentContextPath().path(mapping + "playlist").toString());
-		return ResponseEntity.created(uri).body(playlistController.createMyPlaylist(newPlaylist, imageFile, request));
+		return ResponseEntity.created(uri).body(playlistController.createMyPlaylist(form, image, request));
 	}
 
 	// ▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬
 	// DB-V5.1 OK!
 	// PLAYLIST : Edit my playlist
 	@PutMapping("playlist")
-	public ResponseEntity<PlaylistModel> editPlaylist(@RequestBody(required = true) PlaylistForm detail,
-			HttpServletRequest request) {
+	public ResponseEntity<PlaylistModel> editPlaylist(@RequestPart(required = true) PlaylistForm form,
+			@RequestPart(required = false) MultipartFile image, HttpServletRequest request) {
 		URI uri = URI
 				.create(ServletUriComponentsBuilder.fromCurrentContextPath().path(mapping + "playlist").toString());
-		return ResponseEntity.created(uri).body(playlistController.editMyPlaylist(detail, request));
+		return ResponseEntity.created(uri).body(playlistController.editMyPlaylist(form, image, request));
 	}
 
 	// ▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬
@@ -145,28 +145,24 @@ public class A2UserApis {
 		return ResponseEntity.ok().body(playlistController.removeTrackFromPlaylist(form, request));
 	}
 
-	// ▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬
-	// User profile Api
-	// ---------------------
+	// ▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬
+	// DB-V5.1 OK!
+	// ACCOUNT : Get my profile
 	@GetMapping("myProfile")
 	public ResponseEntity<UserAccountModel> getMyProfile(HttpServletRequest request) {
 		return ResponseEntity.ok().body(userProfileController.getMyProfile(request));
 	}
 
+	// ▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬
+	// DB-V5.1 OK!
+	// ACCOUNT : Edit my profile.
 	@PutMapping("myProfile")
-	public ResponseEntity<UserAccountModel> editMyProfile(@RequestBody UserProfileForm newInfo,
-			HttpServletRequest request) {
+	public ResponseEntity<UserAccountModel> editMyProfile(@RequestPart(required = true) UserProfileForm profile,
+			@RequestPart(required = false) MultipartFile profileImage, HttpServletRequest request) {
 		URI uri = URI
 				.create(ServletUriComponentsBuilder.fromCurrentContextPath().path(mapping + "myProfile").toString());
-		return ResponseEntity.created(uri).body(userProfileController.editBasicProfileInfo(newInfo, request));
-	}
-
-	@PutMapping("profile-image")
-	public ResponseEntity<String> updateProfileImage(@RequestPart MultipartFile profileImage,
-			HttpServletRequest request) {
-		URI uri = URI.create(
-				ServletUriComponentsBuilder.fromCurrentContextPath().path("api/profile/profile-image").toString());
-		return ResponseEntity.created(uri).body(userProfileController.setNewUserProfileImage(profileImage, request));
+		return ResponseEntity.created(uri)
+				.body(userProfileController.editBasicProfileInfo(profile, profileImage, request));
 	}
 
 	// ▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬

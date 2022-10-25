@@ -76,6 +76,11 @@ public interface TracksRepository extends JpaRepository<TracksModel, Integer> {
 	@Query(nativeQuery = true, value = "UPDATE tracks SET album_id = :albumId WHERE track_id = :id")
 	void updateTrackAlbum(int id, int albumId);
 
+	@Transactional
+	@Modifying
+	@Query(nativeQuery = true, value = "UPDATE tracks SET view_count = :count WHERE track_id = :id")
+	void updateViewCount(int count, int id);
+
 	// ▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬
 
 	@Query(nativeQuery = true, value = "SELECT t.* FROM tracks t RIGHT JOIN track_album a ON a.track_id = t.track_id WHERE a.album_id = :albumId AND LOWER(t.track_name) LIKE LOWER(CONCAT('%',:searchContent,'%')) AND t.status_id = 1001")

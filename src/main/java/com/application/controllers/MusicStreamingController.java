@@ -15,7 +15,6 @@ import org.springframework.stereotype.Service;
 import com.application.exceptons.ExceptionFoundation;
 import com.application.exceptons.ExceptionResponseModel.EXCEPTION_CODES;
 import com.application.repositories.TracksRepository;
-import com.application.repositories.UserAccountRepository;
 import com.application.utilities.JwtTokenUtills;
 import com.application.utilities.MinioStorageService;
 
@@ -37,8 +36,6 @@ public class MusicStreamingController {
 	@Autowired
 	private JwtTokenUtills tokenUtills;
 
-	@Autowired
-	private UserAccountRepository userAccountRepository;
 	@Autowired
 	private TracksRepository tracksRepository;
 
@@ -78,7 +75,7 @@ public class MusicStreamingController {
 			statObjectResult.put("medisType", statObject.contentType());
 			return statObjectResult;
 		} catch (Exception exc) {
-			throw new ExceptionFoundation(EXCEPTION_CODES.SEARCH_NOT_FOUND, HttpStatus.NOT_FOUND,
+			throw new ExceptionFoundation(EXCEPTION_CODES.BROWSE_NO_RECORD_EXISTS, HttpStatus.NOT_FOUND,
 					"[ getStatObject ] " + trackNameLocation + " is unreachable.");
 		}
 	}

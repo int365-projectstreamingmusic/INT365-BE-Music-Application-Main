@@ -44,7 +44,7 @@ public class PlayHistoryController {
 		UserAccountModel requestedBy = generalFunctionController.getUserAccount(request);
 		List<PlayHistoryModel> result = playHistoryRepository.listLastVisit(requestedBy.getAccountId(), numberOfRecord);
 		if (result.size() < 1) {
-			throw new ExceptionFoundation(EXCEPTION_CODES.BROWSE_NO_RECORD_EXISTS, HttpStatus.I_AM_A_TEAPOT,
+			throw new ExceptionFoundation(EXCEPTION_CODES.BROWSE_NO_RECORD_EXISTS, HttpStatus.NOT_FOUND,
 					"[ BROWSE_NO_RECORD_EXISTS ] This user has no history.");
 		}
 		return result;
@@ -74,7 +74,7 @@ public class PlayHistoryController {
 					sendPageRequest);
 		}
 		if (result.getTotalElements() <= 0) {
-			throw new ExceptionFoundation(EXCEPTION_CODES.BROWSE_NO_RECORD_EXISTS, HttpStatus.I_AM_A_TEAPOT,
+			throw new ExceptionFoundation(EXCEPTION_CODES.BROWSE_NO_RECORD_EXISTS, HttpStatus.NOT_FOUND,
 					"[ BROWSE_NO_RECORD_EXISTS ] No record found.");
 		}
 
@@ -90,7 +90,7 @@ public class PlayHistoryController {
 		PlayHistoryModel playHistoryModel = playHistoryRepository
 				.findRecordByUserIdAndTrackId(requestedBy.getAccountId(), trackId);
 		if (playHistoryModel == null) {
-			throw new ExceptionFoundation(EXCEPTION_CODES.BROWSE_NO_RECORD_EXISTS, HttpStatus.I_AM_A_TEAPOT,
+			throw new ExceptionFoundation(EXCEPTION_CODES.BROWSE_NO_RECORD_EXISTS, HttpStatus.NOT_FOUND,
 					"[ BROWSE_NO_RECORD_EXISTS ] This record does not exist.");
 		}
 		return playHistoryModel;
@@ -120,7 +120,7 @@ public class PlayHistoryController {
 		if (playHistoryRepository.hasAtLeastOneRecord(requestedBy.getAccountId()) == 1) {
 			playHistoryRepository.deleteAllByUserAccountId(requestedBy.getAccountId());
 		} else {
-			throw new ExceptionFoundation(EXCEPTION_CODES.RECORD_ALREADY_GONE, HttpStatus.I_AM_A_TEAPOT,
+			throw new ExceptionFoundation(EXCEPTION_CODES.BROWSE_NO_RECORD_EXISTS, HttpStatus.NOT_FOUND,
 					"[ DELETE_ALREADY_GONE ] This user has no history, no need to delete anything.");
 		}
 
@@ -136,7 +136,7 @@ public class PlayHistoryController {
 
 		if (playHistoryRepository.hasAtLeastOneRecordAfterTimeRange(requestedBy.getAccountId(),
 				targetAfterThisTime) == 0) {
-			throw new ExceptionFoundation(EXCEPTION_CODES.RECORD_ALREADY_GONE, HttpStatus.I_AM_A_TEAPOT,
+			throw new ExceptionFoundation(EXCEPTION_CODES.BROWSE_NO_RECORD_EXISTS, HttpStatus.NOT_FOUND,
 					"[ DELETE_ALREADY_GONE ] This user has no history in the past " + inTheLastXMinute
 							+ " minutes, no need to delete anything.");
 		} else {
@@ -152,11 +152,11 @@ public class PlayHistoryController {
 		UserAccountModel requestedBy = generalFunctionController.getUserAccount(request);
 
 		PlayHistoryModel targetHistory = playHistoryRepository.findById(historyId)
-				.orElseThrow(() -> new ExceptionFoundation(EXCEPTION_CODES.RECORD_ALREADY_GONE,
-						HttpStatus.I_AM_A_TEAPOT, "[ DELETE_ALREADY_GONE ] No history of this Id."));
+				.orElseThrow(() -> new ExceptionFoundation(EXCEPTION_CODES.BROWSE_NO_RECORD_EXISTS,
+						HttpStatus.NOT_FOUND, "[ DELETE_ALREADY_GONE ] No history of this Id."));
 
 		if (targetHistory.getAccountid() != requestedBy.getAccountId()) {
-			throw new ExceptionFoundation(EXCEPTION_CODES.AUTHEN_NOT_THE_OWNER, HttpStatus.I_AM_A_TEAPOT,
+			throw new ExceptionFoundation(EXCEPTION_CODES.AUTHEN_NOT_THE_OWNER, HttpStatus.UNAUTHORIZED,
 					"[ AUTHEN_NOT_THE_OWNER ] This user is not the owner of this record, and is not allowed to commit change to this record.");
 		} else {
 			playHistoryRepository.deleteById(historyId);
@@ -171,7 +171,7 @@ public class PlayHistoryController {
 		UserAccountModel requestedBy = generalFunctionController.getUserAccount(request);
 
 		if (playHistoryRepository.isExistedRecord(requestedBy.getAccountId(), trackId) == 0) {
-			throw new ExceptionFoundation(EXCEPTION_CODES.RECORD_ALREADY_GONE, HttpStatus.I_AM_A_TEAPOT,
+			throw new ExceptionFoundation(EXCEPTION_CODES.BROWSE_NO_RECORD_EXISTS, HttpStatus.NOT_FOUND,
 					"[ DELETE_ALREADY_GONE ] This user has no history, no need to delete anything.");
 		} else {
 			playHistoryRepository.deleteByUserIdAndTrackId(requestedBy.getAccountId(), trackId);

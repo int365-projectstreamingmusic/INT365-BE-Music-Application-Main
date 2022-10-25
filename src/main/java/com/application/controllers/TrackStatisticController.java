@@ -178,6 +178,7 @@ public class TrackStatisticController {
 
 			List<TrackCountModel> trackCountList = new ArrayList<>();
 
+			int totalCount = 0;
 			for (int i = 0; i <= numberOfWeek; i++) {
 				Random random = new Random();
 				int randomizedNumberOfview = (int) random.nextInt(9950) + 10;
@@ -192,10 +193,12 @@ public class TrackStatisticController {
 				newTrackCount.setViewCount(randomizedNumberOfview);
 				newTrackCount.setId(new TrackCountCompKey(trackId, timeStamp.toString()));
 				trackCountRepository.save(newTrackCount);
+				totalCount += randomizedNumberOfview;
 			}
+			tracksRepository.updateViewCount(totalCount, trackId);
 			return trackCountList;
 		} catch (ParseException e) {
-			throw new ExceptionFoundation(EXCEPTION_CODES.DEAD, HttpStatus.INTERNAL_SERVER_ERROR,
+			throw new ExceptionFoundation(EXCEPTION_CODES.CORE_INTERNAL_SERVER_ERROR, HttpStatus.INTERNAL_SERVER_ERROR,
 					"[ DEAD ] Error in function : addCustomViewCount " + e.getLocalizedMessage());
 		}
 	}

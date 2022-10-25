@@ -27,7 +27,8 @@ public class PlaylistForm {
 	private boolean autoAddMusic;
 
 	@Basic(optional = true)
-	private List<TrackListSub> trackLst;
+	private List<TrackListSub> trackIdList;
+	
 	@Basic(optional = true)
 	private List<MoodModel> moods;
 	@Basic(optional = true)

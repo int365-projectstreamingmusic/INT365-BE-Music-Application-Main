@@ -23,7 +23,6 @@ public class GeneralContentController {
 	// GenerateArtistContentList
 	public Map<?, ?> generateContentList() {
 		Map<String, Object> result = new HashMap<>();
-		
 		return null;
 	}
 

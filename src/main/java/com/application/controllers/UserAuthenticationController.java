@@ -59,7 +59,8 @@ public class UserAuthenticationController {
 	@Value("${general.role.suspended}")
 	private int userRoleSuspendedId;
 
-	// OK!
+	// ▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬
+	// DB-V5 OK!
 	// userRegistration
 	public Map<String, Object> userRegistration(UserRegiserationForm incomingRegisteration) {
 		UserAccountModel registeration = new UserAccountModel();
@@ -139,14 +140,15 @@ public class UserAuthenticationController {
 
 	}
 
-	// OK!
+	// ▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬
+	// DB-V5 OK!
 	// userAuthentication
 	public Map<String, Object> userAuthentication(UserLoginForm userLoginModel, HttpServletResponse response) {
 		UserAccountModel requestedUser = userAccountModelRepository.findByUsername(userLoginModel.getUserName());
 
 		if (requestedUser == null
 				|| !passwordEncoder.matches(userLoginModel.getPassword(), requestedUser.getUserPasscode())) {
-			throw new ExceptionFoundation(EXCEPTION_CODES.AUTHEN_INCORRECT_CREDENTIALS, HttpStatus.I_AM_A_TEAPOT,
+			throw new ExceptionFoundation(EXCEPTION_CODES.AUTHEN_INCORRECT_CREDENTIALS, HttpStatus.FORBIDDEN,
 					"[ AUTHEN FAILED ] Username or password doesn't match.");
 		} else if (userRoleModelRepository
 				.existByUserIdAndRoleId(new UserRolesCompKey(requestedUser.getAccountId(), userRoleSuspendedId))) {
@@ -171,7 +173,8 @@ public class UserAuthenticationController {
 		return result;
 	}
 
-	// OK!
+	// ▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬
+	// DB-V5 OK!
 	// userChangePassword
 	public ResponseEntity<HttpStatus> userChangePassword(ChangePasswordForm passwordform, HttpServletRequest request,
 			HttpServletResponse response) {
@@ -199,7 +202,8 @@ public class UserAuthenticationController {
 
 	}
 
-	// OK!
+	// ▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬
+	// DB-V5 OK!
 	// userLogOut
 	public ResponseEntity<HttpStatus> userLogOut(HttpServletResponse response) {
 		response.setHeader(HttpHeaders.AUTHORIZATION, "");
