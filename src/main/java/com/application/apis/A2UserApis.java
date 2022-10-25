@@ -11,6 +11,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -27,9 +28,11 @@ import com.application.controllers.TrackMarkingController;
 import com.application.controllers.UserProfileController;
 import com.application.entities.models.PlayHistoryModel;
 import com.application.entities.models.PlaylistModel;
+import com.application.entities.models.PlaylistTrackListModel;
 import com.application.entities.models.UserAccountModel;
 import com.application.entities.models.UserTrackMarkingModel;
 import com.application.entities.submittionforms.PlaylistForm;
+import com.application.entities.submittionforms.PlaylistOutput;
 import com.application.entities.submittionforms.UserProfileForm;
 import com.application.exceptons.ExceptionFoundation;
 import com.application.exceptons.ExceptionResponseModel.EXCEPTION_CODES;
@@ -49,11 +52,9 @@ public class A2UserApis {
 	@Autowired
 	private PlayHistoryController playHistoryController;
 
-	// ---------------------
-	// Playlist
-	// ---------------------
-
-	// ListMyCreatedPlaylist
+	// ▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬
+	// DB-V5.1 OK!
+	// PLAYLIST : ListMyCreatedPlaylist
 	@GetMapping("playlist")
 	public ResponseEntity<Page<PlaylistModel>> listMyOwnedPlaylist(@RequestParam(defaultValue = "0") int page,
 			@RequestParam(defaultValue = "0") int pageSize, @RequestParam(defaultValue = "") String searchContent,
@@ -61,39 +62,110 @@ public class A2UserApis {
 		return ResponseEntity.ok().body(playlistController.getMyPlaylist(page, pageSize, searchContent, request));
 	}
 
-	@PostMapping("playlist/create")
-	public ResponseEntity<Page<PlaylistModel>> createNewPlaylist(@RequestBody PlaylistForm newPlaylist,
-			HttpServletRequest request) {
-		URI uri = URI.create(
-				ServletUriComponentsBuilder.fromCurrentContextPath().path(mapping + "playlist/create").toString());
-		return ResponseEntity.created(uri).body(null);
+	// ▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬
+	// DB-V5.1 OK!
+	// PLAYLIST : Get my playlist by ID.
+	@GetMapping("playlist/{id}")
+	public ResponseEntity<PlaylistOutput> GetMyOwnedPlaylistById(@PathVariable int id,
+			@RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "0") int pageSize,
+			@RequestParam(defaultValue = "") String searchContent, HttpServletRequest request) {
+		return ResponseEntity.ok().body(playlistController.getPlaylistByID(id, page, pageSize, searchContent, request));
 	}
 
-	// ---------------------
-	// User profile Api
-	// ---------------------
+	// ▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬
+	// DB-V5.1 OK!
+	// PLAYLIST : Create Playlist
+	@PostMapping("playlist")
+	public ResponseEntity<PlaylistModel> createNewPlaylist(@RequestPart(required = true) PlaylistForm form,
+			@RequestPart(required = false) MultipartFile image, HttpServletRequest request) {
+		URI uri = URI
+				.create(ServletUriComponentsBuilder.fromCurrentContextPath().path(mapping + "playlist").toString());
+		return ResponseEntity.created(uri).body(playlistController.createMyPlaylist(form, image, request));
+	}
+
+	// ▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬
+	// DB-V5.1 OK!
+	// PLAYLIST : Edit my playlist
+	@PutMapping("playlist")
+	public ResponseEntity<PlaylistModel> editPlaylist(@RequestPart(required = true) PlaylistForm form,
+			@RequestPart(required = false) MultipartFile image, HttpServletRequest request) {
+		URI uri = URI
+				.create(ServletUriComponentsBuilder.fromCurrentContextPath().path(mapping + "playlist").toString());
+		return ResponseEntity.created(uri).body(playlistController.editMyPlaylist(form, image, request));
+	}
+
+	// ▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬
+	// DB-V5.1 OK!
+	// PLAYLIST : Upload playlist thumbnail
+	@PutMapping("playlist/thumbnail/{trackId}")
+	public ResponseEntity<HttpStatus> uploadThumbnail(@PathVariable int trackId, @RequestPart MultipartFile image,
+			HttpServletRequest request) {
+		playlistController.uploadeThumbnail(trackId, image, request);
+		URI uri = URI.create(ServletUriComponentsBuilder.fromCurrentContextPath()
+				.path(mapping + "playlist/thumbnail/" + trackId).toString());
+		return ResponseEntity.created(uri).body(HttpStatus.CREATED);
+	}
+
+	// ▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬
+	// DB-V5.1 OK!
+	// PLAYLIST : Switch between private and public.
+	@PutMapping("playlist/visibility")
+	public ResponseEntity<String> togleVisibility(@RequestParam(required = true) int id, HttpServletRequest request) {
+		URI uri = URI.create(
+				ServletUriComponentsBuilder.fromCurrentContextPath().path(mapping + "playlist/visibility").toString());
+		return ResponseEntity.created(uri).body(playlistController.switchPlaylistStatus(id, request));
+	}
+
+	// ▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬
+	// DB-V5.1 OK!
+	// PLAYLIST : Delete playlist
+	@DeleteMapping("playlist")
+	public ResponseEntity<HttpStatus> deletePlaylist(@RequestParam int id, HttpServletRequest request) {
+		playlistController.deletePlaylist(id, request);
+		URI uri = URI
+				.create(ServletUriComponentsBuilder.fromCurrentContextPath().path(mapping + "playlist").toString());
+		return ResponseEntity.created(uri).body(HttpStatus.CREATED);
+	}
+
+	// ▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬
+	// DB-V5.1 OK!
+	// PLAYLIST : Add tracks to playlist : Can only add to 1 playlist at a time.
+	@PutMapping("playlist/add-track")
+	public ResponseEntity<List<PlaylistTrackListModel>> addTrackToPlaylist(@RequestBody PlaylistForm form,
+			HttpServletRequest request) {
+		return ResponseEntity.ok().body(playlistController.addTrackToPlaylist(form, request));
+	}
+
+	// ▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬
+	// DB-V5.1 OK!
+	// PLAYLIST : Remove tracks from playlist : Can only add to 1 playlist.
+	@PutMapping("playlist/remove-track")
+	public ResponseEntity<List<PlaylistTrackListModel>> removeTrackFromPlaylist(@RequestBody PlaylistForm form,
+			HttpServletRequest request) {
+		return ResponseEntity.ok().body(playlistController.removeTrackFromPlaylist(form, request));
+	}
+
+	// ▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬
+	// DB-V5.1 OK!
+	// ACCOUNT : Get my profile
 	@GetMapping("myProfile")
 	public ResponseEntity<UserAccountModel> getMyProfile(HttpServletRequest request) {
 		return ResponseEntity.ok().body(userProfileController.getMyProfile(request));
 	}
 
+	// ▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬
+	// DB-V5.1 OK!
+	// ACCOUNT : Edit my profile.
 	@PutMapping("myProfile")
-	public ResponseEntity<UserAccountModel> editMyProfile(@RequestBody UserProfileForm newInfo,
-			HttpServletRequest request) {
+	public ResponseEntity<UserAccountModel> editMyProfile(@RequestPart(required = true) UserProfileForm profile,
+			@RequestPart(required = false) MultipartFile profileImage, HttpServletRequest request) {
 		URI uri = URI
 				.create(ServletUriComponentsBuilder.fromCurrentContextPath().path(mapping + "myProfile").toString());
-		return ResponseEntity.created(uri).body(userProfileController.editBasicProfileInfo(newInfo, request));
+		return ResponseEntity.created(uri)
+				.body(userProfileController.editBasicProfileInfo(profile, profileImage, request));
 	}
 
-	@PutMapping("profile-image")
-	public ResponseEntity<String> updateProfileImage(@RequestPart MultipartFile profileImage,
-			HttpServletRequest request) {
-		URI uri = URI.create(
-				ServletUriComponentsBuilder.fromCurrentContextPath().path("api/profile/profile-image").toString());
-		return ResponseEntity.created(uri).body(userProfileController.setNewUserProfileImage(profileImage, request));
-	}
-
-	// ---------------------
+	// ▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬
 	// Playground
 	// ---------------------
 
@@ -131,7 +203,7 @@ public class A2UserApis {
 		return ResponseEntity.created(uri).body(HttpStatus.CREATED);
 	}
 
-	// ---------------------
+	// ▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬
 	// Favourite
 	// ---------------------
 
@@ -160,7 +232,7 @@ public class A2UserApis {
 		return ResponseEntity.created(uri).body(HttpStatus.CREATED);
 	}
 
-	// ---------------------
+	// ▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬
 	// History
 	// ---------------------
 

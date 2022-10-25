@@ -25,14 +25,25 @@ public interface PlaylistRepository extends JpaRepository<PlaylistModel, Integer
 	@Query(nativeQuery = true, value = "SELECT * FROM playlist WHERE status_id = 2001 ORDER BY created_date DESC LIMIT :numberOfPlaylist")
 	List<PlaylistModel> listLatestPlaylist(int numberOfPlaylist);
 
-	@Query("UPDATE PlaylistModel p SET p.playlistDesc = :desc WHERE p.id = :playlistId")
+	@Query(nativeQuery = true, value = "SELECT CASE WHEN EXISTS(SELECT * FROM playlist WHERE playlist_id = :playlistId AND account_id = :userId) THEN true ELSE false END")
+	int existByOwner(int userId, int playlistId);
+
+	@Query(nativeQuery = true, value = "SELECT thumbnail FROM playlist WHERE playlist_id = :playlistId AND account_id = :userId")
+	String getThunbmailById(int playlistId, int userId);
+
+	@Query("UPDATE PlaylistModel p SET p.playlistDesc = :desc, p.playlistName = :name WHERE p.id = :playlistId")
 	@Transactional
 	@Modifying
-	PlaylistModel updatePlaylistDesc(int playlistId, String desc);
+	void updatePlaylist(int playlistId, String name, String desc);
 
 	@Query("UPDATE PlaylistModel p SET p.thumbnail = :thumbnail WHERE p.id = :playlistId")
 	@Transactional
 	@Modifying
-	PlaylistModel updatePlaylistThumbnail(int playlistId, String thumbnail);
+	void updatePlaylistThumbnail(int playlistId, String thumbnail);
+
+	@Transactional
+	@Modifying
+	@Query(nativeQuery = true, value = "UPDATE playlist SET status_id = :statusId WHERE playlist_id = :id")
+	void updatePlaylistStatus(int id, int statusId);
 
 }

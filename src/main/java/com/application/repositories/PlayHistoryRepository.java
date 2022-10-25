@@ -61,5 +61,5 @@ public interface PlayHistoryRepository extends JpaRepository<PlayHistoryModel, I
 	@Modifying
 	@Query(nativeQuery = true, value = "UPDATE play_history SET timestamp = :newStamp WHERE account_id = :userId AND track_id = :trackId")
 	void updateTimeStamp(Timestamp newStamp, int userId, int trackId);
-
+	
 }

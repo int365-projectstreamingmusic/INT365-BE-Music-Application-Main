@@ -3,31 +3,59 @@ package com.application.apis;
 import java.net.URI;
 import java.util.List;
 
+import javax.servlet.http.HttpServletRequest;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
-import com.application.controllers.TrackCountController;
+import com.application.controllers.AlbumController;
+import com.application.controllers.TrackStatisticController;
+import com.application.entities.models.AlbumModel;
 import com.application.entities.models.TrackCountModel;
+import com.application.repositories.AlbumRepository;
+import com.application.services.GeneralFunctionController;
 
 @RestController
 @RequestMapping("test/")
 public class A0TestingApis {
 
 	@Autowired
-	private TrackCountController trackCountController;
+	private TrackStatisticController trackCountController;
+	@Autowired
+	private AlbumController albumController;
+	
+	@Autowired
+	private AlbumRepository albumRepository;
 
+	@Autowired
+	private GeneralFunctionController generalFunctionController;
 	private static String mapping = "test/";
 
 	// -----------------------
 	// VIEW COUNT
 	// -----------------------
+	
+	@GetMapping("1")
+	public ResponseEntity<List<AlbumModel>> getAlbums(){
+		return ResponseEntity.ok().body(albumRepository.findAll());
+	}
+
+	@PostMapping("testAlbum")
+	public ResponseEntity<HttpStatus> addNewAlbum(@RequestParam String name, HttpServletRequest request) {
+		albumController.createAlbum(name, generalFunctionController.getUserAccount(request));
+		URI uri = URI.create(
+				ServletUriComponentsBuilder.fromCurrentContextPath().path(mapping + "addMyArtistToTrack").toString());
+		return ResponseEntity.ok().body(HttpStatus.CREATED);
+	}
 
 	@GetMapping("AddCustomTrackCount")
 	public ResponseEntity<List<TrackCountModel>> addCustomTrackCount(@RequestParam int trackId,
@@ -55,15 +83,4 @@ public class A0TestingApis {
 			@RequestParam(defaultValue = "7") int days) {
 		return ResponseEntity.ok().body(trackCountController.getViewCountInPassDays(trackId, days));
 	}
-
-	@GetMapping("getKen")
-	public ResponseEntity<Boolean> getKen(@RequestParam int value1, @RequestParam int value2,
-			@RequestParam int value3) {
-		if (value1 < value2 || value2 < value3 || value1 < value3) {
-			return ResponseEntity.ok().body(true);
-		} else {
-			return ResponseEntity.ok().body(false);
-		}
-	}
-
 }

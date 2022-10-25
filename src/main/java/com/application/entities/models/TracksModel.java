@@ -2,6 +2,7 @@ package com.application.entities.models;
 
 import java.util.List;
 
+import javax.annotation.Nullable;
 import javax.persistence.Basic;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -12,6 +13,7 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
@@ -64,10 +66,21 @@ public class TracksModel {
 	@JoinColumn(name = "status_id", referencedColumnName = "status_id")
 	private PlayTrackStatusModel playTrackStatus;
 
+	@ManyToOne
+	@Nullable
+	@Basic(optional = true)
+	@JoinColumn(name = "album_id", referencedColumnName = "album_id")
+	private AlbumModel albums;
+
 	@OneToMany
 	@JoinColumn(name = "track_id", referencedColumnName = "track_id")
 	@OnDelete(action = OnDeleteAction.CASCADE)
 	private List<GenresTracksModel> genreTrack;
+
+	@OneToMany
+	@JoinColumn(name = "track_id", referencedColumnName = "track_id")
+	@OnDelete(action = OnDeleteAction.CASCADE)
+	private List<MoodTrackModel> moods;
 
 	@OneToMany
 	@JoinColumn(name = "track_id", referencedColumnName = "track_id")
@@ -78,5 +91,12 @@ public class TracksModel {
 	@Basic(optional = false)
 	@Column(name = "account_id")
 	private int accountId;
+
+	@Transient
+	private boolean isFavorite;
+	@Transient
+	private boolean isPlayground;
+	@Transient
+	private boolean isInHistory;
 
 }

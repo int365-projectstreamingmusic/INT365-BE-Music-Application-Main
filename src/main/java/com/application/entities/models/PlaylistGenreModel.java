@@ -1,22 +1,23 @@
 package com.application.entities.models;
 
+import javax.persistence.EmbeddedId;
 import javax.persistence.Entity;
-import javax.persistence.Id;
 import javax.persistence.Table;
 
-import com.application.entities.copmskeys.AlbumTrackCompKey;
+import com.application.entities.copmskeys.PlaylistGenreCompKey;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+@Table(name = "playlist_genre", schema = "sitgarden")
 @Entity
 @Data
-@Table(name = "track_album", schema = "sitgarden")
 @AllArgsConstructor
 @NoArgsConstructor
-public class AlbumTrackModel {
+public class PlaylistGenreModel {
 
-	@Id
-	private AlbumTrackCompKey id;
+	@EmbeddedId
+	private PlaylistGenreCompKey id;
+
 }

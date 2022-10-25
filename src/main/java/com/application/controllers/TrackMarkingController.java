@@ -1,15 +1,19 @@
 package com.application.controllers;
 
+import java.util.ArrayList;
+import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import com.application.entities.copmskeys.UserTrackMarkingCompkey;
+import com.application.entities.models.TracksModel;
 import com.application.entities.models.UserAccountModel;
 import com.application.entities.models.UserTrackMarkingModel;
 import com.application.exceptons.ExceptionFoundation;
@@ -29,7 +33,21 @@ public class TrackMarkingController {
 	@Autowired
 	private GeneralFunctionController generalFunctionController;
 
-	// OK!
+	// ▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬
+	//
+	// CheckIfFavorite
+	public boolean checkIfFavorite(int userId, int trackId) {
+		UserTrackMarkingCompkey id = new UserTrackMarkingCompkey(trackId, userId, 1001);
+		if (userTrackMarkingRepository.existsById(id)) {
+			return true;
+		} else {
+			return false;
+		}
+
+	}
+
+	// ▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬
+	// DB-V5 OK!
 	// AddNewTrackMarking
 	public UserTrackMarkingModel addNewTrackMarking(int trackId, int trackMarkingId, HttpServletRequest request) {
 		UserAccountModel addedByUser = generalFunctionController.getUserAccount(request);
@@ -44,41 +62,46 @@ public class TrackMarkingController {
 		return userTrackMarkingRepository.findTrackMarkingByCompKey(id);
 	}
 
-	// OK!
+	// ▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬
+	// DB-V5 OK!
 	// RemoveTrackMarking
 	public void removeTrackMarking(int trackId, int trackMarkingId, HttpServletRequest request) {
 		UserAccountModel removedByUser = generalFunctionController.getUserAccount(request);
 		UserTrackMarkingCompkey id = new UserTrackMarkingCompkey(trackId, removedByUser.getAccountId(), trackMarkingId);
 		if (!userTrackMarkingRepository.existsById(id)) {
-			throw new ExceptionFoundation(EXCEPTION_CODES.USER_SEARCH_NOT_FOUND, HttpStatus.I_AM_A_TEAPOT,
+			throw new ExceptionFoundation(EXCEPTION_CODES.USER_SEARCH_NOT_FOUND, HttpStatus.NOT_FOUND,
 					"[ USER_ACCOUNT_NOT_FOUND ] This record is already gone or never be added.");
 		}
 
 		userTrackMarkingRepository.deleteById(id);
 	}
 
-	// OK!
+	// ▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬
+	// DB-V5 OK!
 	// ClearTrackInPlayGround
 	public void clearTrackInPlayGround(HttpServletRequest request) {
 		UserAccountModel requestedBy = generalFunctionController.getUserAccount(request);
 		try {
 			userTrackMarkingRepository.deleteAllPlaygroundById(requestedBy.getAccountId(), 1002);
 		} catch (Exception exc) {
-			throw new ExceptionFoundation(EXCEPTION_CODES.RECORD_ALREADY_GONE, HttpStatus.I_AM_A_TEAPOT,
+			throw new ExceptionFoundation(EXCEPTION_CODES.BROWSE_NO_RECORD_EXISTS, HttpStatus.NOT_FOUND,
 					"[ DELETE_ALREADY_GONE ] Can't delete because the target record is not in the database.");
 		}
 	}
 
-	// OK!
+	// ▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬
+	// DB-V5 OK!
 	// ListTrackByTrackMarkingAndUserAccountId
-	public Page<UserTrackMarkingModel> listTrackByTrackMarkingAndUserAccountId(int page, int pageSize, int trackMarkingId,
-			String searchContent, HttpServletRequest request) {
+	public Page<UserTrackMarkingModel> listTrackByTrackMarkingAndUserAccountId(int page, int pageSize,
+			int trackMarkingId, String searchContent, HttpServletRequest request) {
 		if (page < 0) {
 			page = 0;
 		}
 		if (pageSize < 1 || pageSize > maxMarkingPerPage) {
 			pageSize = defaultMarkingPerPage;
 		}
+
+		UserAccountModel user = generalFunctionController.getUserAccount(request);
 
 		Pageable pageRequest = PageRequest.of(page, pageSize);
 		Page<UserTrackMarkingModel> result;
@@ -92,8 +115,26 @@ public class TrackMarkingController {
 			throw new ExceptionFoundation(EXCEPTION_CODES.BROWSE_NO_RECORD_EXISTS, HttpStatus.NOT_FOUND,
 					"[ BROWSE_NO_RECORD_EXISTS ] No record exist, found no marking for this user.");
 		}
+		List<UserTrackMarkingModel> finalResult = new ArrayList<>();
+		if (trackMarkingId == 1001) {
+			for (int i = 0; i < result.getContent().size(); i++) {
+				UserTrackMarkingModel current = result.getContent().get(i);
+				TracksModel currentTrack = current.getTrack();
+				currentTrack.setFavorite(true);
+				current.setTrack(currentTrack);
+				finalResult.add(current);
+			}
+		} else {
+			for (int i = 0; i < result.getContent().size(); i++) {
+				UserTrackMarkingModel current = result.getContent().get(i);
+				TracksModel currentTrack = current.getTrack();
+				currentTrack.setFavorite(checkIfFavorite(user.getAccountId(), currentTrack.getId()));
+				current.setTrack(currentTrack);
+				finalResult.add(current);
+			}
+		}
 
-		return result;
+		return new PageImpl<>(finalResult, pageRequest, result.getTotalElements());
 	}
 
 }

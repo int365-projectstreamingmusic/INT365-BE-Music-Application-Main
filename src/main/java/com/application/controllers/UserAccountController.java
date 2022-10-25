@@ -59,7 +59,8 @@ public class UserAccountController {
 	@Value("${general.useraccount.max-page-size}")
 	private int maxPageSize;
 
-	// OK!
+	// ▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬
+	// DB-V5 OK!
 	// getProfileFromToken
 	public UserAccountModel getProfileFromToken(HttpServletRequest request) {
 		UserAccountModel userProfile = userAccountModelRepository
@@ -67,7 +68,8 @@ public class UserAccountController {
 		return userProfile;
 	}
 
-	// OK!
+	// ▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬
+	// DB-V5 OK!
 	// SwitchSuspendUser
 	public boolean switchSuspendUser(int id, HttpServletRequest request) {
 		boolean isSuspended;
@@ -98,7 +100,8 @@ public class UserAccountController {
 		return isSuspended;
 	}
 
-	// OK!
+	// ▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬
+	// DB-V5 OK!
 	// AddUserRole
 	public UserRolesModel addUserRole(int id, int targetRoleId, HttpServletRequest request) {
 		UserAccountModel targetUser = userAccountModelRepository.findById(id)
@@ -116,7 +119,7 @@ public class UserAccountController {
 					"[ UserAccountController ] This user alrealdy have this role assigned.");
 		} else if (userRoleModelRepository
 				.existByUserIdAndRoleId(new UserRolesCompKey(targetUser.getAccountId(), suspendingRoleNumber))) {
-			throw new ExceptionFoundation(EXCEPTION_CODES.SAVE_FORBIDDEN, HttpStatus.I_AM_A_TEAPOT,
+			throw new ExceptionFoundation(EXCEPTION_CODES.SAVE_FORBIDDEN, HttpStatus.FORBIDDEN,
 					"[ UserAccountController ] You can't add role to the user who has been suspended.");
 		}
 
@@ -127,7 +130,8 @@ public class UserAccountController {
 		return newRole;
 	}
 
-	// OK!
+	// ▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬
+	// DB-V5 OK!
 	// DeleteUserRole
 	public void deleteUserROle(int id, int targetRoleId, HttpServletRequest request) {
 		UserAccountModel targetUser = userAccountModelRepository.findById(id)
@@ -146,7 +150,8 @@ public class UserAccountController {
 		userRoleModelRepository.deleteById(userRoleId);
 	}
 
-	// OK!
+	// ▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬
+	// DB-V5 OK!
 	// DeleteUserAccountRequestedByUser
 	public void deleteUserAccountRequestedByUser(String password, HttpServletRequest request) {
 
@@ -159,7 +164,7 @@ public class UserAccountController {
 		}
 
 		if (!passwordEncoder.matches(password, targetUser.getUserPasscode())) {
-			throw new ExceptionFoundation(EXCEPTION_CODES.AUTHEN_INCORRECT_CREDENTIALS, HttpStatus.I_AM_A_TEAPOT,
+			throw new ExceptionFoundation(EXCEPTION_CODES.AUTHEN_INCORRECT_CREDENTIALS, HttpStatus.FORBIDDEN,
 					"[ REJECTED ] To delete the account, the owner must know what the password is.");
 		}
 

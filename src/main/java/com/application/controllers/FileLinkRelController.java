@@ -23,8 +23,9 @@ public class FileLinkRelController {
 	@Autowired
 	private MinioStorageService minioStorageService;
 
-	// OK!
-	// insertNewTrackObjectLinkRel
+	// ▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬
+	// DB-V5 OK!
+	// Add image to track.
 	public String insertNewTrackObjectLinkRel(MultipartFile multipartFile, int typeId, int recordRel) {
 		FileLinkRefModel newFileRecord = new FileLinkRefModel();
 
@@ -38,8 +39,9 @@ public class FileLinkRelController {
 		return newFileRecord.getFileId();
 	}
 
-	// OK!
-	// DeleteTargetFileByName
+	// ▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬
+	// DB-V5 OK!
+	// Delete track image.
 	public void deleteTargetFileByName(String fileName) {
 		FileLinkRefModel target = fileLinkRefRepository.findById(fileName).orElseThrow(() -> new ExceptionFoundation(
 				EXCEPTION_CODES.SEARCH_NOT_FOUND, HttpStatus.NOT_FOUND,
@@ -48,8 +50,10 @@ public class FileLinkRelController {
 		minioStorageService.DeleteObjectFromMinIoByPathAndName(destination);
 		fileLinkRefRepository.delete(target);
 	}
-	
-	// DeleteTargetFileByTypeIdAndLinkRef
+
+	// ▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬
+	// DB-V5 OK!
+	// Delete track image using type ID and ref ID.
 	public void deleteTargetFileByTypeIdAndLinkRef(int typeId, int refId) {
 		FileLinkRefModel target = fileLinkRefRepository.findByTargetRefAndTypeId(typeId, refId);
 		String destination = target.getFileType().getPathRel() + target.getFileId();
@@ -57,7 +61,8 @@ public class FileLinkRelController {
 		fileLinkRefRepository.delete(target);
 	}
 
-	// OK!
+	// ▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬
+	// DB-V5 OK!
 	// RetriveImageByName
 	public Resource retriveImageByName(String fileName) {
 		FileLinkRefModel targetFile = fileLinkRefRepository.findById(fileName)
@@ -68,12 +73,24 @@ public class FileLinkRelController {
 		return minioStorageService.getImageFromMinIoByNameLocation(fileNameLocation);
 	}
 
-	// OK!
+	// ▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬
+	// DB-V5 OK!
 	// RetriveImageByTargetRef
 	public Resource retriveImageByTargetRef(int typeId, int targetRef) {
 		FileLinkRefModel fileModel = fileLinkRefRepository.findByTargetRefAndTypeId(typeId, targetRef);
 		String targetFileInMinIo = fileModel.getFileType().getPathRel() + fileModel.getFileId();
 		return minioStorageService.getImageFromMinIoByNameLocation(targetFileInMinIo);
+	}
+
+	// ▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬
+	// DB-V5 OK!
+	// isExistsInRecord
+	public boolean isExistsInRecord(String fileName) {
+		if (fileLinkRefRepository.existsById(fileName)) {
+			return true;
+		} else {
+			return false;
+		}
 	}
 
 }

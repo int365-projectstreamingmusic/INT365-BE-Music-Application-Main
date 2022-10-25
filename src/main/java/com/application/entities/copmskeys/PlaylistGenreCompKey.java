@@ -14,11 +14,12 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class AlbumTrackCompKey implements Serializable {
+public class PlaylistGenreCompKey implements Serializable {
 
-	@Column(name = "album_id")
-	private int albumId;
+	@Column(name = "playlist_id")
+	private int playlisId;
 
-	@Column(name = "track_id")
-	private int trackId;
+	@Column(name = "genre_id")
+	private int genreId;
+
 }

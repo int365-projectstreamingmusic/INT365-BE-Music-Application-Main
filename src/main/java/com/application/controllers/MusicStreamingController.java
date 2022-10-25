@@ -3,6 +3,8 @@ package com.application.controllers;
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.servlet.http.HttpServletRequest;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.PropertySource;
@@ -12,6 +14,8 @@ import org.springframework.stereotype.Service;
 
 import com.application.exceptons.ExceptionFoundation;
 import com.application.exceptons.ExceptionResponseModel.EXCEPTION_CODES;
+import com.application.repositories.TracksRepository;
+import com.application.utilities.JwtTokenUtills;
 import com.application.utilities.MinioStorageService;
 
 import io.minio.StatObjectResponse;
@@ -25,15 +29,36 @@ public class MusicStreamingController {
 	@Autowired
 	private MinioStorageService minioStorageService;
 
+	@Autowired
+	private PlayHistoryController playHistoryController;
+	@Autowired
+	private TrackStatisticController trackStatisticController;
+	@Autowired
+	private JwtTokenUtills tokenUtills;
+
+	@Autowired
+	private TracksRepository tracksRepository;
+
 	@Value("${minio.storage.track.music}")
 	private String trackMusicLocation;
 
 	@Value("${minio.storage.track.sound}")
 	private String trackSoundLocation;
 
-	// OK!
-	public ResponseEntity<byte[]> getTrack(String track, String range) {
-		return getTrackContentByRange("tracks/musics/" + track, range);
+	// This will give user a history and view count when entered the track.
+	public void trackEntrance(String trackFile, HttpServletRequest request) {
+		int trackId = tracksRepository.getIdFromFileName(trackFile);
+		if (request.getHeader("Authorization") != null) {
+			int userId = tokenUtills.getUserAccountFromToken(request).getAccountId();
+			playHistoryController.InsertOrUpdateHistory(userId, trackId);
+		}
+		trackStatisticController.increateViewCount(trackId);
+	}
+
+	// This will call a track file and send it to the user.
+	// This will also save a history if there is a token.
+	public ResponseEntity<byte[]> getTrack(String trackFile, String range, HttpServletRequest request) {
+		return getTrackContentByRange("tracks/musics/" + trackFile, range);
 	}
 
 	// OK!
@@ -50,7 +75,7 @@ public class MusicStreamingController {
 			statObjectResult.put("medisType", statObject.contentType());
 			return statObjectResult;
 		} catch (Exception exc) {
-			throw new ExceptionFoundation(EXCEPTION_CODES.SEARCH_NOT_FOUND, HttpStatus.NOT_FOUND,
+			throw new ExceptionFoundation(EXCEPTION_CODES.BROWSE_NO_RECORD_EXISTS, HttpStatus.NOT_FOUND,
 					"[ getStatObject ] " + trackNameLocation + " is unreachable.");
 		}
 	}
@@ -96,7 +121,7 @@ public class MusicStreamingController {
 			return ResponseEntity.status(HttpStatus.PARTIAL_CONTENT).header("Content-Type", "audio/" + fileType)
 					.header("Accept-Ranges", "bytes").header("Content-Length", contentLength)
 					.header("Content-Range", "bytes " + byteRangeStart + "-" + byteRangeEnd + "/" + trackSize)
-					.body(requestedByteRange);
+					.header("Current-bytes", "" + byteRangeStart).body(requestedByteRange);
 		} catch (Exception exc) {
 			throw new ExceptionFoundation(EXCEPTION_CODES.CORE_METHOD_FAILED, HttpStatus.INTERNAL_SERVER_ERROR,
 					"[ getTrackContentByRange ] Streaming failed.");
