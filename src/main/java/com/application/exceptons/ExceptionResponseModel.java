@@ -17,8 +17,8 @@ public class ExceptionResponseModel {
 		SAVE_FILE_FAILED(2001), // Can't save image or file.
 		SAVE_FILE_INVALID(2002), // Wrong format
 		SAVE_EXISTS(2003), // Already exist
-		SAVE_IS_NULL(2004),
-		SAVE_FORBIDDEN(2005),
+		SAVE_IS_NULL(2004), // ---------
+		SAVE_FORBIDDEN(2005), // ---------
 
 		// Authentication
 		AUTHEN_BAD_CREDENTIALS(3001), // Username or password is incorrect. Or both!
@@ -32,19 +32,6 @@ public class ExceptionResponseModel {
 		AUTHEN_EMAIL_ALREADY_EXIST(3009), // Email is taken
 		AUTHEN_IS_TAKEN(3010), AUTHEN_PASSWORD_MISSMATCH(3011),
 
-		// Unavailable, at least for now.
-		FEATURE_NOT_IMPLEMENTED(4001), // Not yet done.
-		FEATURE_KNOWN_BUG(4002), // We just know that it is going to be an error. At least the application
-									// doesn't rest in peace.
-		FEATURE_TOO_DANGEROUS_TO_HAVE_IT(4003), // We won't let you use it...
-		FEATURE_MISS_USED(4004),
-
-		// Application core infrastructure
-		CORE_INIT_FAILED(5001), // File initialization failed.
-		CORE_METHOD_FAILED(5002), CORE_FILE_DUPLICATED(5003), // File duplicated.
-		CORE_COMPRESSION_FAILURE(5004), CORE_MINIO_NOT_FOUND(5005), CORE_NOT_IMPLEMENTED(5006),
-		CORE_INTERNAL_SERVER_ERROR(5007),
-
 		// User application
 		SHOP_NOT_ON_STORE(6001), // Sorry! they don't want to sell this product!
 		SHOP_NOT_ENOUGH_GOODS_FOR_SELL(6002), // Have 3 but order 4.
@@ -57,46 +44,58 @@ public class ExceptionResponseModel {
 		MINIO_OBJECT_UNREACHABLE(7002), // Minio object is unreachable.
 		MINIO_OBJECT_INVALID(7003), // What they have and what we need are not the same.
 		MINIO_OBJECT_FORMAT_NOT_SUPPORT(7004),
-	
 
 		// User
 
 		// Others
 		DEAD(9999), // Just stupidly died with an unknown reason.
-		
-		
+
 		// User registeration
-		REGISTERATION_INVALID_EMAIL(10001),
-		REGISTERATION_INVALID_PASSWORD(10002),
-		REGISTERATION_INVALID_USERNAME(10003),
-		REGISTERATION_TAKEN_EMAIL(10004),
-		REGISTERATION_TAKEN_USERNAME(10005),
-		REGISTERATION_PASSWORD_MISMATCH(10006),
-		
+		REGISTERATION_INVALID_EMAIL(10001), // ---------
+		REGISTERATION_INVALID_PASSWORD(10002), // ---------
+		REGISTERATION_INVALID_USERNAME(10003), // ---------
+		REGISTERATION_TAKEN_EMAIL(10004), // ---------
+		REGISTERATION_TAKEN_USERNAME(10005), // ---------
+		REGISTERATION_PASSWORD_MISMATCH(10006), // ---------
+
 		// User Authentication and authorization
-		AUTHEN_INCORRECT_CREDENTIALS(20001),
-		AUTHEN_ACCOUNT_SUSPENDED(20002),
-		AUTHEN_INSUFFICIENT_PRIVILEGES(20003),
-		AUTHEN_NOT_THE_OWNER(20004),
-		AUTHEN_NOT_FOUND(20005),
-		AUTHEN_BAD_TOKEN(20006),
-		
+		AUTHEN_INCORRECT_CREDENTIALS(20001), // ---------
+		AUTHEN_ACCOUNT_SUSPENDED(20002), // ---------
+		AUTHEN_INSUFFICIENT_PRIVILEGES(20003), // ---------
+		AUTHEN_NOT_THE_OWNER(20004), // ---------
+		AUTHEN_NOT_FOUND(20005), // ---------
+		AUTHEN_BAD_TOKEN(20006), // ---------
+
 		// User action
-		USER_ACCOUNT_NOT_FOUND(30001),
-		USER_SEARCH_NOT_FOUND(30002),
-		USER_SAVE_REJECTED(30003),
-		USER_ILLEGAL_NAME(30004),
-		
+		USER_ACCOUNT_NOT_FOUND(30001), // ---------
+		USER_SEARCH_NOT_FOUND(30002), // ---------
+		USER_SAVE_REJECTED(30003), // ---------
+		USER_ILLEGAL_NAME(30004), // ---------
+
 		// Browsing
-		BROWSE_NO_RECORD_EXISTS(40001),
-		BROWSE_IMPOSSIBLE(40002),
-		BROWSE_FORBIDDEN(40003),
-		
+		BROWSE_NO_RECORD_EXISTS(40001), // ---------
+		BROWSE_IMPOSSIBLE(40002), // ---------
+		BROWSE_FORBIDDEN(40003), // ---------
+
 		// Deleting
-		RECORD_ALREADY_GONE(50001),
-		RECORE_ALREADY_EXIST(50002),
-		RECORD_INVALID_STATUS(50003);
-		
+		RECORD_ALREADY_GONE(50001), // ---------
+		RECORE_ALREADY_EXIST(50002), // ---------
+		RECORD_INVALID_STATUS(50003), // ---------
+
+		// Unavailable, at least for now.
+		FEATURE_NOT_IMPLEMENTED(60001), // Not yet done.
+		FEATURE_KNOWN_BUG(60002), // We just know that it is going to be an error.
+		FEATURE_TOO_DANGEROUS_TO_HAVE_IT(60003), // We won't let you use it...
+		FEATURE_MISS_USED(60004), // ---------
+
+		// Application core infrastructure
+		CORE_INIT_FAILED(70001), // File initialization failed.
+		CORE_METHOD_FAILED(70002), // ---------
+		CORE_FILE_DUPLICATED(70003), // File duplicated.
+		CORE_COMPRESSION_FAILURE(70004), // ---------
+		CORE_MINIO_NOT_FOUND(70005), // ---------
+		CORE_NOT_IMPLEMENTED(70006), // ---------
+		CORE_INTERNAL_SERVER_ERROR(70007);// ---------
 
 		private final int codeValue;
 

@@ -26,7 +26,6 @@ import com.application.exceptons.ExceptionResponseModel.EXCEPTION_CODES;
 import com.application.repositories.PlayTrackStatusRepository;
 import com.application.repositories.PlaylistRepository;
 import com.application.repositories.PlaylistTrackListRepository;
-import com.application.repositories.TracksRepository;
 import com.application.services.GeneralFunctionController;
 import com.application.utilities.ValidatorServices;
 
@@ -140,23 +139,22 @@ public class PlaylistController {
 	// ▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬
 	// DB-V5.1 OK!
 	// CreateMyPlaylist
-	public PlaylistModel createMyPlaylist(PlaylistForm newPlaylistForm, MultipartFile imageFile,
-			HttpServletRequest request) {
+	public PlaylistModel createMyPlaylist(PlaylistForm form, MultipartFile image, HttpServletRequest request) {
 		UserAccountModel createdBy = generalFunctionController.getUserAccount(request);
 		PlaylistModel newPlaylist = new PlaylistModel();
 		Timestamp currentTime = new Timestamp(System.currentTimeMillis());
 
-		if (!validatorServices.validatePlaylistName(newPlaylistForm.getPlaylistName())) {
+		if (!validatorServices.validatePlaylistName(form.getPlaylistName())) {
 			throw new ExceptionFoundation(EXCEPTION_CODES.USER_ILLEGAL_NAME, HttpStatus.I_AM_A_TEAPOT,
 					"[ USER_ILLEGAL_NAME ] The playlist name must have at least 4 characters and not more than 45.");
 		}
-		if (newPlaylistForm.getPlaylistDesc() == "") {
-			newPlaylistForm.setPlaylistDesc(
-					"A playlist," + newPlaylistForm.getPlaylistName() + " created by " + createdBy.getUsername());
+
+		if (form.getPlaylistDesc() == "") {
+			form.setPlaylistDesc("A playlist," + form.getPlaylistName() + " created by " + createdBy.getUsername());
 		}
 
-		newPlaylist.setPlaylistName(newPlaylistForm.getPlaylistName());
-		newPlaylist.setPlaylistDesc(newPlaylistForm.getPlaylistDesc());
+		newPlaylist.setPlaylistName(form.getPlaylistName());
+		newPlaylist.setPlaylistDesc(form.getPlaylistDesc());
 
 		newPlaylist.setCreatedDate(currentTime.toString());
 		// Assign Private Playlist when created.
@@ -166,18 +164,18 @@ public class PlaylistController {
 
 		newPlaylist = playlistRepository.save(newPlaylist);
 
-		if (newPlaylistForm.getGenres() != null && !(newPlaylistForm.getGenres().size() <= 0)) {
-			newPlaylist.setGenres(genreController.addPlaylistGenre(newPlaylist.getId(), newPlaylistForm.getGenres()));
+		if (form.getGenres() != null && !(form.getGenres().size() <= 0)) {
+			newPlaylist.setGenres(genreController.addPlaylistGenre(newPlaylist.getId(), form.getGenres()));
 		}
-		if (newPlaylistForm.getMoods() != null && !(newPlaylistForm.getMoods().size() <= 0)) {
-			newPlaylist.setMoods(moodController.addMoodToPlaylist(newPlaylist.getId(), newPlaylistForm.getMoods()));
+		if (form.getMoods() != null && !(form.getMoods().size() <= 0)) {
+			newPlaylist.setMoods(moodController.addMoodToPlaylist(newPlaylist.getId(), form.getMoods()));
 		}
-		if (newPlaylistForm.isAutoAddMusic()) {
+		if (form.isAutoAddMusic()) {
 
 		}
 
-		if (imageFile != null) {
-			String playlistThumbnailFileName = fileLinkRelController.insertNewTrackObjectLinkRel(imageFile, 301,
+		if (image != null) {
+			String playlistThumbnailFileName = fileLinkRelController.insertNewTrackObjectLinkRel(image, 301,
 					newPlaylist.getId());
 			newPlaylist.setThumbnail(playlistThumbnailFileName);
 			playlistRepository.updatePlaylistThumbnail(newPlaylist.getId(), playlistThumbnailFileName);
@@ -188,22 +186,29 @@ public class PlaylistController {
 	// ▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬
 	// DB-V5.1 OK!
 	// EditMyPlaylist
-	public PlaylistModel editMyPlaylist(PlaylistForm newInfoForm, HttpServletRequest request) {
+	public PlaylistModel editMyPlaylist(PlaylistForm form, MultipartFile image, HttpServletRequest request) {
 		UserAccountModel createdBy = generalFunctionController.getUserAccount(request);
-		PlaylistModel target = playlistRepository.findById(newInfoForm.getId())
+		PlaylistModel target = playlistRepository.findById(form.getId())
 				.orElseThrow(() -> new ExceptionFoundation(EXCEPTION_CODES.BROWSE_NO_RECORD_EXISTS,
-						HttpStatus.NOT_FOUND, "[ BROWSE_NO_RECORD_EXISTS ] The playlist with the ID "
-								+ newInfoForm.getId() + " does not exist."));
+						HttpStatus.NOT_FOUND,
+						"[ BROWSE_NO_RECORD_EXISTS ] The playlist with the ID " + form.getId() + " does not exist."));
 		generalFunctionController.checkOwnerShipForRecord(createdBy.getAccountId(),
 				target.getUserAccountModel().getAccountId());
-		if (newInfoForm.getPlaylistName() != ""
-				&& validatorServices.validatePlaylistName(newInfoForm.getPlaylistName())) {
-			target.setPlaylistName(newInfoForm.getPlaylistName());
+		if (form.getPlaylistName() != "" && validatorServices.validatePlaylistName(form.getPlaylistName())) {
+			target.setPlaylistName(form.getPlaylistName());
 		}
-		if (newInfoForm.getPlaylistDesc() != "") {
-			target.setPlaylistDesc(newInfoForm.getPlaylistDesc());
+		if (form.getPlaylistDesc() != "") {
+			target.setPlaylistDesc(form.getPlaylistDesc());
 		}
-		playlistRepository.updatePlaylist(target.getId(), target.getPlaylistName(), target.getPlaylistDesc());
+		target = playlistRepository.save(target);
+
+		if (image != null) {
+			if (fileLinkRelController.isExistsInRecord(target.getThumbnail())) {
+				fileLinkRelController.deleteTargetFileByName(target.getThumbnail());
+			}
+			playlistRepository.updatePlaylistThumbnail(form.getId(),
+					fileLinkRelController.insertNewTrackObjectLinkRel(image, 301, target.getId()));
+		}
 		return target;
 	}
 
@@ -277,7 +282,7 @@ public class PlaylistController {
 	public void deletePlaylist(int playlistId, HttpServletRequest request) {
 		UserAccountModel createdBy = generalFunctionController.getUserAccount(request);
 		if (playlistRepository.existByOwner(createdBy.getAccountId(), playlistId) != 1) {
-			throw new ExceptionFoundation(EXCEPTION_CODES.RECORD_ALREADY_GONE, HttpStatus.NOT_FOUND,
+			throw new ExceptionFoundation(EXCEPTION_CODES.BROWSE_NO_RECORD_EXISTS, HttpStatus.NOT_FOUND,
 					"[ RECORD_ALREADY_GONE ] No playlist with this ID found in this user' record. It may never exist or not the owner.");
 		} else {
 			String thumbnailInTarget = playlistRepository.getThunbmailById(playlistId, createdBy.getAccountId());
@@ -303,9 +308,9 @@ public class PlaylistController {
 		// ----
 		List<PlaylistTrackListModel> trackList = playlistTrackListRepository.listTrack(form.getId());
 
-		for (int i = 0; i < form.getTrackLst().size(); i++) {
+		for (int i = 0; i < form.getTrackIdList().size(); i++) {
 			PlaylistTrackListModel newTrack = new PlaylistTrackListModel();
-			newTrack.setId(new PlaylistTrackListCompkey(form.getTrackLst().get(i).getTrackId(), form.getId()));
+			newTrack.setId(new PlaylistTrackListCompkey(form.getTrackIdList().get(i).getTrackId(), form.getId()));
 			newTrack.setIsSkipped(0);
 			newTrack.setPlaceInList(trackList.size() + i + 1);
 
@@ -345,9 +350,9 @@ public class PlaylistController {
 		// ----
 		List<PlaylistTrackListModel> trackList = playlistTrackListRepository.listTrack(form.getId());
 
-		for (int i = 0; i < form.getTrackLst().size(); i++) {
+		for (int i = 0; i < form.getTrackIdList().size(); i++) {
 			PlaylistTrackListModel currentTrack = null;
-			PlaylistTrackListCompkey id = new PlaylistTrackListCompkey(form.getTrackLst().get(i).getTrackId(),
+			PlaylistTrackListCompkey id = new PlaylistTrackListCompkey(form.getTrackIdList().get(i).getTrackId(),
 					form.getId());
 
 			boolean isGoneFromTheList = true;

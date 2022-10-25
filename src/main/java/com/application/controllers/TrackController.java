@@ -110,7 +110,7 @@ public class TrackController {
 				.orElseThrow(() -> new ExceptionFoundation(EXCEPTION_CODES.BROWSE_NO_RECORD_EXISTS,
 						HttpStatus.NOT_FOUND, "[ BROWSE_NO_RECORD_EXISTS ] Track with this ID does not exist."));
 		if (track.getPlayTrackStatus().getId() != 1001) {
-			throw new ExceptionFoundation(EXCEPTION_CODES.BROWSE_FORBIDDEN, HttpStatus.I_AM_A_TEAPOT,
+			throw new ExceptionFoundation(EXCEPTION_CODES.BROWSE_FORBIDDEN, HttpStatus.FORBIDDEN,
 					"[ BROWSE_FORBIDDEN ] This track is not visible to public.");
 		}
 		// If logged in, search for user' favorite. If not, will just send a result.
@@ -225,7 +225,7 @@ public class TrackController {
 	// █████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████
 
 	// ▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬
-	// DB-V5 OK!
+	// DB-V5.2 OK!
 	// AddNewTrack
 	public TracksModel addNewTrack(TrackForm newTrackForm, MultipartFile trackFile, MultipartFile imageFile,
 			HttpServletRequest request) {
@@ -321,6 +321,13 @@ public class TrackController {
 
 		// if(trackInfo.getAlbumName() != null ||
 		// trackInfo.getAlbumName().equals(target.getA))
+		if (trackInfo.getAlbumName() != null && trackInfo.getAlbumName() != "") {
+			if (albumRepository.existsByAlbumName(trackInfo.getAlbumName())) {
+				tracksRepository.updateTrackAlbum(target.getId(), target.getAlbums().getId());
+			} else {
+				albumRepository.updateAlbumName(target.getAlbums().getId(), trackInfo.getAlbumName());
+			}
+		}
 
 		// If with image, do the following.
 		if (image != null) {
@@ -351,7 +358,7 @@ public class TrackController {
 			tracksRepository.updateTrackStatus(trackId, 1001);
 			return "The track ID " + trackId + ":" + target.getTrackName() + " is now visible.";
 		} else {
-			throw new ExceptionFoundation(EXCEPTION_CODES.USER_SAVE_REJECTED, HttpStatus.I_AM_A_TEAPOT,
+			throw new ExceptionFoundation(EXCEPTION_CODES.USER_SAVE_REJECTED, HttpStatus.FORBIDDEN,
 					"[ USER_SAVE_REJECTED ] This playlise is marked as removed, or in breach of the agreement.");
 		}
 
@@ -377,7 +384,7 @@ public class TrackController {
 
 	// ▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬
 	// DB-V5 OK!
-	// getFavoriteTrackList
+	// Check if the track is favorite.
 	public List<TracksModel> getFavoriteTrackList(List<TracksModel> incomingList, HttpServletRequest request) {
 		try {
 			UserAccountModel userAccount = generalFunctionController.getUserAccount(request);

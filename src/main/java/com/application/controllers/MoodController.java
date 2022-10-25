@@ -76,51 +76,11 @@ public class MoodController {
 	// delete mood
 	public void deleteMood(int moodId) {
 		if (!moodRepository.existsById(moodId)) {
-			throw new ExceptionFoundation(EXCEPTION_CODES.RECORD_ALREADY_GONE, HttpStatus.I_AM_A_TEAPOT,
+			throw new ExceptionFoundation(EXCEPTION_CODES.RECORD_ALREADY_GONE, HttpStatus.NOT_FOUND,
 					"[ RECORD_ALREADY_GONE ] This record does not exist in the database.");
 		} else {
 			moodRepository.deleteById(moodId);
 		}
-	}
-
-	// Insert new mood into user
-	public List<MoodUserModel> addMoodToUser(List<MoodModel> moods, UserAccountModel user) {
-		// int numberOfEntiry = moods.size();
-		List<MoodUserModel> newMoodList = new ArrayList<>();
-		for (int i = 0; i < moods.size(); i++) {
-			MoodUserModel newMood = new MoodUserModel();
-			newMood.setId(new MoodUserCompKey(moods.get(i).getId(), user.getAccountId()));
-			newMood.setRatio(1.0);
-			newMood.setCount(1);
-			try {
-				newMood = moodUserRepository.save(newMood);
-				newMoodList.add(newMood);
-			} catch (Exception e) {
-				System.out.println("[ WARNING ] No mood or user found. Skip adding mood to user.");
-			}
-		}
-		return newMoodList;
-	}
-
-	// Insert mood into track
-	public List<MoodTrackModel> addMoodToTrack(int trackId, List<MoodModel> moods) {
-		List<MoodModel> existingMoods = moodRepository.listMoodByTrack(trackId);
-		List<MoodTrackModel> trackMood = new ArrayList<>();
-		for (int i = 0; i < moods.size(); i++) {
-			if (!existingMoods.contains(moods.get(i))) {
-				MoodTrackModel newMood = new MoodTrackModel();
-				newMood.setId(new MoodTrackCompKey(trackId, moods.get(i).getId()));
-				newMood.setRatio(1.0);
-				newMood.setCount(1);
-				try {
-					newMood = moodTrackRepository.save(newMood);
-					trackMood.add(newMood);
-				} catch (Exception e) {
-					System.out.println("[ WARNING ] No mood or user found. Skip adding mood to user.");
-				}
-			}
-		}
-		return trackMood;
 	}
 
 	// ▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬
@@ -145,6 +105,50 @@ public class MoodController {
 			}
 		}
 		return playlistMood;
+	}
+
+	// ▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬
+	//
+	// Insert new mood into user
+	public List<MoodUserModel> addMoodToUser(List<MoodModel> moods, UserAccountModel user) {
+		// int numberOfEntiry = moods.size();
+		List<MoodUserModel> newMoodList = new ArrayList<>();
+		for (int i = 0; i < moods.size(); i++) {
+			MoodUserModel newMood = new MoodUserModel();
+			newMood.setId(new MoodUserCompKey(moods.get(i).getId(), user.getAccountId()));
+			newMood.setRatio(1.0);
+			newMood.setCount(1);
+			try {
+				newMood = moodUserRepository.save(newMood);
+				newMoodList.add(newMood);
+			} catch (Exception e) {
+				System.out.println("[ WARNING ] No mood or user found. Skip adding mood to user.");
+			}
+		}
+		return newMoodList;
+	}
+
+	// ▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬
+	//
+	// Insert mood into track
+	public List<MoodTrackModel> addMoodToTrack(int trackId, List<MoodModel> moods) {
+		List<MoodModel> existingMoods = moodRepository.listMoodByTrack(trackId);
+		List<MoodTrackModel> trackMood = new ArrayList<>();
+		for (int i = 0; i < moods.size(); i++) {
+			if (!existingMoods.contains(moods.get(i))) {
+				MoodTrackModel newMood = new MoodTrackModel();
+				newMood.setId(new MoodTrackCompKey(trackId, moods.get(i).getId()));
+				newMood.setRatio(1.0);
+				newMood.setCount(1);
+				try {
+					newMood = moodTrackRepository.save(newMood);
+					trackMood.add(newMood);
+				} catch (Exception e) {
+					System.out.println("[ WARNING ] No mood or user found. Skip adding mood to user.");
+				}
+			}
+		}
+		return trackMood;
 	}
 
 }
