@@ -158,7 +158,7 @@ public class PlaylistController {
 
 		newPlaylist.setCreatedDate(currentTime.toString());
 		// Assign Private Playlist when created.
-		newPlaylist.setPlayTrackStatus(playTrackStatusRepository.findById(2002).orElseGet(null));
+		newPlaylist.setPlayTrackStatus(playTrackStatusRepository.findById(form.getStatusId()).orElseGet(null));
 		newPlaylist.setUserAccountModel(createdBy);
 		newPlaylist.setThumbnail("");
 
