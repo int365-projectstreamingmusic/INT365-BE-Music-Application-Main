@@ -21,6 +21,6 @@ import com.application.entities.submittionforms.TrackForm;
 
 @RestController
 @RequestMapping("api/manager/track/")
-public class A4ManagerTrackManagementApis {
+public class A5AdmintApis {
 
 }

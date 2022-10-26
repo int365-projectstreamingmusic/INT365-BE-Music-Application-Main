@@ -2,6 +2,7 @@ package com.application.apis;
 
 import java.net.URI;
 import java.util.List;
+import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -23,15 +24,19 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
+import com.application.controllers.CommentsController;
 import com.application.controllers.PlayHistoryController;
 import com.application.controllers.PlaylistController;
 import com.application.controllers.TrackMarkingController;
 import com.application.controllers.UserProfileController;
+import com.application.entities.models.CommentPlaylistModel;
+import com.application.entities.models.CommentTrackModel;
 import com.application.entities.models.PlayHistoryModel;
 import com.application.entities.models.PlaylistModel;
 import com.application.entities.models.PlaylistTrackListModel;
 import com.application.entities.models.UserAccountModel;
 import com.application.entities.models.UserTrackMarkingModel;
+import com.application.entities.submittionforms.CommentForm;
 import com.application.entities.submittionforms.PlaylistForm;
 import com.application.entities.submittionforms.PlaylistOutput;
 import com.application.entities.submittionforms.UserProfileForm;
@@ -52,6 +57,8 @@ public class A2UserApis {
 	private TrackMarkingController trackMarkingController;
 	@Autowired
 	private PlayHistoryController playHistoryController;
+	@Autowired
+	private CommentsController commentsController;
 
 	// ▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬
 	// DB-V5.1 OK!
@@ -167,6 +174,65 @@ public class A2UserApis {
 				.create(ServletUriComponentsBuilder.fromCurrentContextPath().path(mapping + "myProfile").toString());
 		return ResponseEntity.created(uri)
 				.body(userProfileController.editBasicProfileInfo(profile, profileImage, request));
+	}
+
+	// ▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬
+	// Comment
+	// ---------------------
+
+	// ▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬
+	// DB-V5.2 OK!
+	// COMMENT : List my comments.
+	@GetMapping("comment")
+	public ResponseEntity<Map<String, Object>> listComment(@RequestParam(defaultValue = "0") int page,
+			@RequestParam(defaultValue = "0") int pageSize, HttpServletRequest request) {
+		return ResponseEntity.ok().body(commentsController.listMyComment(page, pageSize, request));
+	}
+
+	// ▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬
+	// DB-V5.2 OK
+	// COMMENT TRACK : Post new comment to an existing track.
+	@PostMapping("comment/track")
+	public ResponseEntity<CommentTrackModel> postNewTrackComment(@RequestBody(required = true) CommentForm form,
+			HttpServletRequest request) {
+		URI uri = URI.create(
+				ServletUriComponentsBuilder.fromCurrentContextPath().path(mapping + "comment/track").toString());
+		return ResponseEntity.created(uri).body(commentsController.postNewTrackComment(form, request));
+	}
+
+	// ▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬
+	// DB-V5.2 OK
+	// COMMENT TRACK : Delete by Id
+	@DeleteMapping("comment/track")
+	public ResponseEntity<HttpStatus> deleteTrackComment(@RequestParam(required = true) int commentId,
+			HttpServletRequest request) {
+		URI uri = URI.create(
+				ServletUriComponentsBuilder.fromCurrentContextPath().path(mapping + "comment/track").toString());
+		commentsController.deleteTrackComment(commentId, request);
+		return ResponseEntity.created(uri).body(HttpStatus.CREATED);
+	}
+
+	// ▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬
+	// DB-V5.2 OK
+	// COMMENT PLAYLIST: Post new comment to an existing playlist.
+	@PostMapping("comment/playlist")
+	public ResponseEntity<CommentPlaylistModel> postNewPlaylistComment(@RequestBody(required = true) CommentForm form,
+			HttpServletRequest request) {
+		URI uri = URI.create(
+				ServletUriComponentsBuilder.fromCurrentContextPath().path(mapping + "comment/playlist").toString());
+		return ResponseEntity.created(uri).body(commentsController.postNewPlaylistComment(form, request));
+	}
+
+	// ▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬
+	// DB-V5.2 OK
+	// COMMENT PLAYLIST: Delete by Id
+	@DeleteMapping("comment/playlist")
+	public ResponseEntity<HttpStatus> deletePlaylistComment(@RequestParam(required = true) int commentId,
+			HttpServletRequest request) {
+		URI uri = URI.create(
+				ServletUriComponentsBuilder.fromCurrentContextPath().path(mapping + "comment/playlist").toString());
+		commentsController.deletePlaylistComment(commentId, request);
+		return ResponseEntity.created(uri).body(HttpStatus.CREATED);
 	}
 
 	// ▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬

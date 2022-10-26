@@ -1,5 +1,7 @@
 package com.application.controllers;
 
+import java.util.List;
+
 import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,6 +16,7 @@ import com.application.entities.copmskeys.ArtistTrackCompKey;
 import com.application.entities.models.ArtistsModel;
 import com.application.entities.models.ArtistsTrackModel;
 import com.application.entities.models.UserAccountModel;
+import com.application.entities.submittionforms.ArtistForm;
 import com.application.entities.submittionforms.ArtistTrackForm;
 import com.application.entities.submittionforms.ArtistsEditForm;
 import com.application.exceptons.ExceptionFoundation;
@@ -37,6 +40,8 @@ public class ArtistController {
 	@Autowired
 	private GeneralFunctionController generalFunctionController;
 
+	// ▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬
+	// DB-V5.2 OK!
 	// ListAllArtists
 	public Page<ArtistsModel> listAllArtists(int page, int pageSize, String searchContent) {
 		if (page < 0) {
@@ -56,7 +61,8 @@ public class ArtistController {
 		return result;
 	}
 
-	// OK!
+	// ▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬
+	// DB-V5.2 OK!
 	// ListMyArtistList
 	public Page<ArtistsModel> listMyArtistList(int page, int pageSize, String searchContent,
 			HttpServletRequest request) {
@@ -79,7 +85,8 @@ public class ArtistController {
 		return result;
 	}
 
-	// OK!
+	// ▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬
+	// DB-V5.2 OK!
 	// DeleteArtist
 	public void deleteArtist(int artistId, HttpServletRequest request) {
 		UserAccountModel requestedBy = generalFunctionController.getUserAccount(request);
@@ -97,7 +104,8 @@ public class ArtistController {
 
 	}
 
-	// OK!
+	// ▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬
+	// DB-V5.2 OK!
 	// CheckIfArtistsExistInTrack
 	public boolean checkIfArtistsExistInTrack(int trackId) {
 		if (artistRepository.isExistInTrackId(trackId) == 1) {
@@ -107,7 +115,8 @@ public class ArtistController {
 		}
 	}
 
-	// OK!
+	// ▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬
+	// DB-V5.2 OK!
 	// ListArtistInCurrentTrack
 	public Page<ArtistsModel> listArtistInCurrentTrack(int page, int pageSize, int trackId) {
 
@@ -131,7 +140,41 @@ public class ArtistController {
 		return result;
 	}
 
-	// OK!
+	// ▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬
+	// DB-V5.2 OK!
+	// List artists in the track
+	public List<ArtistsTrackModel> listArtistTrack(int trackId) {
+		return artistTracksRepository.listArtistByTrack(trackId);
+	}
+
+	// ▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬
+	// DB-V5.2 OK!
+	// Create new artist
+	public ArtistsModel newArtist(ArtistForm form, HttpServletRequest request) {
+		UserAccountModel owner = generalFunctionController.getUserAccount(request);
+		ArtistsModel artist = new ArtistsModel();
+		artist.setAddedBy(owner.getAccountId());
+		artist.setArtistBio(form.getArtistBio());
+		artist.setArtistName(form.getArtistName());
+		artistRepository.save(artist);
+		return artist;
+	}
+
+	public ArtistsModel newArtist(ArtistForm form, UserAccountModel user) {
+		ArtistsModel artist = new ArtistsModel();
+		artist.setAddedBy(user.getAccountId());
+		artist.setArtistBio(form.getArtistBio());
+		artist.setArtistName(form.getArtistName());
+		artistRepository.save(artist);
+		return artist;
+	}
+
+	public void newArtistTrack(int trackId, ArtistsModel artist) {
+		artistTracksRepository.insertArtistTrack(trackId, artist.getArtistId(), artist.getArtistBio());
+	}
+
+	// ▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬
+	// DB-V5.2 OK!
 	// EditArtistInfo
 	public ArtistsModel editArtistInfo(ArtistsEditForm newInformation, HttpServletRequest request) {
 
@@ -160,7 +203,8 @@ public class ArtistController {
 		return targetArtistRecord;
 	}
 
-	// OK!
+	// ▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬
+	// DB-V5.2 OK!
 	// EditArtistTrackDescription
 	public ArtistsTrackModel editArtistTrackDescription(ArtistTrackForm newInfo, HttpServletRequest request) {
 
@@ -186,7 +230,8 @@ public class ArtistController {
 		return targetArtistTrackRecord;
 	}
 
-	// OK!
+	// ▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬
+	// DB-V5.2 OK!
 	// DeleteArtistFromTrack
 	public void DeleteArtistFromTrack(ArtistTrackForm targetForm, HttpServletRequest request) {
 		CheckIncomingArtistTrackForm(targetForm);
@@ -202,7 +247,8 @@ public class ArtistController {
 		artistTracksRepository.deleteById(targetArtistInTrack.getArtistTrackID());
 	}
 
-	// OK!
+	// ▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬
+	// DB-V5.2 OK!
 	// AddArtistToTrack
 	public ArtistsTrackModel addArtistToTrack(ArtistTrackForm newForm, HttpServletRequest request) {
 
@@ -214,8 +260,7 @@ public class ArtistController {
 				.orElseThrow(() -> new ExceptionFoundation(EXCEPTION_CODES.BROWSE_NO_RECORD_EXISTS,
 						HttpStatus.NOT_FOUND, "[ BROWSE_NO_RECORD_EXISTS ] This artist does not exist in this track."));
 
-		generalFunctionController.checkOwnerShipForRecord(owner.getAccountId(),
-				targetArtist.getAddedBy());
+		generalFunctionController.checkOwnerShipForRecord(owner.getAccountId(), targetArtist.getAddedBy());
 
 		ArtistsTrackModel newArtistTrack = new ArtistsTrackModel();
 		newArtistTrack.setArtistTrackID(new ArtistTrackCompKey(newForm.getTrackId(), newForm.getArtistId()));
@@ -232,6 +277,8 @@ public class ArtistController {
 		return newArtistTrack;
 	}
 
+	// ▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬
+	// DB-V5.2 OK!
 	// CheckIncomingArtistTrackForm
 	private void CheckIncomingArtistTrackForm(ArtistTrackForm form) {
 		if (form.getArtistId() <= 0 || form.getTrackId() <= 0) {
