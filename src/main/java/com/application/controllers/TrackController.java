@@ -17,8 +17,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.application.entities.models.AlbumModel;
+import com.application.entities.models.ArtistsModel;
 import com.application.entities.models.TracksModel;
 import com.application.entities.models.UserAccountModel;
+import com.application.entities.submittionforms.ArtistForm;
 import com.application.entities.submittionforms.TrackForm;
 import com.application.exceptons.ExceptionFoundation;
 import com.application.exceptons.ExceptionResponseModel.EXCEPTION_CODES;
@@ -58,6 +60,8 @@ public class TrackController {
 	private TrackStatisticController trackCountController;
 	@Autowired
 	private MoodController moodController;
+	@Autowired
+	private ArtistController artistController;
 
 	@Value("${minio.storage.track.music}")
 	String minioTrackLocation;
@@ -255,6 +259,7 @@ public class TrackController {
 		newTrack.setMoods(null);
 		newTrack.setTrackFile("-");
 		newTrack.setAlbums(null);
+		newTrack.setArtistTracks(null);
 		newTrack = tracksRepository.save(newTrack);
 
 		// Adding genre to the track
@@ -263,6 +268,17 @@ public class TrackController {
 		}
 		if (newTrackForm.getMoodList() != null && !(newTrackForm.getMoodList().size() <= 0)) {
 			newTrack.setMoods(moodController.addMoodToTrack(newTrack.getId(), newTrackForm.getMoodList()));
+		}
+
+		// Saving artist
+		if (newTrackForm.getArtist() != "") {
+			ArtistForm form = new ArtistForm();
+			form.setArtistName(newTrackForm.getArtist());
+			form.setArtistBio(
+					"An artist " + newTrackForm.getArtist() + " is added by " + requestedBy.getProfileIamge());
+			ArtistsModel artist = artistController.newArtist(form, requestedBy);
+			artistController.newArtistTrack(newTrack.getId(), artist);
+			newTrack.setArtistTracks(artistController.listArtistTrack(newTrack.getId()));
 		}
 
 		// Saving new album
@@ -373,7 +389,7 @@ public class TrackController {
 				() -> new ExceptionFoundation(EXCEPTION_CODES.BROWSE_NO_RECORD_EXISTS, HttpStatus.NOT_FOUND,
 						"[ BROWSE_NO_RECORD_EXISTS ] Track with this ID does not exist. Nothing is deleted."));
 		generalFunctionController.checkOwnerShipForRecord(owner.getAccountId(), target.getAccountId());
-		tracksRepository.deleteById(trackId);
+		tracksRepository.deleteFromDatabase(trackId);
 	}
 
 	// █████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████
