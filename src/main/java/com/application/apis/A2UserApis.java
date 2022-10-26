@@ -95,10 +95,9 @@ public class A2UserApis {
 	// ▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬
 	// DB-V5.1 OK!
 	// PLAYLIST : Edit my playlist
-	@PutMapping(value = "playlist", produces = { MediaType.APPLICATION_JSON_VALUE, MediaType.IMAGE_JPEG_VALUE,
-			MediaType.IMAGE_PNG_VALUE })
-	public ResponseEntity<PlaylistModel> editPlaylist(@RequestPart(required = true) PlaylistForm form,
-			@RequestPart(required = false) MultipartFile image, HttpServletRequest request) {
+	@PutMapping(value = "playlist")
+	public ResponseEntity<PlaylistModel> editPlaylist(@RequestPart(required = true, name = "form") PlaylistForm form,
+			@RequestPart(required = false, name = "image") MultipartFile image, HttpServletRequest request) {
 		URI uri = URI
 				.create(ServletUriComponentsBuilder.fromCurrentContextPath().path(mapping + "playlist").toString());
 		return ResponseEntity.created(uri).body(playlistController.editMyPlaylist(form, image, request));
@@ -107,8 +106,7 @@ public class A2UserApis {
 	// ▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬
 	// DB-V5.1 OK!
 	// PLAYLIST : Upload playlist thumbnail
-	@PutMapping(value = "playlist/thumbnail/{trackId}", produces = { MediaType.IMAGE_JPEG_VALUE,
-			MediaType.IMAGE_PNG_VALUE })
+	@PutMapping(value = "playlist/thumbnail/{trackId}")
 	public ResponseEntity<HttpStatus> uploadThumbnail(@PathVariable int trackId, @RequestPart MultipartFile image,
 			HttpServletRequest request) {
 		playlistController.uploadeThumbnail(trackId, image, request);
@@ -167,8 +165,7 @@ public class A2UserApis {
 	// ▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬
 	// DB-V5.1 OK!
 	// ACCOUNT : Edit my profile.
-	@PutMapping(value = "myProfile", consumes = { MediaType.APPLICATION_JSON_VALUE, MediaType.IMAGE_JPEG_VALUE,
-			MediaType.IMAGE_PNG_VALUE })
+	@PutMapping(value = "myProfile")
 	public ResponseEntity<UserAccountModel> editMyProfile(
 			@RequestPart(required = true, name = "profile") UserProfileForm profile,
 			@RequestPart(required = false, name = "profileImage") MultipartFile profileImage,
