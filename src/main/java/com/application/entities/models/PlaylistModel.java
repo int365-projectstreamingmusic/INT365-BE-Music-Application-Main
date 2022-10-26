@@ -11,6 +11,7 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
@@ -62,4 +63,7 @@ public class PlaylistModel {
 	@ManyToOne
 	@JoinColumn(name = "status_id", referencedColumnName = "status_id")
 	private PlayTrackStatusModel playTrackStatus;
+
+	@Transient
+	private List<CommentPlaylistModel> comments;
 }

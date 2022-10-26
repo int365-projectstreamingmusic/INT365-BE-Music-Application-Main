@@ -10,7 +10,10 @@ import lombok.NoArgsConstructor;
 public class CommentForm {
 
 	@Basic(optional = true)
-	private int commentType;
+	private int playlistId;
+	@Basic(optional = true)
+	private int trackId;
+
 	@Basic(optional = true)
 	private String comment;
 

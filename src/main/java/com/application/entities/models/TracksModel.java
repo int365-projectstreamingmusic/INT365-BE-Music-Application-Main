@@ -93,6 +93,9 @@ public class TracksModel {
 	private int accountId;
 
 	@Transient
+	private List<CommentTrackModel> comments;
+
+	@Transient
 	private boolean isFavorite;
 	@Transient
 	private boolean isPlayground;
