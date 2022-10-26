@@ -15,5 +15,5 @@ public interface ReportsRepository extends JpaRepository<ReportsModel, Integer> 
 	@Modifying
 	@Transactional
 	@Query(value = "UPDATE ReportsModel r SET r.isSolved = TRUE WHERE r.id = :id")
-	void setSolved();
+	void setSolved(int id);
 }
