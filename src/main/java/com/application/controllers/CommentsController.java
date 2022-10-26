@@ -152,6 +152,34 @@ public class CommentsController {
 
 	// ▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬
 	// DB-V5.2 OK!
+	// Edit track comment
+	public CommentTrackModel editTrackComment(CommentForm form, HttpServletRequest request) {
+		UserAccountModel owner = generalFunctionController.getUserAccount(request);
+		CommentTrackModel comment = commentTrackRepository.findById(form.getId())
+				.orElseThrow(() -> new ExceptionFoundation(EXCEPTION_CODES.BROWSE_NO_RECORD_EXISTS,
+						HttpStatus.NOT_FOUND, "[ BROWSE_NO_RECORD_EXISTS ] The comment with this ID does not exist."));
+		generalFunctionController.checkOwnerShipForRecord(owner.getAccountId(), comment.getUser().getAccountId());
+		comment.setComment(form.getComment());
+		commentTrackRepository.editComment(comment.getId(), comment.getComment());
+		return comment;
+	}
+
+	// ▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬
+	// DB-V5.2 OK!
+	// Edit Playlist comment
+	public CommentPlaylistModel editPlaylistComment(CommentForm form, HttpServletRequest request) {
+		UserAccountModel owner = generalFunctionController.getUserAccount(request);
+		CommentPlaylistModel comment = commentPlaylistRepository.findById(form.getId())
+				.orElseThrow(() -> new ExceptionFoundation(EXCEPTION_CODES.BROWSE_NO_RECORD_EXISTS,
+						HttpStatus.NOT_FOUND, "[ BROWSE_NO_RECORD_EXISTS ] The comment with this ID does not exist."));
+		generalFunctionController.checkOwnerShipForRecord(owner.getAccountId(), comment.getUser().getAccountId());
+		comment.setComment(form.getComment());
+		commentPlaylistRepository.editComment(comment.getId(), comment.getComment());
+		return comment;
+	}
+
+	// ▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬
+	// DB-V5.2 OK!
 	// Delete playlist comment
 	public void deletePlaylistComment(int commentId, HttpServletRequest request) {
 		UserAccountModel owner = generalFunctionController.getUserAccount(request);
@@ -174,7 +202,4 @@ public class CommentsController {
 		commentTrackRepository.deleteById(commentId);
 	}
 
-	// list all of my comment.
-
-	// list all of user comment.
 }

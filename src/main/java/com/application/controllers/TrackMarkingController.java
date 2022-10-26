@@ -34,7 +34,7 @@ public class TrackMarkingController {
 	private GeneralFunctionController generalFunctionController;
 
 	// ▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬
-	//
+	// DB-V5 OK!
 	// CheckIfFavorite
 	public boolean checkIfFavorite(int userId, int trackId) {
 		UserTrackMarkingCompkey id = new UserTrackMarkingCompkey(trackId, userId, 1001);
@@ -45,6 +45,8 @@ public class TrackMarkingController {
 		}
 	}
 
+	// ▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬
+	// DB-V5 OK!
 	// CheckIfPlayground
 	public boolean checkIfPlayground(int userId, int trackId) {
 		UserTrackMarkingCompkey id = new UserTrackMarkingCompkey(trackId, userId, 1002);

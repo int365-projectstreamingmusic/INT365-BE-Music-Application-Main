@@ -335,8 +335,7 @@ public class TrackController {
 			target.setGenreTrack(genreController.addGenreToTrack(target.getId(), trackInfo.getGenreList()));
 		}
 
-		// if(trackInfo.getAlbumName() != null ||
-		// trackInfo.getAlbumName().equals(target.getA))
+		// If with album name.
 		if (trackInfo.getAlbumName() != null && trackInfo.getAlbumName() != "") {
 			if (albumRepository.existsByAlbumName(trackInfo.getAlbumName())) {
 				tracksRepository.updateTrackAlbum(target.getId(), target.getAlbums().getId());
