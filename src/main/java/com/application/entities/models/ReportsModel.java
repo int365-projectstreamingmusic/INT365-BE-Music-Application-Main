@@ -30,12 +30,12 @@ public class ReportsModel {
 	@Column(name = "report_id")
 	private int id;
 
-	//@Column(name = "reported_by")
+	// @Column(name = "reported_by")
 	@ManyToOne
 	@JoinColumn(name = "reported_by", referencedColumnName = "account_id", insertable = false, updatable = false)
 	private UserAccountModel reportedBy;
 
-	//@Column(name = "reported_user")
+	// @Column(name = "reported_user")
 	@Nullable
 	@Basic(optional = true)
 	@ManyToOne
@@ -58,10 +58,14 @@ public class ReportsModel {
 
 	@Column(name = "report_text")
 	private String reportText;
-	
+
 	@Column(name = "report_ref")
 	private String reportRef;
-	
+
+	@ManyToOne
+	@JoinColumn(name = "report_group_id", referencedColumnName = "id")
+	private ReportGroupModel reportGroup;
+
 	@ManyToOne
 	@JoinColumn(name = "type_id", referencedColumnName = "type_id")
 	private ReportTypeModel type;

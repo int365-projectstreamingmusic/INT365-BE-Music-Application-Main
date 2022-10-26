@@ -45,6 +45,7 @@ public class ReportController {
 				EXCEPTION_CODES.BROWSE_NO_RECORD_EXISTS, HttpStatus.NOT_FOUND,
 				"[ BROWSE_NO_RECORD_EXISTS ] The report id " + reportId + " does not exist or deleted by user."));
 		report.setSolved(true);
+		reportsRepository.setSolved(reportId);
 		reportsRepository.save(report);
 	}
 
