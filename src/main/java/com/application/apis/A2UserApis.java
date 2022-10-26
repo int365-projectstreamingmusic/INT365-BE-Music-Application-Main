@@ -8,6 +8,7 @@ import javax.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -75,7 +76,8 @@ public class A2UserApis {
 	// ▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬
 	// DB-V5.1 OK!
 	// PLAYLIST : Create Playlist
-	@PostMapping("playlist")
+	@PostMapping(value = "playlist", produces = { MediaType.APPLICATION_JSON_VALUE, MediaType.IMAGE_JPEG_VALUE,
+			MediaType.IMAGE_PNG_VALUE })
 	public ResponseEntity<PlaylistModel> createNewPlaylist(@RequestPart(required = true) PlaylistForm form,
 			@RequestPart(required = false) MultipartFile image, HttpServletRequest request) {
 		URI uri = URI
@@ -86,7 +88,8 @@ public class A2UserApis {
 	// ▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬
 	// DB-V5.1 OK!
 	// PLAYLIST : Edit my playlist
-	@PutMapping("playlist")
+	@PutMapping(value = "playlist", produces = { MediaType.APPLICATION_JSON_VALUE, MediaType.IMAGE_JPEG_VALUE,
+			MediaType.IMAGE_PNG_VALUE })
 	public ResponseEntity<PlaylistModel> editPlaylist(@RequestPart(required = true) PlaylistForm form,
 			@RequestPart(required = false) MultipartFile image, HttpServletRequest request) {
 		URI uri = URI
@@ -97,7 +100,8 @@ public class A2UserApis {
 	// ▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬
 	// DB-V5.1 OK!
 	// PLAYLIST : Upload playlist thumbnail
-	@PutMapping("playlist/thumbnail/{trackId}")
+	@PutMapping(value = "playlist/thumbnail/{trackId}", produces = { MediaType.IMAGE_JPEG_VALUE,
+			MediaType.IMAGE_PNG_VALUE })
 	public ResponseEntity<HttpStatus> uploadThumbnail(@PathVariable int trackId, @RequestPart MultipartFile image,
 			HttpServletRequest request) {
 		playlistController.uploadeThumbnail(trackId, image, request);

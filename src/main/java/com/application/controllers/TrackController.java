@@ -389,11 +389,14 @@ public class TrackController {
 		try {
 			UserAccountModel userAccount = generalFunctionController.getUserAccount(request);
 			for (int i = 0; i < incomingList.size(); i++) {
+				TracksModel currentTrackCheck = incomingList.get(i);
 				if (trackMarkingController.checkIfFavorite(userAccount.getAccountId(), incomingList.get(i).getId())) {
-					TracksModel currentTrackCheck = incomingList.get(i);
 					currentTrackCheck.setFavorite(true);
-					incomingList.set(i, currentTrackCheck);
 				}
+				if (trackMarkingController.checkIfFavorite(userAccount.getAccountId(), incomingList.get(i).getId())) {
+					currentTrackCheck.setPlayground(true);
+				}
+				incomingList.set(i, currentTrackCheck);
 			}
 			return incomingList;
 		} catch (Exception e) {

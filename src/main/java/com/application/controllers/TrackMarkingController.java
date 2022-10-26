@@ -43,7 +43,16 @@ public class TrackMarkingController {
 		} else {
 			return false;
 		}
+	}
 
+	// CheckIfPlayground
+	public boolean checkIfPlayground(int userId, int trackId) {
+		UserTrackMarkingCompkey id = new UserTrackMarkingCompkey(trackId, userId, 1002);
+		if (userTrackMarkingRepository.existsById(id)) {
+			return true;
+		} else {
+			return false;
+		}
 	}
 
 	// ▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬
@@ -121,6 +130,14 @@ public class TrackMarkingController {
 				UserTrackMarkingModel current = result.getContent().get(i);
 				TracksModel currentTrack = current.getTrack();
 				currentTrack.setFavorite(true);
+				current.setTrack(currentTrack);
+				finalResult.add(current);
+			}
+		} else if (trackMarkingId == 1002) {
+			for (int i = 0; i < result.getContent().size(); i++) {
+				UserTrackMarkingModel current = result.getContent().get(i);
+				TracksModel currentTrack = current.getTrack();
+				currentTrack.setPlayground(true);
 				current.setTrack(currentTrack);
 				finalResult.add(current);
 			}
