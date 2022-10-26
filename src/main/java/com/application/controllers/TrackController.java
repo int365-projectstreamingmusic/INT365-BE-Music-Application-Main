@@ -95,8 +95,8 @@ public class TrackController {
 			}
 		}
 		// If logged in, search for user' favorite. If not, will just send a result.
-		return new PageImpl<>(getFavoriteTrackList(result.stream().collect(Collectors.toList()), request),
-				sendPageRequest, result.getTotalElements());
+		return new PageImpl<>(getTrackMarking(result.stream().collect(Collectors.toList()),
+				generalFunctionController.getUserAccount(request)), sendPageRequest, result.getTotalElements());
 
 	}
 
@@ -140,7 +140,7 @@ public class TrackController {
 					"[ BROWSE_NO_RECORD_EXISTS ] No track released today.");
 		}
 		// If logged in, search for user' favorite. If not, will just send a result.
-		return getFavoriteTrackList(result, request);
+		return getTrackMarking(result, generalFunctionController.getUserAccount(request));
 	}
 
 	// ▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬
@@ -151,7 +151,7 @@ public class TrackController {
 			numberOfTracks = trackMaxPageSize;
 		}
 		List<TracksModel> result = tracksRepository.listTopTrack(numberOfTracks);
-		return getFavoriteTrackList(result, request);
+		return getTrackMarking(result, generalFunctionController.getUserAccount(request));
 	}
 
 	// ▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬
@@ -168,7 +168,7 @@ public class TrackController {
 		String to = trackCountController.getTimeStampFromMilisecond(timestampToday).toString();
 
 		List<TracksModel> result = tracksRepository.listTopTrack(numberOfTracks, from, to);
-		return getFavoriteTrackList(result, request);
+		return getTrackMarking(result, generalFunctionController.getUserAccount(request));
 	}
 
 	// ▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬
@@ -191,8 +191,8 @@ public class TrackController {
 			throw new ExceptionFoundation(EXCEPTION_CODES.SEARCH_NOT_FOUND, HttpStatus.NOT_FOUND,
 					"[ TrackController ] Found nothing here. Seems like there is no track here.");
 		}
-		return new PageImpl<>(getFavoriteTrackList(result.stream().collect(Collectors.toList()), request),
-				sendPageRequest, result.getTotalElements());
+		return new PageImpl<>(getTrackMarking(result.stream().collect(Collectors.toList()),
+				generalFunctionController.getUserAccount(request)), sendPageRequest, result.getTotalElements());
 	}
 
 	// ▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬
@@ -218,8 +218,8 @@ public class TrackController {
 			throw new ExceptionFoundation(EXCEPTION_CODES.SEARCH_NOT_FOUND, HttpStatus.NOT_FOUND,
 					"[ TrackController ] Found nothing here. Seems like there is no track here.");
 		}
-		return new PageImpl<>(getFavoriteTrackList(result.stream().collect(Collectors.toList()), request),
-				sendPageRequest, result.getTotalElements());
+		return new PageImpl<>(getTrackMarking(result.stream().collect(Collectors.toList()),
+				generalFunctionController.getUserAccount(request)), sendPageRequest, result.getTotalElements());
 	}
 
 	// █████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████
@@ -400,15 +400,14 @@ public class TrackController {
 	// ▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬
 	// DB-V5 OK!
 	// Check if the track is favorite.
-	public List<TracksModel> getFavoriteTrackList(List<TracksModel> incomingList, HttpServletRequest request) {
+	public List<TracksModel> getTrackMarking(List<TracksModel> incomingList, UserAccountModel userAccount) {
 		try {
-			UserAccountModel userAccount = generalFunctionController.getUserAccount(request);
 			for (int i = 0; i < incomingList.size(); i++) {
 				TracksModel currentTrackCheck = incomingList.get(i);
 				if (trackMarkingController.checkIfFavorite(userAccount.getAccountId(), incomingList.get(i).getId())) {
 					currentTrackCheck.setFavorite(true);
 				}
-				if (trackMarkingController.checkIfFavorite(userAccount.getAccountId(), incomingList.get(i).getId())) {
+				if (trackMarkingController.checkIfPlayground(userAccount.getAccountId(), incomingList.get(i).getId())) {
 					currentTrackCheck.setPlayground(true);
 				}
 				incomingList.set(i, currentTrackCheck);

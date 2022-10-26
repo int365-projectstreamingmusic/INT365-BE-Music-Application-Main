@@ -60,7 +60,7 @@ public class ReportsModel {
 	private String reportText;
 
 	@Column(name = "report_ref")
-	private String reportRef;
+	private int reportRef;
 
 	@ManyToOne
 	@JoinColumn(name = "report_group_id", referencedColumnName = "id")
