@@ -167,10 +167,12 @@ public class A2UserApis {
 	// ▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬
 	// DB-V5.1 OK!
 	// ACCOUNT : Edit my profile.
-	@PutMapping(value = "myProfile", produces = { MediaType.APPLICATION_JSON_VALUE, MediaType.IMAGE_JPEG_VALUE,
+	@PutMapping(value = "myProfile", consumes = { MediaType.APPLICATION_JSON_VALUE, MediaType.IMAGE_JPEG_VALUE,
 			MediaType.IMAGE_PNG_VALUE })
-	public ResponseEntity<UserAccountModel> editMyProfile(@RequestPart(required = true) UserProfileForm profile,
-			@RequestPart(required = false) MultipartFile profileImage, HttpServletRequest request) {
+	public ResponseEntity<UserAccountModel> editMyProfile(
+			@RequestPart(required = true, name = "profile") UserProfileForm profile,
+			@RequestPart(required = false, name = "profileImage") MultipartFile profileImage,
+			HttpServletRequest request) {
 		URI uri = URI
 				.create(ServletUriComponentsBuilder.fromCurrentContextPath().path(mapping + "myProfile").toString());
 		return ResponseEntity.created(uri)
