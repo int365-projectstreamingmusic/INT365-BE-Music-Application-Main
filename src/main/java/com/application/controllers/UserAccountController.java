@@ -182,7 +182,7 @@ public class UserAccountController {
 		userRoleModelRepository.insertNewRecord(targetUser.getAccountId(), suspendingRoleNumber);
 
 		ReportsModel newReport = new ReportsModel();
-		newReport.setIsSolved(1);
+		newReport.setSolved(true);
 		newReport.setReportedBy(targetUser);
 		newReport.setReportedToUser(targetUser);
 

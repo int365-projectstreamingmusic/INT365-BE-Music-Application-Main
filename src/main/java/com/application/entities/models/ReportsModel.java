@@ -43,7 +43,7 @@ public class ReportsModel {
 	private UserAccountModel reportedToUser;
 
 	@Column(name = "is_solved")
-	private int isSolved;
+	private boolean isSolved;
 
 	@Column(name = "report_date")
 	@JsonFormat(pattern = "yyyy/mm/dd")
