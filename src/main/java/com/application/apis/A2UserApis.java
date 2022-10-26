@@ -167,7 +167,8 @@ public class A2UserApis {
 	// ▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬
 	// DB-V5.1 OK!
 	// ACCOUNT : Edit my profile.
-	@PutMapping("myProfile")
+	@PutMapping(value = "myProfile", produces = { MediaType.APPLICATION_JSON_VALUE, MediaType.IMAGE_JPEG_VALUE,
+			MediaType.IMAGE_PNG_VALUE })
 	public ResponseEntity<UserAccountModel> editMyProfile(@RequestPart(required = true) UserProfileForm profile,
 			@RequestPart(required = false) MultipartFile profileImage, HttpServletRequest request) {
 		URI uri = URI
@@ -233,6 +234,24 @@ public class A2UserApis {
 				ServletUriComponentsBuilder.fromCurrentContextPath().path(mapping + "comment/playlist").toString());
 		commentsController.deletePlaylistComment(commentId, request);
 		return ResponseEntity.created(uri).body(HttpStatus.CREATED);
+	}
+
+	// COMMENT TRACK : Edit comment
+	@PutMapping("comment/track")
+	public ResponseEntity<CommentTrackModel> editTrackComment(@RequestBody(required = true) CommentForm form,
+			HttpServletRequest request) {
+		URI uri = URI.create(
+				ServletUriComponentsBuilder.fromCurrentContextPath().path(mapping + "comment/track").toString());
+		return ResponseEntity.created(uri).body(commentsController.editTrackComment(form, request));
+	}
+
+	// COMMENT PLAYLIST : Edit comment
+	@PutMapping("comment/playlist")
+	public ResponseEntity<CommentPlaylistModel> editPlaylistComment(@RequestBody(required = true) CommentForm form,
+			HttpServletRequest request) {
+		URI uri = URI.create(
+				ServletUriComponentsBuilder.fromCurrentContextPath().path(mapping + "comment/track").toString());
+		return ResponseEntity.created(uri).body(commentsController.editPlaylistComment(form, request));
 	}
 
 	// ▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬

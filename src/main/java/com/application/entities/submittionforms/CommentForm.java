@@ -16,5 +16,7 @@ public class CommentForm {
 
 	@Basic(optional = true)
 	private String comment;
+	@Basic(optional = true)
+	private int id;
 
 }
