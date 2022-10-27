@@ -70,4 +70,21 @@ public class ReportsModel {
 	@JoinColumn(name = "type_id", referencedColumnName = "type_id")
 	private ReportTypeModel type;
 
+	public enum REPORT_TYPE {
+
+		SOLVED_WITH_WARNING(101), SOLVED_WITH_NONE(102), SOLVED_WITH_SUSPEND(103), REPORT_USER(1101),
+		REPORT_TRACK(1200), REPORT_COMMENT_TRACK(1300), REPORT_COMMENT_PLAYLIST(1400), REPORT_PLAYLIST(1500),
+		DELETED_BY_USER(8002);
+
+		private final int codeValue;
+
+		private REPORT_TYPE(int codeValue) {
+			this.codeValue = codeValue;
+		}
+
+		public int getCodeValue() {
+			return codeValue;
+		}
+	}
+
 }

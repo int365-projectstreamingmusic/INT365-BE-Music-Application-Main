@@ -171,9 +171,6 @@ public class TrackMarkingController {
 		if (form.getTrackId().length <= 0) {
 			throw new ExceptionFoundation(EXCEPTION_CODES.BROWSE_IMPOSSIBLE, HttpStatus.I_AM_A_TEAPOT,
 					"[ BROWSE_IMPOSSIBLE ] You can't leave the track list ID blank.");
-		} else if (form.getMarkingId() != 1001) {
-			throw new ExceptionFoundation(EXCEPTION_CODES.SAVE_FORBIDDEN, HttpStatus.NOT_FOUND,
-					"[ SAVE_FORBIDDEN ] The status ID is invalid.");
 		} else {
 			List<UserTrackMarkingModel> resultList = new ArrayList<>();
 			for (int i = 0; i < form.getTrackId().length; i++) {
@@ -198,9 +195,6 @@ public class TrackMarkingController {
 		if (form.getTrackId().length <= 0) {
 			throw new ExceptionFoundation(EXCEPTION_CODES.BROWSE_IMPOSSIBLE, HttpStatus.I_AM_A_TEAPOT,
 					"[ BROWSE_IMPOSSIBLE ] You can't leave the track list ID blank.");
-		} else if (form.getMarkingId() != 1002) {
-			throw new ExceptionFoundation(EXCEPTION_CODES.SAVE_FORBIDDEN, HttpStatus.NOT_FOUND,
-					"[ SAVE_FORBIDDEN ] The status ID is invalid.");
 		} else {
 			List<UserTrackMarkingModel> resultList = new ArrayList<>();
 			for (int i = 0; i < form.getTrackId().length; i++) {
@@ -225,9 +219,6 @@ public class TrackMarkingController {
 		if (form.getTrackId().length <= 0) {
 			throw new ExceptionFoundation(EXCEPTION_CODES.BROWSE_IMPOSSIBLE, HttpStatus.I_AM_A_TEAPOT,
 					"[ BROWSE_IMPOSSIBLE ] When deleting a list of favorite, You can't leave the track list ID blank.");
-		} else if (form.getMarkingId() != 1001) {
-			throw new ExceptionFoundation(EXCEPTION_CODES.SAVE_FORBIDDEN, HttpStatus.NOT_FOUND,
-					"[ SAVE_FORBIDDEN ] The status ID is invalid.");
 		} else {
 			for (int i = 0; i < form.getTrackId().length; i++) {
 				UserTrackMarkingCompkey id = new UserTrackMarkingCompkey(Array.getInt(form.getTrackId(), i),
@@ -247,9 +238,6 @@ public class TrackMarkingController {
 		if (form.getTrackId().length <= 0) {
 			throw new ExceptionFoundation(EXCEPTION_CODES.BROWSE_IMPOSSIBLE, HttpStatus.I_AM_A_TEAPOT,
 					"[ BROWSE_IMPOSSIBLE ] When deleting a list of favorite, You can't leave the track list ID blank.");
-		} else if (form.getMarkingId() != 1002) {
-			throw new ExceptionFoundation(EXCEPTION_CODES.SAVE_FORBIDDEN, HttpStatus.NOT_FOUND,
-					"[ SAVE_FORBIDDEN ] The status ID is invalid.");
 		} else {
 			for (int i = 0; i < form.getTrackId().length; i++) {
 				UserTrackMarkingCompkey id = new UserTrackMarkingCompkey(Array.getInt(form.getTrackId(), i),
