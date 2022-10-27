@@ -34,11 +34,13 @@ import com.application.entities.models.CommentTrackModel;
 import com.application.entities.models.PlayHistoryModel;
 import com.application.entities.models.PlaylistModel;
 import com.application.entities.models.PlaylistTrackListModel;
+import com.application.entities.models.TrackMarkingModel;
 import com.application.entities.models.UserAccountModel;
 import com.application.entities.models.UserTrackMarkingModel;
 import com.application.entities.submittionforms.CommentForm;
 import com.application.entities.submittionforms.PlaylistForm;
 import com.application.entities.submittionforms.PlaylistOutput;
+import com.application.entities.submittionforms.TrackMarkingForm;
 import com.application.entities.submittionforms.UserProfileForm;
 import com.application.exceptons.ExceptionFoundation;
 import com.application.exceptons.ExceptionResponseModel.EXCEPTION_CODES;
@@ -77,7 +79,7 @@ public class A2UserApis {
 	public ResponseEntity<PlaylistOutput> GetMyOwnedPlaylistById(@PathVariable int id,
 			@RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "0") int pageSize,
 			@RequestParam(defaultValue = "") String searchContent, HttpServletRequest request) {
-		return ResponseEntity.ok().body(playlistController.getPlaylistByID(id, page, pageSize, searchContent, request));
+		return ResponseEntity.ok().body(playlistController.getPlaylistById(id, page, pageSize, searchContent, request));
 	}
 
 	// ▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬
@@ -257,6 +259,7 @@ public class A2UserApis {
 	// Playground
 	// ---------------------
 
+	// PLAYGROUND : List all track in playground.
 	@GetMapping("Playground")
 	public ResponseEntity<Page<UserTrackMarkingModel>> getMyPlayground(@RequestParam(defaultValue = "0") int page,
 			@RequestParam(defaultValue = "0") int pageSize, @RequestParam(defaultValue = "") String searchContent,
@@ -265,6 +268,7 @@ public class A2UserApis {
 				1002, searchContent, request));
 	}
 
+	// PLAYGROUND : Add one to playground.
 	@PostMapping("Playground")
 	public ResponseEntity<UserTrackMarkingModel> addTrackToMyPlayground(@RequestParam(required = true) int trackId,
 			HttpServletRequest request) {
@@ -273,6 +277,7 @@ public class A2UserApis {
 		return ResponseEntity.created(uri).body(trackMarkingController.addNewTrackMarking(trackId, 1002, request));
 	}
 
+	// PLAYGROUND : Remove one from playground.
 	@DeleteMapping("Playground")
 	public ResponseEntity<HttpStatus> deleteTrackFromMyPlayground(@RequestParam(required = true) int trackId,
 			HttpServletRequest request) {
@@ -282,6 +287,7 @@ public class A2UserApis {
 		return ResponseEntity.created(uri).body(HttpStatus.CREATED);
 	}
 
+	// PLAYGROUND : Delete all from playground.
 	@DeleteMapping("Playground/clear")
 	public ResponseEntity<HttpStatus> clearMyPlayground(@RequestParam(required = true) int trackId,
 			HttpServletRequest request) {
@@ -291,10 +297,40 @@ public class A2UserApis {
 		return ResponseEntity.created(uri).body(HttpStatus.CREATED);
 	}
 
+	// PLAYGROUND : Add many to playground.
+	@PostMapping("Playground/add")
+	public ResponseEntity<List<UserTrackMarkingModel>> addManyTracksToPlayground(
+			@RequestBody(required = true) TrackMarkingForm form, HttpServletRequest request) {
+		URI uri = URI.create(
+				ServletUriComponentsBuilder.fromCurrentContextPath().path(mapping + "Playground/add").toString());
+		return ResponseEntity.created(uri).body(trackMarkingController.addManyToPlayground(form, request));
+	}
+
+	// PLAYGROUND : delete many to playground.
+	@DeleteMapping("Playground/remove")
+	public ResponseEntity<HttpStatus> removeManyFromPlayground(@RequestBody(required = true) TrackMarkingForm form,
+			HttpServletRequest request) {
+		trackMarkingController.removeManyFromPlayground(form, request);
+		URI uri = URI.create(
+				ServletUriComponentsBuilder.fromCurrentContextPath().path(mapping + "Playground/remove").toString());
+		return ResponseEntity.created(uri).body(HttpStatus.CREATED);
+	}
+
+	// FAVORITE : delete may from favrite
+	@DeleteMapping("Favorite/remove")
+	public ResponseEntity<HttpStatus> removeManyFromFavorite(@RequestBody(required = true) TrackMarkingForm form,
+			HttpServletRequest request) {
+		trackMarkingController.removeManyFromFavorite(form, request);
+		URI uri = URI.create(
+				ServletUriComponentsBuilder.fromCurrentContextPath().path(mapping + "Playground/remove").toString());
+		return ResponseEntity.created(uri).body(HttpStatus.CREATED);
+	}
+
 	// ▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬
 	// Favourite
 	// ---------------------
 
+	// FAVORITE : List my favorite tracks.
 	@GetMapping("Favorite")
 	public ResponseEntity<Page<UserTrackMarkingModel>> getMyFavoriteList(@RequestParam(defaultValue = "0") int page,
 			@RequestParam(defaultValue = "0") int pageSize, @RequestParam(defaultValue = "") String searchContent,
@@ -303,6 +339,7 @@ public class A2UserApis {
 				1001, searchContent, request));
 	}
 
+	// FAVORITE : Add one favorite.
 	@PostMapping("Favorite")
 	public ResponseEntity<UserTrackMarkingModel> addMyFavoriteTrack(@RequestParam(required = true) int trackId,
 			HttpServletRequest request) {
@@ -311,6 +348,7 @@ public class A2UserApis {
 		return ResponseEntity.created(uri).body(trackMarkingController.addNewTrackMarking(trackId, 1001, request));
 	}
 
+	// FAVORITE : Delete one favorite.
 	@DeleteMapping("Favorite")
 	public ResponseEntity<HttpStatus> deleteTrackFromMyFavorite(@RequestParam(required = true) int trackId,
 			HttpServletRequest request) {
@@ -318,6 +356,15 @@ public class A2UserApis {
 				.create(ServletUriComponentsBuilder.fromCurrentContextPath().path(mapping + "Favorite").toString());
 		trackMarkingController.removeTrackMarking(trackId, 1001, request);
 		return ResponseEntity.created(uri).body(HttpStatus.CREATED);
+	}
+
+	// FAVORITE : Add many favorite.
+	@PostMapping("Favorite/add")
+	public ResponseEntity<List<UserTrackMarkingModel>> addManyTracksToFavorite(
+			@RequestBody(required = true) TrackMarkingForm form, HttpServletRequest request) {
+		URI uri = URI
+				.create(ServletUriComponentsBuilder.fromCurrentContextPath().path(mapping + "Favorite/add").toString());
+		return ResponseEntity.created(uri).body(trackMarkingController.AddManyFavorite(form, request));
 	}
 
 	// ▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬

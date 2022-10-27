@@ -1,6 +1,7 @@
 package com.application.controllers;
 
 import java.sql.Timestamp;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -8,6 +9,7 @@ import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.PropertySource;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
@@ -18,9 +20,11 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.application.entities.models.AlbumModel;
 import com.application.entities.models.ArtistsModel;
+import com.application.entities.models.PlaylistModel;
 import com.application.entities.models.TracksModel;
 import com.application.entities.models.UserAccountModel;
 import com.application.entities.submittionforms.ArtistForm;
+import com.application.entities.submittionforms.PlaylistOutputTrack;
 import com.application.entities.submittionforms.TrackForm;
 import com.application.exceptons.ExceptionFoundation;
 import com.application.exceptons.ExceptionResponseModel.EXCEPTION_CODES;
@@ -31,12 +35,15 @@ import com.application.services.GeneralFunctionController;
 import com.application.utilities.MinioStorageService;
 
 @Service
+@PropertySource("application.properties")
 public class TrackController {
 
 	@Value("${general.track.default-page-size}")
 	private int trackDefaultSize;
 	@Value("${general.track.max-page-size}")
 	private int trackMaxPageSize;
+	@Value("${application.default.image.track}")
+	private String defaultTrackImage;
 
 	@Autowired
 	private TracksRepository tracksRepository;
@@ -200,17 +207,10 @@ public class TrackController {
 	// Get list of track in playlist
 	public Page<TracksModel> listTrackByPlaylist(int playlistId, int page, int pageSize, String searchContent,
 			boolean isByPlaylistOwner, HttpServletRequest request) {
-		if (page < 0) {
-			page = 0;
-		}
-		if (pageSize < 1 || pageSize > trackMaxPageSize) {
-			pageSize = trackDefaultSize;
-		}
-
-		Pageable sendPageRequest = PageRequest.of(page, pageSize);
+		Pageable sendPageRequest = getPageRequest(page, pageSize);
 		Page<TracksModel> result;
 		if (isByPlaylistOwner) {
-			result = tracksRepository.listAllByPlaylistOwner(playlistId, searchContent, sendPageRequest);
+			result = tracksRepository.listAllByPlaylistId(playlistId, searchContent, sendPageRequest);
 		} else {
 			result = tracksRepository.listAllByPlaylist(playlistId, searchContent, sendPageRequest);
 		}
@@ -220,6 +220,89 @@ public class TrackController {
 		}
 		return new PageImpl<>(getTrackMarking(result.stream().collect(Collectors.toList()),
 				generalFunctionController.getUserAccount(request)), sendPageRequest, result.getTotalElements());
+	}
+
+	// ▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬
+	// DB-V5.1 OK!
+	// List tracks in the playground that is owned by that user.
+	public Page<PlaylistOutputTrack> getTrackInPlaylistById(PlaylistModel playlist, String searcnContent,
+			Pageable pageRequest, UserAccountModel user) {
+		Page<TracksModel> trackResult = tracksRepository.listAllByPlaylistId(playlist.getId(), searcnContent,
+				pageRequest);
+		if (trackResult.getContent().size() <= 0) {
+			throw new ExceptionFoundation(EXCEPTION_CODES.BROWSE_NO_RECORD_EXISTS, HttpStatus.NOT_FOUND,
+					"[ BROWSE_NO_RECORD_EXISTS ] This playlist has no music for a moment.");
+		} else {
+			List<TracksModel> trackList = getTrackMarking(trackResult.getContent(), user);
+			List<PlaylistOutputTrack> outputTrack = new ArrayList<>();
+			for (int i = 0; i < trackList.size(); i++) {
+				PlaylistOutputTrack current = new PlaylistOutputTrack();
+				// If not public, set null.
+				if (trackList.get(i).getPlayTrackStatus().getId() != 1001
+						&& trackList.get(i).getAccountId() != user.getAccountId()
+						&& user.getAccountId() == playlist.getUserAccountModel().getAccountId()) {
+					current.setFavorite(trackList.get(i).isFavorite());
+					current.setId(trackList.get(i).getId());
+					current.setPlayground(trackList.get(i).isPlayground());
+					current.setTrackFile(null);
+					current.setTrackName("Unavailable");
+					current.setTrackThumbnail(defaultTrackImage);
+					current.setStatus(trackList.get(i).getPlayTrackStatus());
+					outputTrack.add(current);
+				} else {
+					current.setFavorite(trackList.get(i).isFavorite());
+					current.setId(trackList.get(i).getId());
+					current.setPlayground(trackList.get(i).isPlayground());
+					current.setTrackFile(trackList.get(i).getTrackFile());
+					current.setTrackName(trackList.get(i).getTrackName());
+					current.setTrackThumbnail(trackList.get(i).getTrackThumbnail());
+					current.setStatus(trackList.get(i).getPlayTrackStatus());
+					outputTrack.add(current);
+				}
+			}
+			return new PageImpl<>(outputTrack, pageRequest, trackResult.getNumberOfElements());
+		}
+	}
+
+	public Page<PlaylistOutputTrack> getTrackInPlaylistById(int playlistId, String searcnContent,
+			Pageable pageRequest) {
+		Page<TracksModel> trackResult = tracksRepository.listAllByPlaylistId(playlistId, searcnContent, pageRequest);
+		if (trackResult.getContent().size() <= 0) {
+			throw new ExceptionFoundation(EXCEPTION_CODES.BROWSE_NO_RECORD_EXISTS, HttpStatus.NOT_FOUND,
+					"[ BROWSE_NO_RECORD_EXISTS ] This playlist has no music for a moment.");
+		} else {
+			List<TracksModel> trackList = trackResult.getContent();
+			List<PlaylistOutputTrack> outputTrack = new ArrayList<>();
+			for (int i = 0; i < trackList.size(); i++) {
+				PlaylistOutputTrack current = new PlaylistOutputTrack();
+				// If not public, set null.
+				if (!(trackList.get(i).getPlayTrackStatus().getId() != 1001)) {
+					current.setId(trackList.get(i).getId());
+					current.setTrackFile(trackList.get(i).getTrackFile());
+					current.setTrackName(trackList.get(i).getTrackName());
+					current.setTrackThumbnail(trackList.get(i).getTrackThumbnail());
+					current.setStatus(trackList.get(i).getPlayTrackStatus());
+					outputTrack.add(current);
+				}
+			}
+			return new PageImpl<>(outputTrack, pageRequest, trackResult.getNumberOfElements());
+		}
+
+	}
+
+	// ▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬
+	// DB-V5.1 OK!
+	// Send page request back to another function.
+	public Pageable getPageRequest(int page, int pageSize) {
+		if (page < 0) {
+			page = 0;
+		}
+		if (pageSize < 1 || pageSize > trackMaxPageSize) {
+			pageSize = trackDefaultSize;
+		}
+
+		Pageable sendPageRequest = PageRequest.of(page, pageSize);
+		return sendPageRequest;
 	}
 
 	// █████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████
@@ -402,6 +485,7 @@ public class TrackController {
 	// Check if the track is favorite.
 	public List<TracksModel> getTrackMarking(List<TracksModel> incomingList, UserAccountModel userAccount) {
 		try {
+			List<TracksModel> result = new ArrayList<>();
 			for (int i = 0; i < incomingList.size(); i++) {
 				TracksModel currentTrackCheck = incomingList.get(i);
 				if (trackMarkingController.checkIfFavorite(userAccount.getAccountId(), incomingList.get(i).getId())) {
@@ -410,11 +494,12 @@ public class TrackController {
 				if (trackMarkingController.checkIfPlayground(userAccount.getAccountId(), incomingList.get(i).getId())) {
 					currentTrackCheck.setPlayground(true);
 				}
-				incomingList.set(i, currentTrackCheck);
+				result.add(currentTrackCheck);
 			}
 			return incomingList;
 		} catch (Exception e) {
-			return incomingList;
+			throw new ExceptionFoundation(EXCEPTION_CODES.CORE_INTERNAL_SERVER_ERROR, HttpStatus.INTERNAL_SERVER_ERROR,
+					"[ CORE_INTERNAL_SERVER_ERROR ] " + e.getLocalizedMessage());
 		}
 	}
 }

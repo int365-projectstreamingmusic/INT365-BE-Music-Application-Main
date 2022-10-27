@@ -2,11 +2,6 @@ package com.application.entities.submittionforms;
 
 import javax.persistence.Basic;
 
-import org.springframework.data.domain.Page;
-import org.springframework.lang.Nullable;
-
-import com.application.entities.models.PlaylistModel;
-
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -14,13 +9,11 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class PlaylistOutput {
+public class TrackMarkingForm {
 
 	@Basic(optional = true)
-	private PlaylistModel playlist;
-
+	private int markingId;
 	@Basic(optional = true)
-	@Nullable
-	private Page<PlaylistOutputTrack> tracksInfo;
+	private int[] trackId;
 
 }

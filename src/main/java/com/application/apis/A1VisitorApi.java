@@ -193,7 +193,7 @@ public class A1VisitorApi {
 	public ResponseEntity<PlaylistOutput> getPlaylist(@PathVariable int id, @RequestParam(defaultValue = "0") int page,
 			@RequestParam(defaultValue = "15") int pageSize, @RequestParam(defaultValue = "") String searchContent,
 			HttpServletRequest request) {
-		return ResponseEntity.ok().body(playlistController.getPlaylistByID(id, page, pageSize, searchContent, request));
+		return ResponseEntity.ok().body(playlistController.getPlaylistById(id, page, pageSize, searchContent, request));
 	}
 
 	// █████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████

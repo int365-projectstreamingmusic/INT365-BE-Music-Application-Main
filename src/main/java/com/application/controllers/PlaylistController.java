@@ -10,6 +10,7 @@ import org.springframework.context.annotation.PropertySource;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -96,23 +97,30 @@ public class PlaylistController {
 	// ▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬
 	// DB-V5.1 OK!
 	// GetPlaylistByID
-	public PlaylistOutput getPlaylistByID(int playlistId, int page, int pageSize, String searchContent,
+	public PlaylistOutput getPlaylistById(int id, int page, int pageSize, String searchContent,
 			HttpServletRequest request) {
 		PlaylistOutput result = new PlaylistOutput();
-		result.setPlaylist(playlistRepository.findById(playlistId).orElseThrow(
+		PlaylistModel playlist = playlistRepository.findById(id).orElseThrow(
 				() -> new ExceptionFoundation(EXCEPTION_CODES.BROWSE_NO_RECORD_EXISTS, HttpStatus.NOT_FOUND,
-						"[ BROWSE_NO_RECORD_EXISTS ] The playlist ID " + playlistId + " does not exist.")));
-		if (result.getPlaylist().getPlayTrackStatus().getId() != 2001) {
-			throw new ExceptionFoundation(EXCEPTION_CODES.BROWSE_FORBIDDEN, HttpStatus.I_AM_A_TEAPOT,
-					"[ BROWSE_FORBIDDEN ] The playlist ID" + playlistId + " is marked hiden from public.");
+						"[ BROWSE_NO_RECORD_EXISTS ]The playlist ID " + id + " does not exist. "));
+		if (request.getHeader(HttpHeaders.AUTHORIZATION) != null) {
+			UserAccountModel user = generalFunctionController.getUserAccount(request);
+			if (!(playlist.getPlayTrackStatus().getId() != 2001)
+					|| user.getAccountId() == playlist.getUserAccountModel().getAccountId()) {
+				result.setTracksInfo(trackController.getTrackInPlaylistById(playlist, searchContent,
+						trackController.getPageRequest(page, pageSize), user));
+				result.setPlaylist(playlist);
+				return result;
+			} else {
+				throw new ExceptionFoundation(EXCEPTION_CODES.BROWSE_FORBIDDEN, HttpStatus.UNAUTHORIZED,
+						"[ BROWSE_FORBIDDEN ] This playlist is a private playlist.");
+			}
+		} else {
+			result.setPlaylist(playlist);
+			result.setTracksInfo(trackController.getTrackInPlaylistById(id, searchContent,
+					trackController.getPageRequest(page, pageSize)));
+			return result;
 		}
-		try {
-			result.setTracks(
-					trackController.listTrackByPlaylist(playlistId, page, pageSize, searchContent, false, request));
-		} catch (Exception exc) {
-			result.setTracks(null);
-		}
-		return result;
 	}
 
 	// ▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬
