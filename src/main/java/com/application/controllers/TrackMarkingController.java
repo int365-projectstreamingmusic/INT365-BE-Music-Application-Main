@@ -1,5 +1,6 @@
 package com.application.controllers;
 
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.List;
 import javax.servlet.http.HttpServletRequest;
@@ -13,11 +14,14 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import com.application.entities.copmskeys.UserTrackMarkingCompkey;
+import com.application.entities.models.TrackMarkingModel;
 import com.application.entities.models.TracksModel;
 import com.application.entities.models.UserAccountModel;
 import com.application.entities.models.UserTrackMarkingModel;
+import com.application.entities.submittionforms.TrackMarkingForm;
 import com.application.exceptons.ExceptionFoundation;
 import com.application.exceptons.ExceptionResponseModel.EXCEPTION_CODES;
+import com.application.repositories.TracksRepository;
 import com.application.repositories.UserTrackMarkingRepository;
 import com.application.services.GeneralFunctionController;
 
@@ -30,6 +34,9 @@ public class TrackMarkingController {
 
 	@Autowired
 	private UserTrackMarkingRepository userTrackMarkingRepository;
+	@Autowired
+	private TracksRepository tracksRepository;
+
 	@Autowired
 	private GeneralFunctionController generalFunctionController;
 
@@ -156,4 +163,101 @@ public class TrackMarkingController {
 		return new PageImpl<>(finalResult, pageRequest, result.getTotalElements());
 	}
 
+	// ▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬
+	// DB-V5.2 OK!
+	// INSERT : Add many favorite list into user.
+	public List<UserTrackMarkingModel> AddManyFavorite(TrackMarkingForm form, HttpServletRequest request) {
+		UserAccountModel user = generalFunctionController.getUserAccount(request);
+		if (form.getTrackId().length <= 0) {
+			throw new ExceptionFoundation(EXCEPTION_CODES.BROWSE_IMPOSSIBLE, HttpStatus.I_AM_A_TEAPOT,
+					"[ BROWSE_IMPOSSIBLE ] You can't leave the track list ID blank.");
+		} else if (form.getMarkingId() != 1001) {
+			throw new ExceptionFoundation(EXCEPTION_CODES.SAVE_FORBIDDEN, HttpStatus.NOT_FOUND,
+					"[ SAVE_FORBIDDEN ] The status ID is invalid.");
+		} else {
+			List<UserTrackMarkingModel> resultList = new ArrayList<>();
+			for (int i = 0; i < form.getTrackId().length; i++) {
+				UserTrackMarkingCompkey id = new UserTrackMarkingCompkey(Array.getInt(form.getTrackId(), i),
+						user.getAccountId(), 1001);
+				if (!userTrackMarkingRepository.existsById(id) && tracksRepository.existsById(id.getTrack_id())) {
+					UserTrackMarkingModel current = new UserTrackMarkingModel();
+					current.setId(id);
+					current = userTrackMarkingRepository.save(current);
+					resultList.add(current);
+				}
+			}
+			return resultList;
+		}
+	}
+
+	// ▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬
+	// DB-V5.2 OK!
+	// INSERT : Add many into playground.
+	public List<UserTrackMarkingModel> addManyToPlayground(TrackMarkingForm form, HttpServletRequest request) {
+		UserAccountModel user = generalFunctionController.getUserAccount(request);
+		if (form.getTrackId().length <= 0) {
+			throw new ExceptionFoundation(EXCEPTION_CODES.BROWSE_IMPOSSIBLE, HttpStatus.I_AM_A_TEAPOT,
+					"[ BROWSE_IMPOSSIBLE ] You can't leave the track list ID blank.");
+		} else if (form.getMarkingId() != 1002) {
+			throw new ExceptionFoundation(EXCEPTION_CODES.SAVE_FORBIDDEN, HttpStatus.NOT_FOUND,
+					"[ SAVE_FORBIDDEN ] The status ID is invalid.");
+		} else {
+			List<UserTrackMarkingModel> resultList = new ArrayList<>();
+			for (int i = 0; i < form.getTrackId().length; i++) {
+				UserTrackMarkingCompkey id = new UserTrackMarkingCompkey(Array.getInt(form.getTrackId(), i),
+						user.getAccountId(), 1002);
+				if (!userTrackMarkingRepository.existsById(id) && tracksRepository.existsById(id.getTrack_id())) {
+					UserTrackMarkingModel current = new UserTrackMarkingModel();
+					current.setId(id);
+					current = userTrackMarkingRepository.save(current);
+					resultList.add(current);
+				}
+			}
+			return resultList;
+		}
+	}
+
+	// ▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬
+	//
+	// DETETE : Remove many from favorite.
+	public void removeManyFromFavorite(TrackMarkingForm form, HttpServletRequest request) {
+		UserAccountModel user = generalFunctionController.getUserAccount(request);
+		if (form.getTrackId().length <= 0) {
+			throw new ExceptionFoundation(EXCEPTION_CODES.BROWSE_IMPOSSIBLE, HttpStatus.I_AM_A_TEAPOT,
+					"[ BROWSE_IMPOSSIBLE ] When deleting a list of favorite, You can't leave the track list ID blank.");
+		} else if (form.getMarkingId() != 1001) {
+			throw new ExceptionFoundation(EXCEPTION_CODES.SAVE_FORBIDDEN, HttpStatus.NOT_FOUND,
+					"[ SAVE_FORBIDDEN ] The status ID is invalid.");
+		} else {
+			for (int i = 0; i < form.getTrackId().length; i++) {
+				UserTrackMarkingCompkey id = new UserTrackMarkingCompkey(Array.getInt(form.getTrackId(), i),
+						user.getAccountId(), 1001);
+				if (userTrackMarkingRepository.existsById(id)) {
+					userTrackMarkingRepository.deleteById(id);
+				}
+			}
+		}
+	}
+
+	// ▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬
+	//
+	// DETETE : Remove many from playground.
+	public void removeManyFromPlayground(TrackMarkingForm form, HttpServletRequest request) {
+		UserAccountModel user = generalFunctionController.getUserAccount(request);
+		if (form.getTrackId().length <= 0) {
+			throw new ExceptionFoundation(EXCEPTION_CODES.BROWSE_IMPOSSIBLE, HttpStatus.I_AM_A_TEAPOT,
+					"[ BROWSE_IMPOSSIBLE ] When deleting a list of favorite, You can't leave the track list ID blank.");
+		} else if (form.getMarkingId() != 1002) {
+			throw new ExceptionFoundation(EXCEPTION_CODES.SAVE_FORBIDDEN, HttpStatus.NOT_FOUND,
+					"[ SAVE_FORBIDDEN ] The status ID is invalid.");
+		} else {
+			for (int i = 0; i < form.getTrackId().length; i++) {
+				UserTrackMarkingCompkey id = new UserTrackMarkingCompkey(Array.getInt(form.getTrackId(), i),
+						user.getAccountId(), 1002);
+				if (userTrackMarkingRepository.existsById(id)) {
+					userTrackMarkingRepository.deleteById(id);
+				}
+			}
+		}
+	}
 }
