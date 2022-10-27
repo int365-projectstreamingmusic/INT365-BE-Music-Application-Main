@@ -11,8 +11,8 @@ import com.application.entities.models.ReportsModel;
 @Repository
 public interface ReportsRepository extends JpaRepository<ReportsModel, Integer> {
 
-	@Query(nativeQuery = true, value = "")
-	ReportsModel getReportByGroupId(int groupId);
+	/*@Query(nativeQuery = true, value = "")
+	ReportsModel getReportByGroupId(int groupId);*/
 
 	@Modifying
 	@Transactional
