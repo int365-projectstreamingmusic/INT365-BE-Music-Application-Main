@@ -123,10 +123,10 @@ public class TrackMarkingController {
 		Pageable pageRequest = PageRequest.of(page, pageSize);
 		Page<UserTrackMarkingModel> result;
 		if (searchContent != "") {
-			result = userTrackMarkingRepository.listAllFromUserIdAndTrackMarkingIdAndSearchName(1, trackMarkingId,
+			result = userTrackMarkingRepository.listAllFromUserIdAndTrackMarkingIdAndSearchName(user.getAccountId(), trackMarkingId,
 					pageRequest, searchContent);
 		} else {
-			result = userTrackMarkingRepository.listAllFromUserIdAndTrackMarkingId(1, trackMarkingId, pageRequest);
+			result = userTrackMarkingRepository.listAllFromUserIdAndTrackMarkingId(user.getAccountId(), trackMarkingId, pageRequest);
 		}
 		if (result.getContent().size() <= 0) {
 			throw new ExceptionFoundation(EXCEPTION_CODES.BROWSE_NO_RECORD_EXISTS, HttpStatus.NOT_FOUND,
