@@ -3,7 +3,6 @@ package com.application.apis;
 import java.net.URI;
 
 import javax.servlet.http.HttpServletRequest;
-import javax.sound.midi.Track;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -11,7 +10,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -25,9 +23,7 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import com.application.controllers.AlbumController;
 import com.application.controllers.ArtistController;
 import com.application.controllers.TrackController;
-import com.application.controllers.TrackStatisticController;
 import com.application.controllers.TrackGeneralController;
-import com.application.controllers.TrackMarkingController;
 import com.application.entities.models.AlbumModel;
 import com.application.entities.models.ArtistsModel;
 import com.application.entities.models.ArtistsTrackModel;
@@ -36,7 +32,6 @@ import com.application.entities.submittionforms.AlbumForm;
 import com.application.entities.submittionforms.ArtistTrackForm;
 import com.application.entities.submittionforms.ArtistsEditForm;
 import com.application.entities.submittionforms.TrackForm;
-import com.application.utilities.ValidatorServices;
 
 @RestController
 @RequestMapping("/api/artist/")

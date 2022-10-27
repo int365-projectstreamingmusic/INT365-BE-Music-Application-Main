@@ -3,9 +3,7 @@ package com.application.apis;
 import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
-import javax.websocket.server.PathParam;
 
-import org.simpleframework.xml.Path;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
@@ -28,6 +26,7 @@ import com.application.entities.models.GenreModel;
 import com.application.entities.models.MoodModel;
 import com.application.entities.models.PlaylistModel;
 import com.application.entities.models.TracksModel;
+import com.application.entities.submittionforms.AlbumOutput;
 import com.application.entities.submittionforms.PlaylistOutput;
 
 @RestController
@@ -159,10 +158,10 @@ public class A1VisitorApi {
 	// ▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬
 	// DB-V5.1 OK!
 	// ALBUM : Get track in album.
-	@GetMapping("album/{id}")
-	public ResponseEntity<Page<TracksModel>> listAlbum(@PathVariable int id, @RequestParam(defaultValue = "0") int page,
-			@RequestParam(defaultValue = "50") int pageSize, @RequestParam(defaultValue = "") String searchContent,
-			HttpServletRequest request) {
+	@GetMapping("album/get")
+	public ResponseEntity<AlbumOutput> listAlbum(@RequestParam(required = true) int id,
+			@RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "50") int pageSize,
+			@RequestParam(defaultValue = "") String searchContent, HttpServletRequest request) {
 		return ResponseEntity.ok().body(trackController.listTrackByAlbum(id, page, pageSize, searchContent, request));
 	}
 

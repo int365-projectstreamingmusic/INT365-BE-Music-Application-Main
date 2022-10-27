@@ -23,27 +23,14 @@ public interface AlbumRepository extends JpaRepository<AlbumModel, Integer> {
 
 	boolean existsByAlbumName(String albumName);
 
-	@Transactional
 	@Modifying
-	@Query(nativeQuery = true, value = "UPDATE album SET")
-	void updateAlbumName(int id, String newName);
+	@Transactional
+	@Query(nativeQuery = true, value = "UPDATE album SET album_name = :newName WHERE album_id = :id")
+	void updateNewAlbumName(int id, String newName);
 
-	/*
-	 * @Transactional
-	 * 
-	 * @Modifying
-	 * 
-	 * @Query(value =
-	 * "INSERT INTO album (album_name,album_decription,status_id,account_id)VALUES(:name,:desc,:statusId,:userId)"
-	 * ) void insertNewAlbum(String name, String desc, int statusId, int userId);
-	 */
-	/*
-	 * @Query(value =
-	 * "UPDATE TracksModel t SET t.trackFile = :trackName WHERE t.id = :trackId")
-	 * 
-	 * @Transactional
-	 * 
-	 * @Modifying int update(String trackName, int trackId);
-	 */
+	@Modifying
+	@Transactional
+	@Query(nativeQuery = true, value = "UPDATE album SET album_name = :newDesc WHERE album_id = :albumId")
+	void updateNewAlbumdesc(int albumId, String newDesc);
 
 }

@@ -1,6 +1,7 @@
 package com.application.controllers;
 
 import java.sql.Timestamp;
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
@@ -8,6 +9,7 @@ import javax.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpHeaders;
@@ -19,6 +21,7 @@ import com.application.entities.copmskeys.PlaylistTrackListCompkey;
 import com.application.entities.models.PlayTrackStatusModel;
 import com.application.entities.models.PlaylistModel;
 import com.application.entities.models.PlaylistTrackListModel;
+import com.application.entities.models.TracksModel;
 import com.application.entities.models.UserAccountModel;
 import com.application.entities.submittionforms.PlaylistForm;
 import com.application.entities.submittionforms.PlaylistOutput;
@@ -27,6 +30,7 @@ import com.application.exceptons.ExceptionResponseModel.EXCEPTION_CODES;
 import com.application.repositories.PlayTrackStatusRepository;
 import com.application.repositories.PlaylistRepository;
 import com.application.repositories.PlaylistTrackListRepository;
+import com.application.repositories.TracksRepository;
 import com.application.services.GeneralFunctionController;
 import com.application.utilities.ValidatorServices;
 
@@ -40,6 +44,8 @@ public class PlaylistController {
 	private PlaylistTrackListRepository playlistTrackListRepository;
 	@Autowired
 	private PlayTrackStatusRepository playTrackStatusRepository;
+	@Autowired
+	private TracksRepository tracksRepository;
 
 	@Autowired
 	private TrackController trackController;
@@ -99,28 +105,38 @@ public class PlaylistController {
 	// GetPlaylistByID
 	public PlaylistOutput getPlaylistById(int id, int page, int pageSize, String searchContent,
 			HttpServletRequest request) {
-		PlaylistOutput result = new PlaylistOutput();
+
 		PlaylistModel playlist = playlistRepository.findById(id).orElseThrow(
 				() -> new ExceptionFoundation(EXCEPTION_CODES.BROWSE_NO_RECORD_EXISTS, HttpStatus.NOT_FOUND,
 						"[ BROWSE_NO_RECORD_EXISTS ]The playlist ID " + id + " does not exist. "));
+		PlaylistOutput result = new PlaylistOutput();
+		Pageable sendPageRequest = trackController.getPageRequest(page, pageSize);
+		result.setPlaylist(playlist);
+		result.setTracksInfo(null);
+		Page<TracksModel> resultTrack = tracksRepository.listAllByPlaylistId(id, searchContent, sendPageRequest);
+
 		if (request.getHeader(HttpHeaders.AUTHORIZATION) != null) {
 			UserAccountModel user = generalFunctionController.getUserAccount(request);
-			if (!(playlist.getPlayTrackStatus().getId() != 2001)
-					|| user.getAccountId() == playlist.getUserAccountModel().getAccountId()) {
-				result.setTracksInfo(trackController.getTrackInPlaylistById(playlist, searchContent,
-						trackController.getPageRequest(page, pageSize), user));
-				result.setPlaylist(playlist);
-				return result;
-			} else {
-				throw new ExceptionFoundation(EXCEPTION_CODES.BROWSE_FORBIDDEN, HttpStatus.UNAUTHORIZED,
-						"[ BROWSE_FORBIDDEN ] This playlist is a private playlist.");
+			List<TracksModel> tracks = trackController.getTrackMarking(resultTrack.getContent(), user);
+			List<TracksModel> outputTrack = new ArrayList<>();
+			for (int i = 0; i < tracks.size(); i++) {
+				TracksModel current = tracks.get(i);
+				if (tracks.get(i).getPlayTrackStatus().getId() == 1001
+						|| user.getAccountId() == tracks.get(i).getAccountId()) {
+					outputTrack.add(current);
+				} else {
+					current.setTrackFile(null);
+					current.setTrackThumbnail("201-TRACK-NOT-AVAILABLE.png");
+					current.setTrackName("NOT AVAILABLE");
+					current.setTrackDesc("This track is not available in public.");
+					outputTrack.add(current);
+				}
 			}
+			result.setTracksInfo(new PageImpl<>(outputTrack, sendPageRequest, resultTrack.getNumberOfElements()));
 		} else {
-			result.setPlaylist(playlist);
-			result.setTracksInfo(trackController.getTrackInPlaylistById(id, searchContent,
-					trackController.getPageRequest(page, pageSize)));
-			return result;
+			result.setTracksInfo(tracksRepository.userListAllByPlaylist(id, searchContent, sendPageRequest));
 		}
+		return result;
 	}
 
 	// ▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬
