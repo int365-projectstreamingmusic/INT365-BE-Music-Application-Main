@@ -14,6 +14,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -147,7 +148,12 @@ public class TrackController {
 					"[ BROWSE_NO_RECORD_EXISTS ] No track released today.");
 		}
 		// If logged in, search for user' favorite. If not, will just send a result.
-		return getTrackMarking(result, generalFunctionController.getUserAccount(request));
+		if (request.getHeader(HttpHeaders.AUTHORIZATION) != null) {
+			UserAccountModel user = generalFunctionController.getUserAccount(request);
+			return getTrackMarking(result, user);
+		} else {
+			return result;
+		}
 	}
 
 	// ▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬
@@ -404,29 +410,32 @@ public class TrackController {
 		TracksModel target = tracksRepository.findById(trackInfo.getId())
 				.orElseThrow(() -> new ExceptionFoundation(EXCEPTION_CODES.BROWSE_NO_RECORD_EXISTS,
 						HttpStatus.NOT_FOUND, "[ BROWSE_NO_RECORD_EXISTS ] Track with this ID does not exist."));
-
+		System.err.println("A1");
 		generalFunctionController.checkOwnerShipForRecord(requestedBy.getAccountId(), target.getAccountId());
 		if (trackInfo.getTrackName() != "") {
 			target.setTrackName(trackInfo.getTrackName());
 		}
 		if (trackInfo.getTrackDesc() != "") {
 			target.setTrackDesc(trackInfo.getTrackDesc());
-		}
+		}System.err.println("A2");
 		tracksRepository.updateBasicTrackInfo(target.getId(), target.getTrackName(), target.getTrackDesc());
 
 		if (trackInfo.getGenreList() != null) {
 			target.setGenreTrack(genreController.addGenreToTrack(target.getId(), trackInfo.getGenreList()));
 		}
-
+		System.err.println("A3");
 		// If with album name.
 		if (trackInfo.getAlbumName() != null && trackInfo.getAlbumName() != "") {
+			System.err.println("A3.1");
 			if (albumRepository.existsByAlbumName(trackInfo.getAlbumName())) {
 				tracksRepository.updateTrackAlbum(target.getId(), target.getAlbums().getId());
+				
 			} else {
+				System.err.println("A3.2");
 				albumRepository.updateAlbumName(target.getAlbums().getId(), trackInfo.getAlbumName());
 			}
 		}
-
+		System.err.println("A4");
 		// If with image, do the following.
 		if (image != null) {
 			if (fileLinkRelController.isExistsInRecord(target.getTrackThumbnail())) {
@@ -436,7 +445,7 @@ public class TrackController {
 					target.getId());
 			tracksRepository.updateTrackThumbnail(target.getId(), trackThumbnailFileName);
 		}
-
+		System.err.println("A5");
 		return tracksRepository.findById(target.getId())
 				.orElseThrow(() -> new ExceptionFoundation(EXCEPTION_CODES.CORE_INTERNAL_SERVER_ERROR,
 						HttpStatus.INTERNAL_SERVER_ERROR,
