@@ -88,11 +88,11 @@ public interface TracksRepository extends JpaRepository<TracksModel, Integer> {
 
 	// ▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬
 
-	@Query(nativeQuery = true, value = "SELECT t.* FROM tracks t RIGHT JOIN track_album a ON a.track_id = t.track_id WHERE a.album_id = :albumId AND LOWER(t.track_name) LIKE LOWER(CONCAT('%',:searchContent,'%')) AND t.status_id = 1001")
+	@Query(nativeQuery = true, value = "SELECT * FROM tracks WHERE album_id = :albumId AND LOWER(track_name) LIKE LOWER(CONCAT('%',:searchContent,'%'))")
 	Page<TracksModel> listAllByAlbum(int albumId, String searchContent, Pageable pageable);
 
 	@Query(nativeQuery = true, value = "SELECT t.* FROM tracks t RIGHT JOIN playlist_tracklist p ON p.track_id = t.track_id WHERE p.playlist_id = :playlist AND LOWER(t.track_name) LIKE LOWER(CONCAT('%',:searchContent,'%')) AND t.status_id = 1001")
-	Page<TracksModel> listAllByPlaylist(int playlist, String searchContent, Pageable pageable);
+	Page<TracksModel> userListAllByPlaylist(int playlist, String searchContent, Pageable pageable);
 
 	@Query(nativeQuery = true, value = "SELECT t.* FROM tracks t RIGHT JOIN playlist_tracklist p ON p.track_id = t.track_id WHERE p.playlist_id = :playlist AND LOWER(t.track_name) LIKE LOWER(CONCAT('%',:searchContent,'%'))")
 	Page<TracksModel> listAllByPlaylistId(int playlist, String searchContent, Pageable pageable);

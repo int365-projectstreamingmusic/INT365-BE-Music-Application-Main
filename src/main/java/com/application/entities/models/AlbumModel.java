@@ -45,8 +45,4 @@ public class AlbumModel {
 	@JoinColumn(name = "account_id", referencedColumnName = "account_id")
 	private UserAccountModel owner;
 
-	@Transient
-	@JoinColumn(name = "album_id", referencedColumnName = "album_id", insertable = false, updatable = false)
-	private List<TracksModel> tracks;
-
 }
