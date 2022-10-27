@@ -12,8 +12,6 @@ import lombok.NoArgsConstructor;
 public class TrackMarkingForm {
 
 	@Basic(optional = true)
-	private int markingId;
-	@Basic(optional = true)
 	private int[] trackId;
 
 }

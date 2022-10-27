@@ -24,6 +24,7 @@ import com.application.entities.models.ArtistsModel;
 import com.application.entities.models.PlaylistModel;
 import com.application.entities.models.TracksModel;
 import com.application.entities.models.UserAccountModel;
+import com.application.entities.submittionforms.AlbumOutput;
 import com.application.entities.submittionforms.ArtistForm;
 import com.application.entities.submittionforms.PlaylistOutputTrack;
 import com.application.entities.submittionforms.TrackForm;
@@ -103,9 +104,13 @@ public class TrackController {
 			}
 		}
 		// If logged in, search for user' favorite. If not, will just send a result.
-		return new PageImpl<>(getTrackMarking(result.stream().collect(Collectors.toList()),
-				generalFunctionController.getUserAccount(request)), sendPageRequest, result.getTotalElements());
-
+		if (request.getHeader(HttpHeaders.AUTHORIZATION) != null) {
+			UserAccountModel user = generalFunctionController.getUserAccount(request);
+			return new PageImpl<>(getTrackMarking(result.stream().collect(Collectors.toList()), user), sendPageRequest,
+					result.getTotalElements());
+		} else {
+			return result;
+		}
 	}
 
 	// █████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████
@@ -164,7 +169,11 @@ public class TrackController {
 			numberOfTracks = trackMaxPageSize;
 		}
 		List<TracksModel> result = tracksRepository.listTopTrack(numberOfTracks);
-		return getTrackMarking(result, generalFunctionController.getUserAccount(request));
+		if (request.getHeader(HttpHeaders.AUTHORIZATION) != null) {
+			return getTrackMarking(result, generalFunctionController.getUserAccount(request));
+		} else {
+			return result;
+		}
 	}
 
 	// ▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬
@@ -181,13 +190,18 @@ public class TrackController {
 		String to = trackCountController.getTimeStampFromMilisecond(timestampToday).toString();
 
 		List<TracksModel> result = tracksRepository.listTopTrack(numberOfTracks, from, to);
-		return getTrackMarking(result, generalFunctionController.getUserAccount(request));
+
+		if (request.getHeader(HttpHeaders.AUTHORIZATION) != null) {
+			return getTrackMarking(result, generalFunctionController.getUserAccount(request));
+		} else {
+			return result;
+		}
 	}
 
 	// ▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬
 	// DB-V5.1 OK!
 	// Get tracks in albums.
-	public Page<TracksModel> listTrackByAlbum(int albumId, int page, int pageSize, String searchContent,
+	public AlbumOutput listTrackByAlbum(int albumId, int page, int pageSize, String searchContent,
 			HttpServletRequest request) {
 		if (page < 0) {
 			page = 0;
@@ -197,15 +211,23 @@ public class TrackController {
 		}
 
 		Pageable sendPageRequest = PageRequest.of(page, pageSize);
-		Page<TracksModel> result;
+		Page<TracksModel> trackResult;
+		AlbumOutput result = new AlbumOutput();
+		result.setAlbum(albumRepository.findById(albumId)
+				.orElseThrow(() -> new ExceptionFoundation(EXCEPTION_CODES.BROWSE_NO_RECORD_EXISTS,
+						HttpStatus.NOT_FOUND, "[ BROWSE_NO_RECORD_EXISTS ] The album with this ID does not exist.")));
 
-		result = tracksRepository.listAllByAlbum(albumId, searchContent, sendPageRequest);
-		if (result.getTotalElements() <= 0) {
-			throw new ExceptionFoundation(EXCEPTION_CODES.SEARCH_NOT_FOUND, HttpStatus.NOT_FOUND,
-					"[ TrackController ] Found nothing here. Seems like there is no track here.");
+		trackResult = tracksRepository.listAllByAlbum(albumId, searchContent, sendPageRequest);
+
+		if (request.getHeader(HttpHeaders.AUTHORIZATION) != null) {
+			result.setTracks(new PageImpl<>(
+					getTrackMarking(trackResult.stream().collect(Collectors.toList()),
+							generalFunctionController.getUserAccount(request)),
+					sendPageRequest, trackResult.getTotalElements()));
+		} else {
+			result.setTracks(trackResult);
 		}
-		return new PageImpl<>(getTrackMarking(result.stream().collect(Collectors.toList()),
-				generalFunctionController.getUserAccount(request)), sendPageRequest, result.getTotalElements());
+		return result;
 	}
 
 	// ▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬
@@ -218,7 +240,7 @@ public class TrackController {
 		if (isByPlaylistOwner) {
 			result = tracksRepository.listAllByPlaylistId(playlistId, searchContent, sendPageRequest);
 		} else {
-			result = tracksRepository.listAllByPlaylist(playlistId, searchContent, sendPageRequest);
+			result = tracksRepository.userListAllByPlaylist(playlistId, searchContent, sendPageRequest);
 		}
 		if (result.getTotalElements() <= 0) {
 			throw new ExceptionFoundation(EXCEPTION_CODES.SEARCH_NOT_FOUND, HttpStatus.NOT_FOUND,
@@ -405,37 +427,33 @@ public class TrackController {
 	// ▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬
 	// DB-V5.1 OK!
 	// editTrack
-	public TracksModel editTrack(TrackForm trackInfo, MultipartFile image, HttpServletRequest request) {
+	public TracksModel editTrack(TrackForm form, MultipartFile image, HttpServletRequest request) {
 		UserAccountModel requestedBy = generalFunctionController.getUserAccount(request);
-		TracksModel target = tracksRepository.findById(trackInfo.getId())
+		TracksModel target = tracksRepository.findById(form.getId())
 				.orElseThrow(() -> new ExceptionFoundation(EXCEPTION_CODES.BROWSE_NO_RECORD_EXISTS,
 						HttpStatus.NOT_FOUND, "[ BROWSE_NO_RECORD_EXISTS ] Track with this ID does not exist."));
-		System.err.println("A1");
 		generalFunctionController.checkOwnerShipForRecord(requestedBy.getAccountId(), target.getAccountId());
-		if (trackInfo.getTrackName() != "") {
-			target.setTrackName(trackInfo.getTrackName());
+		
+		if (form.getAlbumName() != "" && albumRepository.existsById(target.getAlbums().getId())) {
+			albumRepository.updateNewAlbumName(target.getAlbums().getId(), form.getAlbumName());
 		}
-		if (trackInfo.getTrackDesc() != "") {
-			target.setTrackDesc(trackInfo.getTrackDesc());
-		}System.err.println("A2");
-		tracksRepository.updateBasicTrackInfo(target.getId(), target.getTrackName(), target.getTrackDesc());
+		
+		
+		if (form.getTrackName() != "") {
+			target.setTrackName(form.getTrackName());
+		}
+		if (form.getTrackDesc() != "") {
+			target.setTrackDesc(form.getTrackDesc());
+		}
 
-		if (trackInfo.getGenreList() != null) {
-			target.setGenreTrack(genreController.addGenreToTrack(target.getId(), trackInfo.getGenreList()));
+		tracksRepository.save(target);
+		// tracksRepository.updateBasicTrackInfo(target.getId(), target.getTrackName(),
+		// target.getTrackDesc());
+
+		if (form.getGenreList() != null) {
+			target.setGenreTrack(genreController.addGenreToTrack(target.getId(), form.getGenreList()));
 		}
-		System.err.println("A3");
-		// If with album name.
-		if (trackInfo.getAlbumName() != null && trackInfo.getAlbumName() != "") {
-			System.err.println("A3.1");
-			if (albumRepository.existsByAlbumName(trackInfo.getAlbumName())) {
-				tracksRepository.updateTrackAlbum(target.getId(), target.getAlbums().getId());
-				
-			} else {
-				System.err.println("A3.2");
-				albumRepository.updateAlbumName(target.getAlbums().getId(), trackInfo.getAlbumName());
-			}
-		}
-		System.err.println("A4");
+
 		// If with image, do the following.
 		if (image != null) {
 			if (fileLinkRelController.isExistsInRecord(target.getTrackThumbnail())) {
@@ -445,11 +463,15 @@ public class TrackController {
 					target.getId());
 			tracksRepository.updateTrackThumbnail(target.getId(), trackThumbnailFileName);
 		}
-		System.err.println("A5");
+	
 		return tracksRepository.findById(target.getId())
 				.orElseThrow(() -> new ExceptionFoundation(EXCEPTION_CODES.CORE_INTERNAL_SERVER_ERROR,
 						HttpStatus.INTERNAL_SERVER_ERROR,
 						"[ CORE_INTERNAL_SERVER_ERROR ] Unknown reason at EDITTRACK function."));
+	}
+
+	public void updateAlbumName(int id, String newName) {
+		albumRepository.updateNewAlbumName(id, newName);
 	}
 
 	// ▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬

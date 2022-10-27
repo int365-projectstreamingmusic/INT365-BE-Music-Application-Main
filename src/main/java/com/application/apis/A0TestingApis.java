@@ -44,6 +44,12 @@ public class A0TestingApis {
 	// VIEW COUNT
 	// -----------------------
 	
+	@PostMapping("2")
+	public ResponseEntity<AlbumModel> test2(@RequestParam String one, @RequestParam int id){
+		albumRepository.updateNewAlbumName(id, one);
+		return ResponseEntity.ok().body(albumRepository.findById(id).orElse(null));
+	}
+	
 	@GetMapping("1")
 	public ResponseEntity<List<AlbumModel>> getAlbums(){
 		return ResponseEntity.ok().body(albumRepository.findAll());
