@@ -1,18 +1,22 @@
 package com.application.controllers;
 
 import java.sql.Timestamp;
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
+import org.springframework.integration.metadata.ListenableMetadataStore;
 import org.springframework.stereotype.Service;
 
 import com.application.entities.models.PlayHistoryModel;
+import com.application.entities.models.TracksModel;
 import com.application.entities.models.UserAccountModel;
 import com.application.exceptons.ExceptionFoundation;
 import com.application.exceptons.ExceptionResponseModel.EXCEPTION_CODES;
@@ -30,9 +34,13 @@ public class PlayHistoryController {
 	private UserAccountRepository userAccountRepository;
 	@Autowired
 	private TracksRepository tracksRepository;
+	@Autowired
+	private TrackMarkingController trackMarkingController;
 
 	@Autowired
 	private GeneralFunctionController generalFunctionController;
+	@Autowired
+	private TrackController trackController;
 
 	private static int maxHistoryPageSize = 250;
 	private static int defaultHistoryPageSize = 50;
@@ -47,7 +55,23 @@ public class PlayHistoryController {
 			throw new ExceptionFoundation(EXCEPTION_CODES.BROWSE_NO_RECORD_EXISTS, HttpStatus.NOT_FOUND,
 					"[ BROWSE_NO_RECORD_EXISTS ] This user has no history.");
 		}
+		return checkTrackMarking(result, requestedBy);
+	}
+
+	public List<PlayHistoryModel> checkTrackMarking(List<PlayHistoryModel> incoming, UserAccountModel user) {
+		List<PlayHistoryModel> result = new ArrayList<>();
+		for (int i = 0; i < incoming.size(); i++) {
+			PlayHistoryModel current = incoming.get(i);
+			TracksModel currentTrack = incoming.get(i).getTrack();
+			currentTrack.setPlayground(
+					trackMarkingController.checkIfPlayground(user.getAccountId(), incoming.get(i).getTrack().getId()));
+			currentTrack.setFavorite(
+					trackMarkingController.checkIfFavorite(user.getAccountId(), incoming.get(i).getTrack().getId()));
+			current.setTrack(currentTrack);
+			result.add(current);
+		}
 		return result;
+
 	}
 
 	// ▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬
@@ -78,7 +102,8 @@ public class PlayHistoryController {
 					"[ BROWSE_NO_RECORD_EXISTS ] No record found.");
 		}
 
-		return result;
+		return new PageImpl<>(checkTrackMarking(result.getContent(), requestedBy), sendPageRequest,
+				result.getNumberOfElements());
 	}
 
 	// ▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬

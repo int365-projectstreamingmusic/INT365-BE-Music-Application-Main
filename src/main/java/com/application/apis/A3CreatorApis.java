@@ -106,16 +106,18 @@ public class A3CreatorApis {
 
 	// DB-V5 OK!
 	@PostMapping("track")
-	public ResponseEntity<TracksModel> createNewTrack(@RequestPart TrackForm newTrack,
-			@RequestPart MultipartFile trackFile, @RequestPart MultipartFile imageFile, HttpServletRequest request) {
+	public ResponseEntity<TracksModel> createNewTrack(
+			@RequestPart(required = true, name = "newTrack") TrackForm newTrack,
+			@RequestPart(required = true, name = "trackFile") MultipartFile trackFile,
+			@RequestPart(required = false, name = "imageFile") MultipartFile imageFile, HttpServletRequest request) {
 		URI uri = URI.create(ServletUriComponentsBuilder.fromCurrentContextPath().path(mapping + "track").toString());
 		return ResponseEntity.created(uri).body(trackController.addNewTrack(newTrack, trackFile, imageFile, request));
 	}
 
 	// DB-V5 OK!
 	@PutMapping("track/edit")
-	public ResponseEntity<TracksModel> editTrack(@RequestPart TrackForm track, @RequestPart MultipartFile image,
-			HttpServletRequest request) {
+	public ResponseEntity<TracksModel> editTrack(@RequestPart(required = true, name = "track") TrackForm track,
+			@RequestPart(required = false, name = "image") MultipartFile image, HttpServletRequest request) {
 		URI uri = URI
 				.create(ServletUriComponentsBuilder.fromCurrentContextPath().path(mapping + "track/edit").toString());
 		return ResponseEntity.created(uri).body(trackController.editTrack(track, image, request));

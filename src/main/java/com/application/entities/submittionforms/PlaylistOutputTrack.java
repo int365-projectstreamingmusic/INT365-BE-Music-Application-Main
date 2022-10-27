@@ -1,40 +1,31 @@
 package com.application.entities.submittionforms;
 
-import java.util.List;
-
 import javax.persistence.Basic;
 
-import com.application.entities.models.GenreModel;
-import com.application.entities.models.MoodModel;
+import com.application.entities.models.PlayTrackStatusModel;
 
 import lombok.AllArgsConstructor;
-import lombok.Getter;
+import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
 
-@Getter
-@Setter
+@Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class TrackForm {
+public class PlaylistOutputTrack {
 
 	@Basic(optional = true)
 	private int id;
-
 	@Basic(optional = true)
 	private String trackName;
 	@Basic(optional = true)
-	private String trackDesc;
+	private String trackFile;
+	@Basic(optional = true)
+	private boolean isFavorite;
+	@Basic(optional = true)
+	private boolean isPlayground;
+	@Basic(optional = true)
+	private String trackThumbnail;
+	@Basic(optional = true)
+	private PlayTrackStatusModel status;
 
-	@Basic(optional = true)
-	private List<GenreModel> genreList;
-	@Basic(optional = true)
-	private List<MoodModel> moodList;
-	@Basic(optional = true)
-	private String albumName;
-	@Basic(optional = true)
-	private String artist;
-
-	@Basic(optional = true)
-	private int statusId;
 }

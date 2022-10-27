@@ -167,6 +167,7 @@ public class UserAuthenticationController {
 
 		Map<String, Object> result = new HashMap<String, Object>();
 		result.put("UserName", userLoginModel.getUserName());
+		result.put("userId", requestedUser.getAccountId());
 		result.put("token", token);
 		result.put("roles", roleList);
 

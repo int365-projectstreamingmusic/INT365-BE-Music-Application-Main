@@ -2,12 +2,14 @@ package com.application.apis;
 
 import java.net.URI;
 import java.util.List;
+import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -22,17 +24,23 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
+import com.application.controllers.CommentsController;
 import com.application.controllers.PlayHistoryController;
 import com.application.controllers.PlaylistController;
 import com.application.controllers.TrackMarkingController;
 import com.application.controllers.UserProfileController;
+import com.application.entities.models.CommentPlaylistModel;
+import com.application.entities.models.CommentTrackModel;
 import com.application.entities.models.PlayHistoryModel;
 import com.application.entities.models.PlaylistModel;
 import com.application.entities.models.PlaylistTrackListModel;
+import com.application.entities.models.TrackMarkingModel;
 import com.application.entities.models.UserAccountModel;
 import com.application.entities.models.UserTrackMarkingModel;
+import com.application.entities.submittionforms.CommentForm;
 import com.application.entities.submittionforms.PlaylistForm;
 import com.application.entities.submittionforms.PlaylistOutput;
+import com.application.entities.submittionforms.TrackMarkingForm;
 import com.application.entities.submittionforms.UserProfileForm;
 import com.application.exceptons.ExceptionFoundation;
 import com.application.exceptons.ExceptionResponseModel.EXCEPTION_CODES;
@@ -51,6 +59,8 @@ public class A2UserApis {
 	private TrackMarkingController trackMarkingController;
 	@Autowired
 	private PlayHistoryController playHistoryController;
+	@Autowired
+	private CommentsController commentsController;
 
 	// ▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬
 	// DB-V5.1 OK!
@@ -69,13 +79,14 @@ public class A2UserApis {
 	public ResponseEntity<PlaylistOutput> GetMyOwnedPlaylistById(@PathVariable int id,
 			@RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "0") int pageSize,
 			@RequestParam(defaultValue = "") String searchContent, HttpServletRequest request) {
-		return ResponseEntity.ok().body(playlistController.getPlaylistByID(id, page, pageSize, searchContent, request));
+		return ResponseEntity.ok().body(playlistController.getPlaylistById(id, page, pageSize, searchContent, request));
 	}
 
 	// ▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬
 	// DB-V5.1 OK!
 	// PLAYLIST : Create Playlist
-	@PostMapping("playlist")
+	@PostMapping(value = "playlist", produces = { MediaType.APPLICATION_JSON_VALUE, MediaType.IMAGE_JPEG_VALUE,
+			MediaType.IMAGE_PNG_VALUE })
 	public ResponseEntity<PlaylistModel> createNewPlaylist(@RequestPart(required = true) PlaylistForm form,
 			@RequestPart(required = false) MultipartFile image, HttpServletRequest request) {
 		URI uri = URI
@@ -86,9 +97,9 @@ public class A2UserApis {
 	// ▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬
 	// DB-V5.1 OK!
 	// PLAYLIST : Edit my playlist
-	@PutMapping("playlist")
-	public ResponseEntity<PlaylistModel> editPlaylist(@RequestPart(required = true) PlaylistForm form,
-			@RequestPart(required = false) MultipartFile image, HttpServletRequest request) {
+	@PutMapping(value = "playlist")
+	public ResponseEntity<PlaylistModel> editPlaylist(@RequestPart(required = true, name = "form") PlaylistForm form,
+			@RequestPart(required = false, name = "image") MultipartFile image, HttpServletRequest request) {
 		URI uri = URI
 				.create(ServletUriComponentsBuilder.fromCurrentContextPath().path(mapping + "playlist").toString());
 		return ResponseEntity.created(uri).body(playlistController.editMyPlaylist(form, image, request));
@@ -97,7 +108,7 @@ public class A2UserApis {
 	// ▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬
 	// DB-V5.1 OK!
 	// PLAYLIST : Upload playlist thumbnail
-	@PutMapping("playlist/thumbnail/{trackId}")
+	@PutMapping(value = "playlist/thumbnail/{trackId}")
 	public ResponseEntity<HttpStatus> uploadThumbnail(@PathVariable int trackId, @RequestPart MultipartFile image,
 			HttpServletRequest request) {
 		playlistController.uploadeThumbnail(trackId, image, request);
@@ -156,9 +167,11 @@ public class A2UserApis {
 	// ▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬
 	// DB-V5.1 OK!
 	// ACCOUNT : Edit my profile.
-	@PutMapping("myProfile")
-	public ResponseEntity<UserAccountModel> editMyProfile(@RequestPart(required = true) UserProfileForm profile,
-			@RequestPart(required = false) MultipartFile profileImage, HttpServletRequest request) {
+	@PutMapping(value = "myProfile")
+	public ResponseEntity<UserAccountModel> editMyProfile(
+			@RequestPart(required = true, name = "profile") UserProfileForm profile,
+			@RequestPart(required = false, name = "profileImage") MultipartFile profileImage,
+			HttpServletRequest request) {
 		URI uri = URI
 				.create(ServletUriComponentsBuilder.fromCurrentContextPath().path(mapping + "myProfile").toString());
 		return ResponseEntity.created(uri)
@@ -166,9 +179,87 @@ public class A2UserApis {
 	}
 
 	// ▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬
+	// Comment
+	// ---------------------
+
+	// ▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬
+	// DB-V5.2 OK!
+	// COMMENT : List my comments.
+	@GetMapping("comment")
+	public ResponseEntity<Map<String, Object>> listComment(@RequestParam(defaultValue = "0") int page,
+			@RequestParam(defaultValue = "0") int pageSize, HttpServletRequest request) {
+		return ResponseEntity.ok().body(commentsController.listMyComment(page, pageSize, request));
+	}
+
+	// ▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬
+	// DB-V5.2 OK
+	// COMMENT TRACK : Post new comment to an existing track.
+	@PostMapping("comment/track")
+	public ResponseEntity<CommentTrackModel> postNewTrackComment(@RequestBody(required = true) CommentForm form,
+			HttpServletRequest request) {
+		URI uri = URI.create(
+				ServletUriComponentsBuilder.fromCurrentContextPath().path(mapping + "comment/track").toString());
+		return ResponseEntity.created(uri).body(commentsController.postNewTrackComment(form, request));
+	}
+
+	// ▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬
+	// DB-V5.2 OK
+	// COMMENT TRACK : Delete by Id
+	@DeleteMapping("comment/track")
+	public ResponseEntity<HttpStatus> deleteTrackComment(@RequestParam(required = true) int commentId,
+			HttpServletRequest request) {
+		URI uri = URI.create(
+				ServletUriComponentsBuilder.fromCurrentContextPath().path(mapping + "comment/track").toString());
+		commentsController.deleteTrackComment(commentId, request);
+		return ResponseEntity.created(uri).body(HttpStatus.CREATED);
+	}
+
+	// ▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬
+	// DB-V5.2 OK
+	// COMMENT PLAYLIST: Post new comment to an existing playlist.
+	@PostMapping("comment/playlist")
+	public ResponseEntity<CommentPlaylistModel> postNewPlaylistComment(@RequestBody(required = true) CommentForm form,
+			HttpServletRequest request) {
+		URI uri = URI.create(
+				ServletUriComponentsBuilder.fromCurrentContextPath().path(mapping + "comment/playlist").toString());
+		return ResponseEntity.created(uri).body(commentsController.postNewPlaylistComment(form, request));
+	}
+
+	// ▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬
+	// DB-V5.2 OK
+	// COMMENT PLAYLIST: Delete by Id
+	@DeleteMapping("comment/playlist")
+	public ResponseEntity<HttpStatus> deletePlaylistComment(@RequestParam(required = true) int commentId,
+			HttpServletRequest request) {
+		URI uri = URI.create(
+				ServletUriComponentsBuilder.fromCurrentContextPath().path(mapping + "comment/playlist").toString());
+		commentsController.deletePlaylistComment(commentId, request);
+		return ResponseEntity.created(uri).body(HttpStatus.CREATED);
+	}
+
+	// COMMENT TRACK : Edit comment
+	@PutMapping("comment/track")
+	public ResponseEntity<CommentTrackModel> editTrackComment(@RequestBody(required = true) CommentForm form,
+			HttpServletRequest request) {
+		URI uri = URI.create(
+				ServletUriComponentsBuilder.fromCurrentContextPath().path(mapping + "comment/track").toString());
+		return ResponseEntity.created(uri).body(commentsController.editTrackComment(form, request));
+	}
+
+	// COMMENT PLAYLIST : Edit comment
+	@PutMapping("comment/playlist")
+	public ResponseEntity<CommentPlaylistModel> editPlaylistComment(@RequestBody(required = true) CommentForm form,
+			HttpServletRequest request) {
+		URI uri = URI.create(
+				ServletUriComponentsBuilder.fromCurrentContextPath().path(mapping + "comment/track").toString());
+		return ResponseEntity.created(uri).body(commentsController.editPlaylistComment(form, request));
+	}
+
+	// ▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬
 	// Playground
 	// ---------------------
 
+	// PLAYGROUND : List all track in playground.
 	@GetMapping("Playground")
 	public ResponseEntity<Page<UserTrackMarkingModel>> getMyPlayground(@RequestParam(defaultValue = "0") int page,
 			@RequestParam(defaultValue = "0") int pageSize, @RequestParam(defaultValue = "") String searchContent,
@@ -177,6 +268,7 @@ public class A2UserApis {
 				1002, searchContent, request));
 	}
 
+	// PLAYGROUND : Add one to playground.
 	@PostMapping("Playground")
 	public ResponseEntity<UserTrackMarkingModel> addTrackToMyPlayground(@RequestParam(required = true) int trackId,
 			HttpServletRequest request) {
@@ -185,6 +277,7 @@ public class A2UserApis {
 		return ResponseEntity.created(uri).body(trackMarkingController.addNewTrackMarking(trackId, 1002, request));
 	}
 
+	// PLAYGROUND : Remove one from playground.
 	@DeleteMapping("Playground")
 	public ResponseEntity<HttpStatus> deleteTrackFromMyPlayground(@RequestParam(required = true) int trackId,
 			HttpServletRequest request) {
@@ -194,6 +287,7 @@ public class A2UserApis {
 		return ResponseEntity.created(uri).body(HttpStatus.CREATED);
 	}
 
+	// PLAYGROUND : Delete all from playground.
 	@DeleteMapping("Playground/clear")
 	public ResponseEntity<HttpStatus> clearMyPlayground(@RequestParam(required = true) int trackId,
 			HttpServletRequest request) {
@@ -203,10 +297,40 @@ public class A2UserApis {
 		return ResponseEntity.created(uri).body(HttpStatus.CREATED);
 	}
 
+	// PLAYGROUND : Add many to playground.
+	@PostMapping("Playground/add")
+	public ResponseEntity<List<UserTrackMarkingModel>> addManyTracksToPlayground(
+			@RequestBody(required = true) TrackMarkingForm form, HttpServletRequest request) {
+		URI uri = URI.create(
+				ServletUriComponentsBuilder.fromCurrentContextPath().path(mapping + "Playground/add").toString());
+		return ResponseEntity.created(uri).body(trackMarkingController.addManyToPlayground(form, request));
+	}
+
+	// PLAYGROUND : delete many to playground.
+	@DeleteMapping("Playground/remove")
+	public ResponseEntity<HttpStatus> removeManyFromPlayground(@RequestBody(required = true) TrackMarkingForm form,
+			HttpServletRequest request) {
+		trackMarkingController.removeManyFromPlayground(form, request);
+		URI uri = URI.create(
+				ServletUriComponentsBuilder.fromCurrentContextPath().path(mapping + "Playground/remove").toString());
+		return ResponseEntity.created(uri).body(HttpStatus.CREATED);
+	}
+
+	// FAVORITE : delete may from favrite
+	@DeleteMapping("Favorite/remove")
+	public ResponseEntity<HttpStatus> removeManyFromFavorite(@RequestBody(required = true) TrackMarkingForm form,
+			HttpServletRequest request) {
+		trackMarkingController.removeManyFromFavorite(form, request);
+		URI uri = URI.create(
+				ServletUriComponentsBuilder.fromCurrentContextPath().path(mapping + "Playground/remove").toString());
+		return ResponseEntity.created(uri).body(HttpStatus.CREATED);
+	}
+
 	// ▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬
 	// Favourite
 	// ---------------------
 
+	// FAVORITE : List my favorite tracks.
 	@GetMapping("Favorite")
 	public ResponseEntity<Page<UserTrackMarkingModel>> getMyFavoriteList(@RequestParam(defaultValue = "0") int page,
 			@RequestParam(defaultValue = "0") int pageSize, @RequestParam(defaultValue = "") String searchContent,
@@ -215,6 +339,7 @@ public class A2UserApis {
 				1001, searchContent, request));
 	}
 
+	// FAVORITE : Add one favorite.
 	@PostMapping("Favorite")
 	public ResponseEntity<UserTrackMarkingModel> addMyFavoriteTrack(@RequestParam(required = true) int trackId,
 			HttpServletRequest request) {
@@ -223,6 +348,7 @@ public class A2UserApis {
 		return ResponseEntity.created(uri).body(trackMarkingController.addNewTrackMarking(trackId, 1001, request));
 	}
 
+	// FAVORITE : Delete one favorite.
 	@DeleteMapping("Favorite")
 	public ResponseEntity<HttpStatus> deleteTrackFromMyFavorite(@RequestParam(required = true) int trackId,
 			HttpServletRequest request) {
@@ -230,6 +356,15 @@ public class A2UserApis {
 				.create(ServletUriComponentsBuilder.fromCurrentContextPath().path(mapping + "Favorite").toString());
 		trackMarkingController.removeTrackMarking(trackId, 1001, request);
 		return ResponseEntity.created(uri).body(HttpStatus.CREATED);
+	}
+
+	// FAVORITE : Add many favorite.
+	@PostMapping("Favorite/add")
+	public ResponseEntity<List<UserTrackMarkingModel>> addManyTracksToFavorite(
+			@RequestBody(required = true) TrackMarkingForm form, HttpServletRequest request) {
+		URI uri = URI
+				.create(ServletUriComponentsBuilder.fromCurrentContextPath().path(mapping + "Favorite/add").toString());
+		return ResponseEntity.created(uri).body(trackMarkingController.AddManyFavorite(form, request));
 	}
 
 	// ▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬

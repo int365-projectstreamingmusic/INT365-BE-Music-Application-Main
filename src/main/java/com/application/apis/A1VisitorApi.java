@@ -16,11 +16,14 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.application.controllers.AlbumController;
+import com.application.controllers.CommentsController;
 import com.application.controllers.GenreController;
 import com.application.controllers.MoodController;
 import com.application.controllers.PlaylistController;
 import com.application.controllers.TrackController;
 import com.application.entities.models.AlbumModel;
+import com.application.entities.models.CommentPlaylistModel;
+import com.application.entities.models.CommentTrackModel;
 import com.application.entities.models.GenreModel;
 import com.application.entities.models.MoodModel;
 import com.application.entities.models.PlaylistModel;
@@ -41,6 +44,29 @@ public class A1VisitorApi {
 	private MoodController moodController;
 	@Autowired
 	private AlbumController albumController;
+	@Autowired
+	private CommentsController commentsController;
+
+	// █████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████
+
+	// ▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬
+	// DB-V5.2 OK!
+	// COMMENT TRACK : List comment in track.
+	@GetMapping("comment/track")
+	public ResponseEntity<Page<CommentTrackModel>> listCommentInTrack(@RequestParam(required = true) int trackId,
+			@RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "0") int pageSize) {
+		return ResponseEntity.ok().body(commentsController.listCommentsInTrack(trackId, page, pageSize));
+	}
+
+	// ▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬
+	// DB-V5.2 OK!
+	// COMMENT PLAYLIST : List comment in playlist.
+	@GetMapping("comment/playlist")
+	public ResponseEntity<Page<CommentPlaylistModel>> listCommentInPlaylist(
+			@RequestParam(required = true) int playlistId, @RequestParam(defaultValue = "0") int page,
+			@RequestParam(defaultValue = "0") int pageSize) {
+		return ResponseEntity.ok().body(commentsController.listCommentsInPlaylist(playlistId, page, pageSize));
+	}
 
 	// █████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████
 
@@ -167,7 +193,7 @@ public class A1VisitorApi {
 	public ResponseEntity<PlaylistOutput> getPlaylist(@PathVariable int id, @RequestParam(defaultValue = "0") int page,
 			@RequestParam(defaultValue = "15") int pageSize, @RequestParam(defaultValue = "") String searchContent,
 			HttpServletRequest request) {
-		return ResponseEntity.ok().body(playlistController.getPlaylistByID(id, page, pageSize, searchContent, request));
+		return ResponseEntity.ok().body(playlistController.getPlaylistById(id, page, pageSize, searchContent, request));
 	}
 
 	// █████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████

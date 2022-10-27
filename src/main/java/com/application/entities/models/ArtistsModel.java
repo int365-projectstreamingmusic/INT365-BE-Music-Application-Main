@@ -1,18 +1,11 @@
 package com.application.entities.models;
 
-import java.util.List;
-
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.OneToMany;
 import javax.persistence.Table;
-
-import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -34,15 +27,14 @@ public class ArtistsModel {
 
 	@Column(name = "artist_bio")
 	private String artistBio;
-
-	@JsonIgnore
-	@OneToMany(fetch = FetchType.LAZY, orphanRemoval = true)
-	@JoinColumn(name = "artist_id", referencedColumnName = "artist_id")
-	private List<ArtistsTrackModel> artistTracks;
 	
 	@Column(name = "added_by")
 	private int addedBy;
-
+	
+	/*@OneToMany(fetch = FetchType.LAZY, orphanRemoval = true)
+	@JoinColumn(name = "artist_id", referencedColumnName = "artist_id")
+	private List<ArtistsTrackModel> artistTracks;*/
+	
 	/*@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "added_by", insertable = false, updatable = false)
 	private UserAccountModel userAccount;*/

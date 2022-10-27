@@ -30,12 +30,12 @@ public class ReportsModel {
 	@Column(name = "report_id")
 	private int id;
 
-	//@Column(name = "reported_by")
+	// @Column(name = "reported_by")
 	@ManyToOne
 	@JoinColumn(name = "reported_by", referencedColumnName = "account_id", insertable = false, updatable = false)
 	private UserAccountModel reportedBy;
 
-	//@Column(name = "reported_user")
+	// @Column(name = "reported_user")
 	@Nullable
 	@Basic(optional = true)
 	@ManyToOne
@@ -43,7 +43,7 @@ public class ReportsModel {
 	private UserAccountModel reportedToUser;
 
 	@Column(name = "is_solved")
-	private int isSolved;
+	private boolean isSolved;
 
 	@Column(name = "report_date")
 	@JsonFormat(pattern = "yyyy/mm/dd")
@@ -58,12 +58,33 @@ public class ReportsModel {
 
 	@Column(name = "report_text")
 	private String reportText;
-	
+
 	@Column(name = "report_ref")
-	private String reportRef;
-	
+	private int reportRef;
+
+	@ManyToOne
+	@JoinColumn(name = "report_group_id", referencedColumnName = "id")
+	private ReportGroupModel reportGroup;
+
 	@ManyToOne
 	@JoinColumn(name = "type_id", referencedColumnName = "type_id")
 	private ReportTypeModel type;
+
+	public enum REPORT_TYPE {
+
+		SOLVED_WITH_WARNING(101), SOLVED_WITH_NONE(102), SOLVED_WITH_SUSPEND(103), REPORT_USER(1101),
+		REPORT_TRACK(1200), REPORT_COMMENT_TRACK(1300), REPORT_COMMENT_PLAYLIST(1400), REPORT_PLAYLIST(1500),
+		DELETED_BY_USER(8002);
+
+		private final int codeValue;
+
+		private REPORT_TYPE(int codeValue) {
+			this.codeValue = codeValue;
+		}
+
+		public int getCodeValue() {
+			return codeValue;
+		}
+	}
 
 }
