@@ -35,15 +35,17 @@ public class ReportController {
 
 	// send report by user
 	public ReportsModel createNewReport(ReportForm form, HttpServletRequest request) {
+		UserAccountModel owner = generalFunctionController.getUserAccount(request);
+
 		ReportsModel report = new ReportsModel();
 
 		ReportTypeModel reportType = reportTypeRepository.findById(form.getReportType())
 				.orElseThrow(() -> new ExceptionFoundation(EXCEPTION_CODES.BROWSE_NO_RECORD_EXISTS,
 						HttpStatus.NOT_FOUND, "[ BROWSE_NO_RECORD_EXISTS ] Invalid report type."));
 
-		report.setReferenceSource(0);
+		report.setReferenceSource(form.getReportRef());
 		report.setReportDate(new Timestamp(System.currentTimeMillis()).toString());
-		report.setReportedBy(null);
+		report.setReportedBy(owner);
 		report.setReportedToUser(null);
 		report.setReportRef(form.getReportRef());
 		report.setReportText(form.getReportMsg());
@@ -75,8 +77,16 @@ public class ReportController {
 	}
 
 	// cancle report by user if it is not solved.
-	public void cancleReport(int reportId, HttpServletRequest request) {
-		
+	public void cancleReport(int reportGroupId, HttpServletRequest request) {
+		UserAccountModel owner = generalFunctionController.getUserAccount(request);
+		ReportGroupModel group = reportGroupRepository.findById(reportGroupId)
+				.orElseThrow(() -> new ExceptionFoundation(EXCEPTION_CODES.BROWSE_NO_RECORD_EXISTS,
+						HttpStatus.NOT_FOUND, "[ BROWSE_NO_RECORD_EXISTS ] The report id " + reportGroupId
+								+ " does not exist or deleted by user."));
+
+		// generalFunctionController.checkOwnerShipForRecord(owner.getAccountId(),
+		// report.getReportedBy().getAccountId());
+
 	}
 
 }
