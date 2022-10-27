@@ -436,7 +436,11 @@ public class TrackController {
 					target.getId());
 			tracksRepository.updateTrackThumbnail(target.getId(), trackThumbnailFileName);
 		}
-		return target;
+
+		return tracksRepository.findById(target.getId())
+				.orElseThrow(() -> new ExceptionFoundation(EXCEPTION_CODES.CORE_INTERNAL_SERVER_ERROR,
+						HttpStatus.INTERNAL_SERVER_ERROR,
+						"[ CORE_INTERNAL_SERVER_ERROR ] Unknown reason at EDITTRACK function."));
 	}
 
 	// ▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬
