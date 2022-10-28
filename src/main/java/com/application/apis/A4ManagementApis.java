@@ -41,4 +41,23 @@ public class A4ManagementApis {
 			@RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "0") int pageSize) {
 		return ResponseEntity.ok().body(commentsController.listUserComment(userId, page, pageSize));
 	}
+
+	// USER : Suspend user or unsuspend user.
+
+	// USER : Assign role to user.
+
+	// USER : Unassign role from user.
+
+	// COMMENT : Delete comment from specific playlist.
+
+	// COMMENT : Delete comment from specific track.
+
+	// ACTION : Browse all action
+
+	// ACTION : Browse all action by staff name.
+	
+	// REPORT : Reply to report
+	
+	// REPORT : Close report solved.
+
 }
