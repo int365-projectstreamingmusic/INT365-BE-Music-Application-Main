@@ -35,7 +35,7 @@ public class TrackStatisticController {
 
 	// ▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬
 	// DB-V5.1 OK!
-	// Get view count in the pass X days.
+	// Get view count of a track in the pass X days.
 	public int getViewCountInPassDays(int trackId, int numberOfDay) {
 		String timesTampTo = getTimestampToday().toString();
 		String timesTampFrom = getTimeStampFromMilisecond(getTimestampToday().getTime() - (numberOfDay * TIME_DIF_DAY))
