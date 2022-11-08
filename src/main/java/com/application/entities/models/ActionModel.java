@@ -13,9 +13,9 @@ import lombok.NoArgsConstructor;
 
 @Data
 @Entity
-@Table(name = "action_history", schema = "sitgarden")
 @AllArgsConstructor
 @NoArgsConstructor
+@Table(name = "action_history", schema = "sitgarden")
 public class ActionModel {
 
 	@Id
@@ -26,7 +26,16 @@ public class ActionModel {
 	@Column(name = "desc")
 	private String desc;
 
+	@Column(name = "timestamp")
+	private String timestamp;
+
+	@Column(name = "target_ref")
+	private int target;
+
 	@Column(name = "account_id")
-	private int accountId;
+	private int account;
+
+	@Column(name = "action_type_id")
+	private int type;
 
 }

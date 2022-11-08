@@ -10,12 +10,13 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-@Table(name = "playlist_tracklist", schema = "sitgarden")
 @Data
+@Entity
 @AllArgsConstructor
 @NoArgsConstructor
-@Entity
+@Table(name = "playlist_tracklist", schema = "sitgarden")
 public class PlaylistTrackListModel {
+	
 	@EmbeddedId
 	private PlaylistTrackListCompkey id;
 

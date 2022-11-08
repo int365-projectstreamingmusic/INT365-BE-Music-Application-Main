@@ -17,7 +17,7 @@ import lombok.NoArgsConstructor;
 public class PlaylistGenreCompKey implements Serializable {
 
 	@Column(name = "playlist_id")
-	private int playlisId;
+	private int playlistId;
 
 	@Column(name = "genre_id")
 	private int genreId;

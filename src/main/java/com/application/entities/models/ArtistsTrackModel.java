@@ -14,11 +14,11 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-@Table(name = "artist_tracks", schema = "sitgarden")
 @Data
+@Entity
 @AllArgsConstructor
 @NoArgsConstructor
-@Entity
+@Table(name = "artist_tracks", schema = "sitgarden")
 public class ArtistsTrackModel {
 
 	@EmbeddedId

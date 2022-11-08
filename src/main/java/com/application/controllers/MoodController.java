@@ -94,8 +94,7 @@ public class MoodController {
 			if (!existingMoods.contains(moodList.get(i))) {
 				MoodPlaylistModel newMood = new MoodPlaylistModel();
 				newMood.setId(new MoodPlaylistCompKey(playlistId, moodList.get(i).getId()));
-				newMood.setCount(1);
-				newMood.setRatio(1.0);
+				newMood.setRatio(1);
 				try {
 					newMood = moodPlaylistRepository.save(newMood);
 					playlistMood.add(newMood);
@@ -116,8 +115,7 @@ public class MoodController {
 		for (int i = 0; i < moods.size(); i++) {
 			MoodUserModel newMood = new MoodUserModel();
 			newMood.setId(new MoodUserCompKey(moods.get(i).getId(), user.getAccountId()));
-			newMood.setRatio(1.0);
-			newMood.setCount(1);
+			newMood.setRatio(1);
 			try {
 				newMood = moodUserRepository.save(newMood);
 				newMoodList.add(newMood);
@@ -138,8 +136,7 @@ public class MoodController {
 			if (!existingMoods.contains(moods.get(i))) {
 				MoodTrackModel newMood = new MoodTrackModel();
 				newMood.setId(new MoodTrackCompKey(trackId, moods.get(i).getId()));
-				newMood.setRatio(1.0);
-				newMood.setCount(1);
+				newMood.setRatio(1);
 				try {
 					newMood = moodTrackRepository.save(newMood);
 					trackMood.add(newMood);

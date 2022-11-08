@@ -12,11 +12,11 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-@Table(name = "user_track_marking", schema = "sitgarden")
 @Data
+@Entity
 @AllArgsConstructor
 @NoArgsConstructor
-@Entity
+@Table(name = "user_track_marking", schema = "sitgarden")
 public class UserTrackMarkingModel {
 
 	@EmbeddedId
@@ -25,7 +25,7 @@ public class UserTrackMarkingModel {
 	@ManyToOne
 	@JoinColumn(name = "track_id", updatable = false, insertable = false)
 	private TracksModel track;
-	
+
 	@ManyToOne
 	@JoinColumn(name = "track_marking_id", updatable = false, insertable = false)
 	private TrackMarkingModel trackMarking;

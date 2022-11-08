@@ -1,6 +1,7 @@
 package com.application.controllers;
 
 import java.sql.Timestamp;
+import java.util.Calendar;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -8,16 +9,22 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
+import com.application.entities.models.CommentPlaylistModel;
+import com.application.entities.models.CommentTrackModel;
 import com.application.entities.models.ReportGroupModel;
+import com.application.entities.models.ReportModel;
 import com.application.entities.models.ReportTypeModel;
-import com.application.entities.models.ReportsModel;
+import com.application.entities.models.TracksModel;
 import com.application.entities.models.UserAccountModel;
 import com.application.entities.submittionforms.ReportForm;
 import com.application.exceptons.ExceptionFoundation;
 import com.application.exceptons.ExceptionResponseModel.EXCEPTION_CODES;
+import com.application.repositories.CommentPlaylistRepository;
+import com.application.repositories.CommentTrackRepository;
 import com.application.repositories.ReportGroupRepository;
 import com.application.repositories.ReportTypeRepository;
 import com.application.repositories.ReportsRepository;
+import com.application.repositories.TracksRepository;
 import com.application.services.GeneralFunctionController;
 
 @Service
@@ -31,62 +38,73 @@ public class ReportController {
 	private ReportTypeRepository reportTypeRepository;
 
 	@Autowired
+	private TracksRepository tracksRepository;
+	@Autowired
+	private CommentPlaylistRepository commentPlaylistRepository;
+	@Autowired
+	private CommentTrackRepository commentTrackRepository;
+
+	@Autowired
 	private GeneralFunctionController generalFunctionController;
 
-	// send report by user
-	public ReportsModel createNewReport(ReportForm form, HttpServletRequest request) {
-		UserAccountModel owner = generalFunctionController.getUserAccount(request);
+	// ▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬
+	// DB-V.6 OK!
+	// The report is made by the user
+	// ---
+	// Needs | reportRef, reportMsg, reportType
+	// Optional | reportGroupId, reportTitle
+	public ReportModel createReport(ReportForm form, HttpServletRequest request) {
+		UserAccountModel user = generalFunctionController.getUserAccount(request);
+		String currentdate = new Timestamp(Calendar.getInstance().getTimeInMillis()).toString();
 
-		ReportsModel report = new ReportsModel();
+		ReportModel newReport = new ReportModel();
+		newReport.setReportedBy(user);
+		newReport.setReportedDate(currentdate);
+		newReport.setReportText(form.getReportMsg());
 
-		ReportTypeModel reportType = reportTypeRepository.findById(form.getReportType())
-				.orElseThrow(() -> new ExceptionFoundation(EXCEPTION_CODES.BROWSE_NO_RECORD_EXISTS,
-						HttpStatus.NOT_FOUND, "[ BROWSE_NO_RECORD_EXISTS ] Invalid report type."));
+		if (true) {
+			ReportGroupModel newGroup = new ReportGroupModel();
+			newGroup.setIsSolved(0);
+			newGroup.setTarget(form.getReportRef());
 
-		report.setReferenceSource(form.getReportRef());
-		report.setReportDate(new Timestamp(System.currentTimeMillis()).toString());
-		report.setReportedBy(owner);
-		report.setReportedToUser(null);
-		report.setReportRef(form.getReportRef());
-		report.setReportText(form.getReportMsg());
+			switch (form.getReportType()) {
+			case 1001: {
+				TracksModel target = tracksRepository.findById(form.getReportRef())
+						.orElseThrow(() -> new ExceptionFoundation(EXCEPTION_CODES.BROWSE_NO_RECORD_EXISTS,
+								HttpStatus.NOT_FOUND,
+								"[ BROWSE_NO_RECORD_EXISTS ] The track with this ID does not exist."));
+				newGroup.setTitle(
+						"Track Report : Track name " + target.getTrackName() + " is reported by " + user.getUsername());
+			}
+			case 2001: {
+				CommentPlaylistModel target = commentPlaylistRepository.findById(form.getReportRef())
+						.orElseThrow(() -> new ExceptionFoundation(EXCEPTION_CODES.BROWSE_NO_RECORD_EXISTS,
+								HttpStatus.NOT_FOUND,
+								"[ BROWSE_NO_RECORD_EXISTS ] The playlist comment with this ID does not exist."));
+				newGroup.setTitle("User Playlist Comment Report : User " + user.getUsername() + " reported "
+						+ target.getUser().getUsername() + "'s comment.");
+			}
+			case 2002: {
+				CommentTrackModel target = commentTrackRepository.findById(form.getReportRef())
+						.orElseThrow(() -> new ExceptionFoundation(EXCEPTION_CODES.BROWSE_NO_RECORD_EXISTS,
+								HttpStatus.NOT_FOUND,
+								"[ BROWSE_NO_RECORD_EXISTS ] The track comment with this ID does not exist."));
+				newGroup.setTitle("User Playlist Comment Report : User " + user.getUsername() + " reported "
+						+ target.getUser().getUsername() + "'s comment.");
 
-		report.setType(reportType);
-		report.setSolved(false);
-		report.setSolveDate(null);
+			}
+			case 3001: {
+				newGroup.setTitle("But reported by " + user.getUsername() + " | ");
+				newGroup.setTarget(0);
+			}
 
-		if (form.getReportGroupId() <= 0) {
-			ReportGroupModel group = new ReportGroupModel();
-			group.setGroupName(null);
-			reportGroupRepository.save(group);
-			report.setReportGroup(group);
+			}
+			newGroup.setType(reportTypeRepository.findById(form.getReportType())
+					.orElseThrow(() -> new ExceptionFoundation(EXCEPTION_CODES.SEARCH_NOT_FOUND, HttpStatus.NOT_FOUND,
+							"[ SEARCH_NOT_FOUND ] Invalid Status ID. Please check our database document for those available status. ")));
+			newGroup.setSolvedDate(null);
+			newGroup.setIsSolved(0);
 		}
-
-		reportsRepository.save(report);
-		return report;
+		return null;
 	}
-
-	// Solve report by admin
-	public void solverReport(int reportId, String message, HttpServletRequest request) {
-		UserAccountModel staff = generalFunctionController.getUserAccount(request);
-		ReportsModel report = reportsRepository.findById(reportId).orElseThrow(() -> new ExceptionFoundation(
-				EXCEPTION_CODES.BROWSE_NO_RECORD_EXISTS, HttpStatus.NOT_FOUND,
-				"[ BROWSE_NO_RECORD_EXISTS ] The report id " + reportId + " does not exist or deleted by user."));
-		report.setSolved(true);
-		report.setSolveDate(new Timestamp(System.currentTimeMillis()).toString());
-		reportsRepository.save(report);
-	}
-
-	// cancle report by user if it is not solved.
-	public void cancleReport(int reportGroupId, HttpServletRequest request) {
-		UserAccountModel owner = generalFunctionController.getUserAccount(request);
-		ReportGroupModel group = reportGroupRepository.findById(reportGroupId)
-				.orElseThrow(() -> new ExceptionFoundation(EXCEPTION_CODES.BROWSE_NO_RECORD_EXISTS,
-						HttpStatus.NOT_FOUND, "[ BROWSE_NO_RECORD_EXISTS ] The report id " + reportGroupId
-								+ " does not exist or deleted by user."));
-
-		// generalFunctionController.checkOwnerShipForRecord(owner.getAccountId(),
-		// report.getReportedBy().getAccountId());
-
-	}
-
 }

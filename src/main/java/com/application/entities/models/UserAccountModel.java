@@ -21,9 +21,9 @@ import lombok.NoArgsConstructor;
 
 @Data
 @Entity
-@Table(name = "user_accounts", schema = "sitgarden")
 @AllArgsConstructor
 @NoArgsConstructor
+@Table(name = "user_accounts", schema = "sitgarden")
 public class UserAccountModel {
 
 	@Id

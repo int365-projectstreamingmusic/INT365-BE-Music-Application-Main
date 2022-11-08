@@ -1,7 +1,5 @@
 package com.application.entities.models;
 
-import java.util.List;
-
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -10,7 +8,6 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
-import javax.persistence.Transient;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
@@ -20,9 +17,9 @@ import lombok.NoArgsConstructor;
 
 @Data
 @Entity
-@Table(name = "album", schema = "sitgarden")
 @AllArgsConstructor
 @NoArgsConstructor
+@Table(name = "album", schema = "sitgarden")
 public class AlbumModel {
 
 	@Id
@@ -33,7 +30,7 @@ public class AlbumModel {
 	@Column(name = "album_name")
 	private String albumName;
 
-	@Column(name = "album_decription")
+	@Column(name = "album_description")
 	private String albumDescription;
 
 	@ManyToOne

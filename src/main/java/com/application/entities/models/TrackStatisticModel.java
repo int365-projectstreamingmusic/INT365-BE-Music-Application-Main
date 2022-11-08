@@ -2,10 +2,10 @@ package com.application.entities.models;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Table;
+
+import com.application.entities.copmskeys.TrackCountCompKey;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -15,17 +15,16 @@ import lombok.NoArgsConstructor;
 @Entity
 @AllArgsConstructor
 @NoArgsConstructor
-@Table(name = "mood", schema = "sitgarden")
-public class MoodModel {
+@Table(name = "track_count_statistic", schema = "sitgarden")
+public class TrackStatisticModel {
 
 	@Id
-	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	private int id;
+	private TrackCountCompKey id;
 
-	@Column(name = "mood")
-	private String name;
+	@Column(name = "view_count")
+	private int viewCount;
 
-	@Column(name = "mood_desc")
-	private String desc;
+	@Column(name = "favorite_count")
+	private int favoriteCount;
 
 }

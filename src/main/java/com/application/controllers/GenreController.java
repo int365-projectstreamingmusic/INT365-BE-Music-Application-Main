@@ -16,7 +16,7 @@ import com.application.entities.copmskeys.GenreTracksCompkey;
 import com.application.entities.copmskeys.PlaylistGenreCompKey;
 import com.application.entities.models.GenreModel;
 import com.application.entities.models.GenresTracksModel;
-import com.application.entities.models.PlaylistGenreModel;
+import com.application.entities.models.GenrePlaylistModel;
 import com.application.entities.models.TracksModel;
 import com.application.entities.models.UserAccountModel;
 import com.application.exceptons.ExceptionFoundation;
@@ -150,12 +150,12 @@ public class GenreController {
 	}
 
 	// Add genre into playlist
-	public List<PlaylistGenreModel> addPlaylistGenre(int playlistId, List<GenreModel> incomingGenreList) {
+	public List<GenrePlaylistModel> addPlaylistGenre(int playlistId, List<GenreModel> incomingGenreList) {
 		List<GenreModel> existingGenre = genreRepository.fineGenreByPlaylistId(playlistId);
-		List<PlaylistGenreModel> genreList = new ArrayList<>();
+		List<GenrePlaylistModel> genreList = new ArrayList<>();
 		for (int i = 0; i < incomingGenreList.size(); i++) {
 			if (!existingGenre.contains(incomingGenreList.get(i))) {
-				PlaylistGenreModel playlistGenre = new PlaylistGenreModel();
+				GenrePlaylistModel playlistGenre = new GenrePlaylistModel();
 				playlistGenre.setId(new PlaylistGenreCompKey(playlistId, incomingGenreList.get(i).getGenreId()));
 				genreList.add(playlistGenre);
 				try {

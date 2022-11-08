@@ -14,12 +14,13 @@ public class ReportForm {
 	@Basic(optional = true)
 	private int id;
 	@Basic(optional = true)
-	private int reportRef;
-
+	private String reportTitle;
 	@Basic(optional = true)
-	private int reportType;
+	private int reportRef;
 	@Basic(optional = true)
 	private String reportMsg;
+	@Basic(optional = true)
+	private int reportType;
 	@Basic(optional = true)
 	private int reportGroupId;
 

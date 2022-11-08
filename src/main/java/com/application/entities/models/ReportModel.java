@@ -9,8 +9,6 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
-
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -19,21 +17,26 @@ import lombok.NoArgsConstructor;
 @Entity
 @AllArgsConstructor
 @NoArgsConstructor
-@Table(name = "play_history", schema = "sitgarden")
-public class PlayHistoryModel {
+@Table(name = "reports", schema = "sitgarden")
+public class ReportModel {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	private int history_id;
+	@Column(name = "report_id")
+	private int id;
 
-	@JsonFormat(pattern = "yyyy-mm-dd")
-	private String timestamp;
-	
-	@Column(name = "account_id")
-	private int accountid;
+	@Column(name = "report_date")
+	private String reportedDate;
+
+	@Column(name = "report_text")
+	private String reportText;
+
+	/*@ManyToOne
+	@JoinColumn(name = "report_group_id", referencedColumnName = "id")
+	private ReportGroupModel reportGroup;*/
 	
 	@ManyToOne
-	@JoinColumn(name = "track_id", referencedColumnName = "track_id",insertable = false,updatable = false)
-	private TracksModel track;
+	@JoinColumn(name = "reported_by",referencedColumnName = "account_id")
+	private UserAccountModel reportedBy;
 
 }

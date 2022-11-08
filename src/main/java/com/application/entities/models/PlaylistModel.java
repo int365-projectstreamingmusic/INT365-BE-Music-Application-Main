@@ -22,11 +22,11 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-@Table(name = "playlist", schema = "sitgarden")
 @Data
+@Entity
 @AllArgsConstructor
 @NoArgsConstructor
-@Entity
+@Table(name = "playlist", schema = "sitgarden")
 public class PlaylistModel {
 
 	@Id
@@ -48,12 +48,10 @@ public class PlaylistModel {
 
 	@OneToMany
 	@JoinColumn(name = "playlist_id", referencedColumnName = "playlist_id")
-	@OnDelete(action = OnDeleteAction.CASCADE)
-	private List<PlaylistGenreModel> genres;
+	private List<GenrePlaylistModel> genres;
 
 	@OneToMany
 	@JoinColumn(name = "playlist_id", referencedColumnName = "playlist_id")
-	@OnDelete(action = OnDeleteAction.CASCADE)
 	private List<MoodPlaylistModel> moods;
 
 	@ManyToOne
