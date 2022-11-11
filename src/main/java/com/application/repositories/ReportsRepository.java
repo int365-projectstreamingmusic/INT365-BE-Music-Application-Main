@@ -1,5 +1,7 @@
 package com.application.repositories;
 
+import java.util.List;
+
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -11,11 +13,11 @@ import com.application.entities.models.ReportModel;
 @Repository
 public interface ReportsRepository extends JpaRepository<ReportModel, Integer> {
 
-	/*@Query(nativeQuery = true, value = "")
-	ReportsModel getReportByGroupId(int groupId);*/
+	@Query(nativeQuery = true, value = "SELECT * FROM reports WHERE report_group_id = :reportGroupId ORDER BY report_date desc")
+	List<ReportModel> getReportList(int reportGroupId);
 
-	/*@Modifying
-	@Transactional
-	@Query(value = "UPDATE ReportsModel r SET r.isSolved = TRUE WHERE r.id = :id")
-	void setSolved(int id);*/
+	@Query(nativeQuery = true, value = "SELECT * FROM reports WHERE report_group_id = :reportGroupId ORDER BY report_date desc LIMIT :limit")
+	List<ReportModel> getReportList(int reportGroupId, int limit);
+
+
 }

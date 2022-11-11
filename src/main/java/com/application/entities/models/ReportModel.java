@@ -5,9 +5,8 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -31,12 +30,13 @@ public class ReportModel {
 	@Column(name = "report_text")
 	private String reportText;
 
-	/*@ManyToOne
-	@JoinColumn(name = "report_group_id", referencedColumnName = "id")
-	private ReportGroupModel reportGroup;*/
-	
-	@ManyToOne
-	@JoinColumn(name = "reported_by",referencedColumnName = "account_id")
+	@Column(name = "report_group_id")
+	private int reportGroupId;
+
+	@Column(name = "reported_by")
+	private int reportedById;
+
+	@Transient
 	private UserAccountModel reportedBy;
 
 }

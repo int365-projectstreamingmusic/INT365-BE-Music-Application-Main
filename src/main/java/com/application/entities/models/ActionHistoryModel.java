@@ -5,6 +5,8 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
 import lombok.AllArgsConstructor;
@@ -16,15 +18,15 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @Table(name = "action_history", schema = "sitgarden")
-public class ActionModel {
+public class ActionHistoryModel {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	@Column(name = "id")
 	private int id;
 
-	@Column(name = "desc")
-	private String desc;
+	@Column(name = "description")
+	private String description;
 
 	@Column(name = "timestamp")
 	private String timestamp;
@@ -35,7 +37,8 @@ public class ActionModel {
 	@Column(name = "account_id")
 	private int account;
 
-	@Column(name = "action_type_id")
-	private int type;
+	@ManyToOne
+	@JoinColumn(name = "action_type_id", referencedColumnName = "id")
+	private ActionTypeModel type;
 
 }

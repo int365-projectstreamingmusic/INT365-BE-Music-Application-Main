@@ -12,8 +12,6 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 
-import org.springframework.data.domain.Page;
-
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -39,14 +37,17 @@ public class ReportGroupModel {
 	@Column(name = "solved_date")
 	private String solvedDate;
 
+	@Column(name = "recent_date")
+	private String recentDate;
+
 	@Column(name = "is_solved")
-	private int isSolved;
+	private boolean isSolved;
 
 	@ManyToOne
 	@JoinColumn(name = "type_id", referencedColumnName = "type_id")
 	private ReportTypeModel type;
-	
+
 	@Transient
-	private Page<ReportModel> reports;
+	private List<ReportModel> reports;
 
 }
