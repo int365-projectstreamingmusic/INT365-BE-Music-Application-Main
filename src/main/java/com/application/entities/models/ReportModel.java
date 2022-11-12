@@ -38,5 +38,7 @@ public class ReportModel {
 
 	@Transient
 	private UserAccountModel reportedBy;
+	@Transient
+	private String note;
 
 }

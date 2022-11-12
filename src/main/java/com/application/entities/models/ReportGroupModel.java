@@ -9,6 +9,7 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 
@@ -43,11 +44,15 @@ public class ReportGroupModel {
 	@Column(name = "is_solved")
 	private boolean isSolved;
 
+	@Column(name = "startedBy")
+	private int startedBy;
+
 	@ManyToOne
 	@JoinColumn(name = "type_id", referencedColumnName = "type_id")
 	private ReportTypeModel type;
 
-	@Transient
+	@OneToMany
+	@JoinColumn(name = "report_group_id", referencedColumnName = "id")
 	private List<ReportModel> reports;
 
 }

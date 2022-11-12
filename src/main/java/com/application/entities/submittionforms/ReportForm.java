@@ -12,16 +12,20 @@ import lombok.NoArgsConstructor;
 public class ReportForm {
 
 	@Basic(optional = true)
-	private int id;
-	@Basic(optional = true)
-	private String reportTitle;
-	@Basic(optional = true)
-	private int reportRef;
+	private int reportId;
+
+	// Related to report.
 	@Basic(optional = true)
 	private String reportMsg;
 	@Basic(optional = true)
+	private int reportGroupId;
+
+	// Related to report group.
+	@Basic(optional = true)
+	private String reportTitle;
+	@Basic(optional = true)
 	private int reportType;
 	@Basic(optional = true)
-	private int reportGroupId;
+	private int targetRef;
 
 }

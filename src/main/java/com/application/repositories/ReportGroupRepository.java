@@ -22,13 +22,22 @@ public interface ReportGroupRepository extends JpaRepository<ReportGroupModel, I
 	@Query(nativeQuery = true, value = "SELECT * FROM report_group WHERE ref_id = :targetRef AND type_id = :typeId ORDER BY recent_date DESC")
 	Page<ReportGroupModel> listReportGroup(Pageable pageable, int typeId, int targetRef);
 
+	@Query(nativeQuery = true, value = "SELECT * FROM report_group WHERE recent_date = (SELECT MIN(recent_date) FROM report_group WHERE ref_id = :targetRef AND type_id = :typeId) AND ref_id = :targetRef AND type_id = :typeId")
+	ReportGroupModel getOldestReportGroup(int typeId, int targetRef);
+
+	@Query(nativeQuery = true, value = "SELECT EXISTS(SELECT * FROM report_group WHERE ref_id = :targetRef AND type_id = :typeId AND startedBy = :userId)")
+	int existsByUserIdAndRefAndType(int userId, int typeId, int targetRef);
+
+	@Query(nativeQuery = true, value = "SELECT * FROM report_group WHERE ref_id = :targetRef AND type_id = :typeId AND startedBy = :userId")
+	ReportGroupModel getByUserIdAndRefAndType(int userId, int typeId, int targetRef);
+
 	@Query(nativeQuery = true, value = "SELECT COUNT(r.id) FROM (SELECT id FROM report_group WHERE ref_id = :targetRef AND type_id = :typeId) r")
 	int numberOfReportToTarget(int targetRef, int typeId);
 
 	@Transactional
 	@Modifying
 	@Query(nativeQuery = true, value = "DELETE FROM report_group WHERE id = :id")
-	void deleteById(int id);
+	void deleteRecordById(int id);
 
 	@Transactional
 	@Modifying
@@ -39,4 +48,5 @@ public interface ReportGroupRepository extends JpaRepository<ReportGroupModel, I
 	@Modifying
 	@Query(nativeQuery = true, value = "UPDATE report_group SET recent_date = :newDate WHERE id = :id")
 	void updateCurrentDate(int id, String newDate);
+
 }

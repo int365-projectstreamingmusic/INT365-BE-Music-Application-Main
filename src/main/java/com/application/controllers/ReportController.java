@@ -1,15 +1,12 @@
 package com.application.controllers;
 
 import java.sql.Timestamp;
-import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
@@ -61,7 +58,48 @@ public class ReportController {
 	private int defauleMaxPageSize = 250;
 
 	// ▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬
-	// DB-V.6 OK!
+	//
+	// This will get the report only for each report types.
+	// NOTE | 1001 Track Report
+	public ReportOutput getReportTrack(int page, int pageSize, int targetRef) {
+		ReportOutput result = getReportStatistic(page, pageSize, targetRef, 1001);
+		result.setTrack(tracksRepository.findById(targetRef).orElse(null));
+		if (result.getTrack() == null) {
+			result.setNote("Reported track is deleted and if no longer exist.");
+		}
+		return result;
+	}
+
+	// NOTE | 2001 Track Comment Report
+	public ReportOutput getReportTrackComment(int page, int pageSize, int targetRef) {
+		ReportOutput result = getReportStatistic(page, pageSize, targetRef, 2001);
+		result.setTrackComment(commentTrackRepository.findById(targetRef).orElse(null));
+		if (result.getTrackComment() == null) {
+			result.setNote("Reported track comment is deleted and if no longer exist.");
+		}
+
+		return result;
+	}
+
+	// NOTE | 2002 Playlist Comment Report
+	public ReportOutput getReportPlaylistComment(int page, int pageSize, int targetRef) {
+		ReportOutput result = getReportStatistic(page, pageSize, targetRef, 2002);
+		result.setPlaylistComment(commentPlaylistRepository.findById(targetRef).orElse(null));
+		if (result.getPlaylistComment() == null) {
+			result.setNote("Reported playlist comment is deleted and if no longer exist.");
+		}
+		return result;
+	}
+
+	// NOTE | 3001 Bug or other Report
+	public ReportOutput getReportBug(int page, int pageSize, int targetRef) {
+		ReportOutput result = getReportStatistic(page, pageSize, targetRef, 3001);
+		result.setNote("This is a bug report.");
+		return result;
+	}
+
+	// ▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬
+	//
 	// Get report detail.
 	public ReportOutput getReportStatistic(int page, int pageSize, int targetRef, int reportType) {
 		Page<ReportGroupModel> reportGroupList = reportGroupRepository.listReportGroup(getPageRequest(page, pageSize),
@@ -71,22 +109,8 @@ public class ReportController {
 					"[ BROWSE_NO_RECORD_EXISTS ] The report group you're looking for does not exist.");
 		}
 
-		// Assign report list into each report group.
-		List<ReportGroupModel> newReportGroupList = new ArrayList<>();
-		for (int i = 0; i <= reportGroupList.getContent().size(); i++) {
-			ReportGroupModel currentGroup = reportGroupList.getContent().get(i);
-			List<ReportModel> reportList = reportsRepository.getReportList(reportGroupList.getContent().get(i).getId());
-			currentGroup.setReports(reportList);
-			newReportGroupList.add(currentGroup);
-		}
-
-		// Ready to user.
-		Page<ReportGroupModel> newListResult = new PageImpl<>(newReportGroupList, getPageRequest(page, pageSize),
-				reportType);
-		ReportGroupModel firstReportGroup = newListResult.getContent().get(newListResult.getContent().size());
-		ReportModel firstReport = firstReportGroup.getReports().get(firstReportGroup.getReports().size());
-		long currentDateMilisecond = Calendar.getInstance().getTimeInMillis();
-		long firstReportDateMinisecond = currentDateMilisecond
+		ReportModel firstReport = reportGroupRepository.getOldestReportGroup(reportType, targetRef).getReports().get(0);
+		long firstReportDateMinisecond = Calendar.getInstance().getTimeInMillis()
 				- generalFunctionController.getTimeStampFromString(firstReport.getReportedDate());
 
 		// Create a result output.
@@ -94,12 +118,12 @@ public class ReportController {
 		result.setNumberOfReport(reportGroupList.getContent().size());
 		result.setHoursAfterFirstReport((int) firstReportDateMinisecond / (1000 * 60 * 60));
 		result.setFirstReportDate(firstReport.getReportedDate());
-		result.setReportGroup(newListResult);
+		result.setReportGroup(reportGroupList);
 		return result;
 	}
 
 	// ▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬
-	// DB-V.6 OK!
+	// DB-V6 OK!
 	// Get report list. Will be listed in group.
 	public Page<ReportGroupModel> getReportGroupList(int page, int pageSize, String searchKey) {
 		Page<ReportGroupModel> result;
@@ -112,7 +136,7 @@ public class ReportController {
 	}
 
 	// ▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬
-	// DB-V.6 OK!
+	// DB-V6 OK!
 	// Get report in specific group.
 	public ReportGroupModel getReportListInGroup(int reportGroupId) {
 		ReportGroupModel reportGroup = reportGroupRepository.findById(reportGroupId).orElseThrow(
@@ -123,7 +147,7 @@ public class ReportController {
 	}
 
 	// ▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬
-	// DB-V.6 OK!
+	// DB-V6 OK!
 	// Delete report by Id, ( Only be able to delete a report group. )
 	// CONDITION | Only the owner can delete.
 	// CONDITION | If it isn't replied, user can delete.
@@ -134,30 +158,29 @@ public class ReportController {
 		ReportGroupModel reportGroup = reportGroupRepository.findById(groupId).orElseThrow(
 				() -> new ExceptionFoundation(EXCEPTION_CODES.BROWSE_NO_RECORD_EXISTS, HttpStatus.NOT_FOUND,
 						"[ BROWSE_NO_RECORD_EXISTS ] The report does not exist, or is already deleted."));
+		generalFunctionController.checkOwnerShipForRecord(owner.getAccountId(), reportGroup.getStartedBy());
 
-		reportGroup.setReports(reportsRepository.getReportList(groupId));
-		generalFunctionController.checkOwnerShipForRecord(owner.getAccountId(),
-				reportGroup.getReports().get(0).getReportedBy().getAccountId());
+		if (reportGroup.getReports().size() > 1) {
+			for (int i = 0; i < reportGroup.getReports().size(); i++) {
+				if (reportGroup.getReports().get(i).getReportedById() != owner.getAccountId()) {
+					throw new ExceptionFoundation(EXCEPTION_CODES.RECORD_HAS_REPLY, HttpStatus.I_AM_A_TEAPOT,
+							"[ RECORD_HAS_REPLY ] You can't delete a report with a reply.");
+				}
+			}
+		}
 
-		if (reportGroup.getReports().size() <= 0) {
-			throw new ExceptionFoundation(EXCEPTION_CODES.BROWSE_NO_RECORD_EXISTS, HttpStatus.NOT_FOUND,
-					"[ BROWSE_NO_RECORD_EXISTS ] Found report group but no record found. This group is empty.");
-		} else if (reportGroup.getReports().size() > 1) {
-			throw new ExceptionFoundation(EXCEPTION_CODES.RECORD_HAS_REPLY, HttpStatus.I_AM_A_TEAPOT,
-					"[ RECORD_HAS_REPLY ] You can't delete a report with a reply.");
-		} else if (reportGroup.isSolved()) {
+		if (reportGroup.isSolved()) {
 			throw new ExceptionFoundation(EXCEPTION_CODES.RECORD_INVALID_STATUS, HttpStatus.I_AM_A_TEAPOT,
 					"[ RECORD_INVALID_STATUS ] You are not allowed to delete solved report.");
 		} else {
-			// Save history
 			actionHistoryController.addNewRecord(new ActionForm(owner, reportGroup.getId(), 503,
 					"User, " + owner.getUsername() + " deleted the report group ID " + reportGroup.getId() + "."));
-			reportGroupRepository.deleteById(groupId);
+			reportGroupRepository.deleteRecordById(groupId);
 		}
 	}
 
 	// ▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬
-	// DB-V.6 OK!
+	//
 	// Mark as resolved.
 	// NOTE | Keeps history when resolve status is changed.
 	public void markResolved(int reportGroupId, HttpServletRequest request) {
@@ -186,82 +209,105 @@ public class ReportController {
 	// ---
 	// Needs | reportRef, reportMsg, reportType
 	// Optional | reportGroupId, reportTitle
-	public void createReport(ReportForm form, HttpServletRequest request) {
+	public ReportModel createReport(ReportForm form, HttpServletRequest request) {
 		UserAccountModel user = generalFunctionController.getUserAccount(request);
 		String currentdate = new Timestamp(Calendar.getInstance().getTimeInMillis()).toString();
 
 		ReportModel newReport = new ReportModel();
-		newReport.setReportedBy(user);
 		newReport.setReportedDate(currentdate);
 		newReport.setReportText(form.getReportMsg());
+		newReport.setReportGroupId(form.getReportGroupId());
+		newReport.setReportedById(user.getAccountId());
+		newReport.setReportedBy(user);
 
-		if (form.getReportGroupId() != 0) {
+		if (form.getReportGroupId() == 0) {
 			ReportGroupModel newGroup = new ReportGroupModel();
-			newGroup.setTarget(form.getReportRef());
-
-			switch (form.getReportType()) {
-			case 1001: {
-				TracksModel target = tracksRepository.findById(form.getReportRef())
-						.orElseThrow(() -> new ExceptionFoundation(EXCEPTION_CODES.BROWSE_NO_RECORD_EXISTS,
+			if (reportGroupRepository.existsByUserIdAndRefAndType(user.getAccountId(), form.getReportType(),
+					form.getTargetRef()) == 1) {
+				ReportGroupModel currentGroup = reportGroupRepository.getByUserIdAndRefAndType(user.getAccountId(),
+						form.getReportType(), form.getTargetRef());
+				newReport.setReportGroupId(currentGroup.getId());
+			} else {
+				newGroup.setTarget(form.getTargetRef());
+				newGroup.setStartedBy(user.getAccountId());
+				newGroup.setType(reportTypeRepository.findById(form.getReportType())
+						.orElseThrow(() -> new ExceptionFoundation(EXCEPTION_CODES.SEARCH_NOT_FOUND,
 								HttpStatus.NOT_FOUND,
-								"[ BROWSE_NO_RECORD_EXISTS ] The track with this ID does not exist."));
-				if (form.getReportTitle() == "") {
-					newGroup.setTitle("Track Report : Track name " + target.getTrackName() + " is reported by "
-							+ user.getUsername());
-				} else {
-					newGroup.setTitle(form.getReportTitle());
+								"[ SEARCH_NOT_FOUND ] Invalid Status ID. Please check our database document for those available status. ")));
+
+				switch (form.getReportType()) {
+				case 1001: {
+					TracksModel target = tracksRepository.findById(form.getTargetRef())
+							.orElseThrow(() -> new ExceptionFoundation(EXCEPTION_CODES.BROWSE_NO_RECORD_EXISTS,
+									HttpStatus.NOT_FOUND,
+									"[ BROWSE_NO_RECORD_EXISTS ] The track with this ID does not exist."));
+					if (form.getReportTitle() == "") {
+						newGroup.setTitle("Track Report : Track name " + target.getTrackName() + " is reported by "
+								+ user.getUsername());
+					} else {
+						newGroup.setTitle(form.getReportTitle());
+					}
+					break;
 				}
-			}
-			case 2001: {
-				CommentPlaylistModel target = commentPlaylistRepository.findById(form.getReportRef())
-						.orElseThrow(() -> new ExceptionFoundation(EXCEPTION_CODES.BROWSE_NO_RECORD_EXISTS,
-								HttpStatus.NOT_FOUND,
-								"[ BROWSE_NO_RECORD_EXISTS ] The playlist comment with this ID does not exist."));
-				if (form.getReportTitle() == "") {
-					newGroup.setTitle("User Playlist Comment Report : User " + user.getUsername() + " reported "
-							+ target.getUser().getUsername() + "'s comment.");
-				} else {
-					newGroup.setTitle(form.getReportTitle());
+				case 2001: {
+					CommentPlaylistModel target = commentPlaylistRepository.findById(form.getTargetRef())
+							.orElseThrow(() -> new ExceptionFoundation(EXCEPTION_CODES.BROWSE_NO_RECORD_EXISTS,
+									HttpStatus.NOT_FOUND,
+									"[ BROWSE_NO_RECORD_EXISTS ] The track comment with this ID does not exist."));
+					if (form.getReportTitle() == "") {
+						newGroup.setTitle("User track Comment Report : User " + user.getUsername() + " reported "
+								+ target.getUser().getUsername() + "'s comment.");
+					} else {
+						newGroup.setTitle(form.getReportTitle());
+					}
+					break;
 				}
-			}
-			case 2002: {
-				CommentTrackModel target = commentTrackRepository.findById(form.getReportRef())
-						.orElseThrow(() -> new ExceptionFoundation(EXCEPTION_CODES.BROWSE_NO_RECORD_EXISTS,
+				case 2002: {
+					CommentTrackModel target = commentTrackRepository.findById(form.getTargetRef())
+							.orElseThrow(() -> new ExceptionFoundation(EXCEPTION_CODES.BROWSE_NO_RECORD_EXISTS,
+									HttpStatus.NOT_FOUND,
+									"[ BROWSE_NO_RECORD_EXISTS ] The playlist comment with this ID does not exist."));
+					if (form.getReportTitle() == "") {
+						newGroup.setTitle("User Playlist Comment Report : User " + user.getUsername() + " reported "
+								+ target.getUser().getUsername() + "'s comment.");
+					} else {
+						newGroup.setTitle(form.getReportTitle());
+					}
+					break;
+				}
+				case 3001: {
+					newGroup.setTitle("Bug reported by " + user.getUsername() + " | ");
+					newGroup.setTarget(0);
+					break;
+				}
+				}
+
+				newGroup.setType(reportTypeRepository.findById(form.getReportType())
+						.orElseThrow(() -> new ExceptionFoundation(EXCEPTION_CODES.SEARCH_NOT_FOUND,
 								HttpStatus.NOT_FOUND,
-								"[ BROWSE_NO_RECORD_EXISTS ] The track comment with this ID does not exist."));
-				newGroup.setTitle("User Playlist Comment Report : User " + user.getUsername() + " reported "
-						+ target.getUser().getUsername() + "'s comment.");
+								"[ SEARCH_NOT_FOUND ] Invalid Status ID. Please check our database document for those available status. ")));
 
+				newGroup.setRecentDate(currentdate);
+				// This report is newly created, and will be waiting for someone to answer.
+				newGroup.setSolvedDate(null);
+				newGroup.setSolved(false);
+				newGroup = reportGroupRepository.save(newGroup);
+				newReport.setReportGroupId(newGroup.getId());
 			}
-			case 3001: {
-				newGroup.setTitle("But reported by " + user.getUsername() + " | ");
-				newGroup.setTarget(0);
-			}
-
-			}
-			newGroup.setType(reportTypeRepository.findById(form.getReportType())
-					.orElseThrow(() -> new ExceptionFoundation(EXCEPTION_CODES.SEARCH_NOT_FOUND, HttpStatus.NOT_FOUND,
-							"[ SEARCH_NOT_FOUND ] Invalid Status ID. Please check our database document for those available status. ")));
-
-			newGroup.setRecentDate(currentdate);
-			// This report is newly created, and will be waiting for someone to answer.
-			newGroup.setSolvedDate(null);
-			newGroup.setSolved(false);
-
-			reportGroupRepository.save(newGroup);
 		} else {
 			ReportGroupModel currentGroup = reportGroupRepository.findById(form.getReportGroupId()).orElseThrow(
 					() -> new ExceptionFoundation(EXCEPTION_CODES.BROWSE_NO_RECORD_EXISTS, HttpStatus.NOT_FOUND,
 							"[ BROWSE_NO_RECORD_EXISTS ] The report group with this ID does not exist."));
 			newReport.setReportGroupId(currentGroup.getId());
+			reportGroupRepository.updateCurrentDate(currentGroup.getId(), currentdate);
 		}
-
-		reportsRepository.save(newReport);
+		newReport = reportsRepository.save(newReport);
+		return newReport;
 	}
 
 	// ▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬
 	// DB-V.6 OK!
-	// Get pagerequest
+	// Get pageRequest
 	private Pageable getPageRequest(int page, int pageSize) {
 		if (page < 0) {
 			page = defaultPageSize;
