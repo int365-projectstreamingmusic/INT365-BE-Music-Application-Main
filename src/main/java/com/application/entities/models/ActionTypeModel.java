@@ -5,26 +5,25 @@ import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Table;
 
-import com.application.entities.copmskeys.TrackCountCompKey;
-
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Data
 @Entity
-@Table(name = "track_count_statistic", schema = "sitgarden")
 @AllArgsConstructor
 @NoArgsConstructor
-public class TrackCountModel {
+@Table(name = "action_type", schema = "sitgarden")
+public class ActionTypeModel {
 
 	@Id
-	private TrackCountCompKey id;
+	@Column(name = "id")
+	private int id;
 
-	@Column(name = "view_count")
-	private int viewCount;
-	
-	@Column(name = "favorite_count")
-	private int favoriteCount;
+	@Column(name = "type")
+	private String type;
+
+	@Column(name = "desc")
+	private String desc;
 
 }

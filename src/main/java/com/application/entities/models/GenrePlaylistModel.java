@@ -1,12 +1,13 @@
 package com.application.entities.models;
 
+import javax.persistence.Basic;
 import javax.persistence.EmbeddedId;
 import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
-import com.application.entities.copmskeys.UserRolesCompKey;
+import com.application.entities.copmskeys.PlaylistGenreCompKey;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import lombok.AllArgsConstructor;
@@ -17,15 +18,16 @@ import lombok.NoArgsConstructor;
 @Entity
 @AllArgsConstructor
 @NoArgsConstructor
-@Table(name = "user_roles", schema = "sitgarden")
-public class UserRolesModel {
+@Table(name = "genre_playlist", schema = "sitgarden")
+public class GenrePlaylistModel {
 
 	@JsonIgnore
 	@EmbeddedId
-	private UserRolesCompKey id;
+	private PlaylistGenreCompKey id;
 
 	@ManyToOne
-	@JoinColumn(name = "roles_id", insertable = false, updatable = false)
-	private RolesModel roles;
+	@JoinColumn(name = "genre_id", insertable = false, updatable = false)
+	@Basic(optional = true)
+	private GenreModel genre;
 
 }

@@ -11,11 +11,11 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-@Table(name = "genre", schema = "sitgarden")
 @Data
+@Entity
 @AllArgsConstructor
 @NoArgsConstructor
-@Entity
+@Table(name = "genre", schema = "sitgarden")
 public class GenreModel {
 
 	@Id

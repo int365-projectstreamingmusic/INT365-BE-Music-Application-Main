@@ -14,20 +14,18 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-@Entity
-@Table(name = "mood_track", schema = "sitgarden")
 @Data
+@Entity
 @AllArgsConstructor
 @NoArgsConstructor
+@Table(name = "mood_track", schema = "sitgarden")
 public class MoodTrackModel {
 
 	@EmbeddedId
 	private MoodTrackCompKey id;
 
 	@Column(name = "ratio")
-	private Double ratio;
-	@Column(name = "record_count")
-	private int count;
+	private int ratio;
 
 	@ManyToOne
 	@Transient

@@ -24,11 +24,11 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-@Entity
 @Data
-@Table(name = "tracks", schema = "sitgarden")
+@Entity
 @AllArgsConstructor
 @NoArgsConstructor
+@Table(name = "tracks", schema = "sitgarden")
 public class TracksModel {
 
 	@Id

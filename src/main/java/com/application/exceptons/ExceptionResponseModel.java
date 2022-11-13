@@ -81,6 +81,7 @@ public class ExceptionResponseModel {
 		RECORD_ALREADY_GONE(50001), // ---------
 		RECORE_ALREADY_EXIST(50002), // ---------
 		RECORD_INVALID_STATUS(50003), // ---------
+		RECORD_HAS_REPLY(50004), // ---------
 
 		// Unavailable, at least for now.
 		FEATURE_NOT_IMPLEMENTED(60001), // Not yet done.

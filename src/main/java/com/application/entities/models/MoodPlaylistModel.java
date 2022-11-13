@@ -14,20 +14,18 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-@Entity
-@Table(name = "mood_playlist", schema = "sitgarden")
 @Data
+@Entity
 @AllArgsConstructor
 @NoArgsConstructor
+@Table(name = "mood_playlist", schema = "sitgarden")
 public class MoodPlaylistModel {
 
 	@EmbeddedId
 	private MoodPlaylistCompKey id;
 
 	@Column(name = "ratio")
-	private Double ratio;
-	@Column(name = "record_count")
-	private int count;
+	private int ratio;
 
 	@ManyToOne
 	@Transient

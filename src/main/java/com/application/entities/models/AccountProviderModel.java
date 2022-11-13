@@ -1,5 +1,6 @@
 package com.application.entities.models;
 
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Table;
@@ -12,11 +13,14 @@ import lombok.NoArgsConstructor;
 @Entity
 @AllArgsConstructor
 @NoArgsConstructor
-@Table(name = "roles", schema = "sitgarden")
-public class RolesModel {
+@Table(name = "account_provider", schema = "sitgarden")
+public class AccountProviderModel {
 
 	@Id
-	private int roles_id;
-	private String roles;
+	@Column(name = "id")
+	private int id;
+
+	private String provider;
+	private String desc;
 
 }

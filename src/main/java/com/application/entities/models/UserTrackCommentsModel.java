@@ -15,11 +15,11 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-@Table(name = "user_track_comments", schema = "sitgarden")
-@Entity
 @Data
+@Entity
 @AllArgsConstructor
 @NoArgsConstructor
+@Table(name = "user_track_comments", schema = "sitgarden")
 public class UserTrackCommentsModel {
 
 	@Id
@@ -30,11 +30,11 @@ public class UserTrackCommentsModel {
 	private String timestamp;
 
 	private String comment;
-	
+
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "account_id")
 	private UserAccountModel account;
-	
+
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "track_id")
 	private TracksModel track;

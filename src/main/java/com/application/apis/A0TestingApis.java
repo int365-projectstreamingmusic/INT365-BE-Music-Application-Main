@@ -20,7 +20,7 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import com.application.controllers.AlbumController;
 import com.application.controllers.TrackStatisticController;
 import com.application.entities.models.AlbumModel;
-import com.application.entities.models.TrackCountModel;
+import com.application.entities.models.TrackStatisticModel;
 import com.application.repositories.AlbumRepository;
 import com.application.services.GeneralFunctionController;
 
@@ -64,7 +64,7 @@ public class A0TestingApis {
 	}
 
 	@GetMapping("AddCustomTrackCount")
-	public ResponseEntity<List<TrackCountModel>> addCustomTrackCount(@RequestParam int trackId,
+	public ResponseEntity<List<TrackStatisticModel>> addCustomTrackCount(@RequestParam int trackId,
 			@RequestParam int nDays) {
 		URI uri = URI.create(
 				ServletUriComponentsBuilder.fromCurrentContextPath().path(mapping + "addMyArtistToTrack").toString());

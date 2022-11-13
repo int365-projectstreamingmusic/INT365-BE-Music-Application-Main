@@ -1,7 +1,10 @@
 package com.application.services;
 
 import java.sql.Timestamp;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.Date;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -60,5 +63,18 @@ public class GeneralFunctionController {
 	public Timestamp getTimeStampFromMilisecond(long miliSecond) {
 		Timestamp timestamp = new Timestamp(miliSecond);
 		return timestamp;
+	}
+
+	public long getTimeStampFromString(String myDate) {
+		try {
+			System.out.println(myDate);
+			SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+			Date date = sdf.parse(myDate);
+			System.out.println(date.toString());
+			return date.getTime();
+		} catch (ParseException e) {
+			throw new ExceptionFoundation(EXCEPTION_CODES.CORE_INTERNAL_SERVER_ERROR, HttpStatus.INTERNAL_SERVER_ERROR,
+					"[ CORE_INTERNAL_SERVER_ERROR ] The parsing of this date gone mulfunction.");
+		}
 	}
 }

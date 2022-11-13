@@ -13,11 +13,11 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-@Entity
 @Data
-@Table(name = "user_playlist_comments", schema = "sitgarden")
+@Entity
 @AllArgsConstructor
 @NoArgsConstructor
+@Table(name = "user_playlist_comments", schema = "sitgarden")
 public class CommentPlaylistModel {
 
 	@Id

@@ -15,7 +15,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import com.application.entities.copmskeys.UserRolesCompKey;
-import com.application.entities.models.ReportsModel;
+import com.application.entities.models.ReportModel;
 import com.application.entities.models.RolesModel;
 import com.application.entities.models.UserAccountModel;
 import com.application.entities.models.UserRolesModel;
@@ -153,7 +153,7 @@ public class UserAccountController {
 	// ▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬
 	// DB-V5 OK!
 	// DeleteUserAccountRequestedByUser
-	public void deleteUserAccountRequestedByUser(String password, HttpServletRequest request) {
+	/*public void deleteUserAccountRequestedByUser(String password, HttpServletRequest request) {
 
 		String userName = JwtTokenUtills.getUserNameFromToken(request);
 		UserAccountModel targetUser = userAccountModelRepository.findByUsername(userName);
@@ -181,7 +181,7 @@ public class UserAccountController {
 		userRoleModelRepository.insertNewRecord(targetUser.getAccountId(), deletedRole);
 		userRoleModelRepository.insertNewRecord(targetUser.getAccountId(), suspendingRoleNumber);
 
-		ReportsModel newReport = new ReportsModel();
+		ReportModel newReport = new ReportModel();
 		newReport.setSolved(true);
 		newReport.setReportedBy(targetUser);
 		newReport.setReportedToUser(targetUser);
@@ -197,7 +197,7 @@ public class UserAccountController {
 
 		reportsRepository.save(newReport);
 
-	}
+	}*/
 
 	// --------------- WIP ---------------
 

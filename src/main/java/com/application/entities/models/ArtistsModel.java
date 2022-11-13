@@ -11,11 +11,11 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-@Table(name = "artists", schema = "sitgarden")
 @Data
+@Entity
 @AllArgsConstructor
 @NoArgsConstructor
-@Entity
+@Table(name = "artists", schema = "sitgarden")
 public class ArtistsModel {
 	@Id
 	@Column(name = "artist_id")
@@ -30,12 +30,5 @@ public class ArtistsModel {
 	
 	@Column(name = "added_by")
 	private int addedBy;
-	
-	/*@OneToMany(fetch = FetchType.LAZY, orphanRemoval = true)
-	@JoinColumn(name = "artist_id", referencedColumnName = "artist_id")
-	private List<ArtistsTrackModel> artistTracks;*/
-	
-	/*@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "added_by", insertable = false, updatable = false)
-	private UserAccountModel userAccount;*/
+
 }
