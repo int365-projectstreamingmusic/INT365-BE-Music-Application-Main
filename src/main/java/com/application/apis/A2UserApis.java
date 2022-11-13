@@ -35,6 +35,7 @@ import com.application.entities.models.CommentTrackModel;
 import com.application.entities.models.PlayHistoryModel;
 import com.application.entities.models.PlaylistModel;
 import com.application.entities.models.PlaylistTrackListModel;
+import com.application.entities.models.ReportGroupModel;
 import com.application.entities.models.ReportModel;
 import com.application.entities.models.UserAccountModel;
 import com.application.entities.models.UserTrackMarkingModel;
@@ -42,6 +43,7 @@ import com.application.entities.submittionforms.CommentForm;
 import com.application.entities.submittionforms.PlaylistForm;
 import com.application.entities.submittionforms.PlaylistOutput;
 import com.application.entities.submittionforms.ReportForm;
+import com.application.entities.submittionforms.ReportOutput;
 import com.application.entities.submittionforms.TrackMarkingForm;
 import com.application.entities.submittionforms.UserProfileForm;
 import com.application.exceptons.ExceptionFoundation;
@@ -431,6 +433,15 @@ public class A2UserApis {
 	// ▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬
 	// Reports
 	// ---------------------
+
+	// ▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬
+	// DB-V6 OK
+	// REPORT : Get my reports
+	@GetMapping("report")
+	public ResponseEntity<Page<ReportGroupModel>> getReports(@RequestParam(defaultValue = "0") int page,
+			@RequestParam(defaultValue = "30") int pageSize, HttpServletRequest request) {
+		return ResponseEntity.ok().body(reportController.getOwnedReport(page, pageSize, request));
+	}
 
 	// ▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬
 	// DB-V6 OK

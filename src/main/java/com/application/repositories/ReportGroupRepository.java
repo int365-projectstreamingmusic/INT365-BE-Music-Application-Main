@@ -13,6 +13,9 @@ import com.application.entities.models.ReportGroupModel;
 @Repository
 public interface ReportGroupRepository extends JpaRepository<ReportGroupModel, Integer> {
 
+	@Query(value = "SELECT r FROM ReportGroupModel r WHERE r.startedBy = :userId ORDER BY r.recentDate DESC")
+	Page<ReportGroupModel> listReportGroupByOwner(Pageable pageable, int userId);
+	
 	@Query(value = "SELECT r FROM ReportGroupModel r ORDER BY r.recentDate DESC")
 	Page<ReportGroupModel> listReportGroup(Pageable pageable);
 
@@ -41,8 +44,8 @@ public interface ReportGroupRepository extends JpaRepository<ReportGroupModel, I
 
 	@Transactional
 	@Modifying
-	@Query(value = "UPDATE ReportGroupModel SET isSolved = :isSolved")
-	void updateIsSolved(boolean isSolved);
+	@Query(value = "UPDATE ReportGroupModel SET isSolved = :isSolved WHERE id = :id")
+	void updateIsSolved(int id,boolean isSolved);
 
 	@Transactional
 	@Modifying

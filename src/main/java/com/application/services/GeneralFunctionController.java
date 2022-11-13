@@ -67,8 +67,10 @@ public class GeneralFunctionController {
 
 	public long getTimeStampFromString(String myDate) {
 		try {
-			SimpleDateFormat sdf = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
+			System.out.println(myDate);
+			SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 			Date date = sdf.parse(myDate);
+			System.out.println(date.toString());
 			return date.getTime();
 		} catch (ParseException e) {
 			throw new ExceptionFoundation(EXCEPTION_CODES.CORE_INTERNAL_SERVER_ERROR, HttpStatus.INTERNAL_SERVER_ERROR,

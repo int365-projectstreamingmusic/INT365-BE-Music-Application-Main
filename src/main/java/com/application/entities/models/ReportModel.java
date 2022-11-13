@@ -8,6 +8,8 @@ import javax.persistence.Id;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
+
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -25,6 +27,7 @@ public class ReportModel {
 	private int id;
 
 	@Column(name = "report_date")
+	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
 	private String reportedDate;
 
 	@Column(name = "report_text")

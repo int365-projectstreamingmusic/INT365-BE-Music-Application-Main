@@ -58,48 +58,7 @@ public class ReportController {
 	private int defauleMaxPageSize = 250;
 
 	// ▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬
-	//
-	// This will get the report only for each report types.
-	// NOTE | 1001 Track Report
-	public ReportOutput getReportTrack(int page, int pageSize, int targetRef) {
-		ReportOutput result = getReportStatistic(page, pageSize, targetRef, 1001);
-		result.setTrack(tracksRepository.findById(targetRef).orElse(null));
-		if (result.getTrack() == null) {
-			result.setNote("Reported track is deleted and if no longer exist.");
-		}
-		return result;
-	}
-
-	// NOTE | 2001 Track Comment Report
-	public ReportOutput getReportTrackComment(int page, int pageSize, int targetRef) {
-		ReportOutput result = getReportStatistic(page, pageSize, targetRef, 2001);
-		result.setTrackComment(commentTrackRepository.findById(targetRef).orElse(null));
-		if (result.getTrackComment() == null) {
-			result.setNote("Reported track comment is deleted and if no longer exist.");
-		}
-
-		return result;
-	}
-
-	// NOTE | 2002 Playlist Comment Report
-	public ReportOutput getReportPlaylistComment(int page, int pageSize, int targetRef) {
-		ReportOutput result = getReportStatistic(page, pageSize, targetRef, 2002);
-		result.setPlaylistComment(commentPlaylistRepository.findById(targetRef).orElse(null));
-		if (result.getPlaylistComment() == null) {
-			result.setNote("Reported playlist comment is deleted and if no longer exist.");
-		}
-		return result;
-	}
-
-	// NOTE | 3001 Bug or other Report
-	public ReportOutput getReportBug(int page, int pageSize, int targetRef) {
-		ReportOutput result = getReportStatistic(page, pageSize, targetRef, 3001);
-		result.setNote("This is a bug report.");
-		return result;
-	}
-
-	// ▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬
-	//
+	// DB-V6 OK!
 	// Get report detail.
 	public ReportOutput getReportStatistic(int page, int pageSize, int targetRef, int reportType) {
 		Page<ReportGroupModel> reportGroupList = reportGroupRepository.listReportGroup(getPageRequest(page, pageSize),
@@ -119,6 +78,31 @@ public class ReportController {
 		result.setHoursAfterFirstReport((int) firstReportDateMinisecond / (1000 * 60 * 60));
 		result.setFirstReportDate(firstReport.getReportedDate());
 		result.setReportGroup(reportGroupList);
+
+		switch (reportType) {
+		case 1001: {
+			result.setTrack(tracksRepository.findById(targetRef).orElse(null));
+			if (result.getTrack() == null) {
+				result.setNote("Reported track is deleted and if no longer exist.");
+			}
+			break;
+		}
+		case 2001: {
+			result.setTrackComment(commentTrackRepository.findById(targetRef).orElse(null));
+			if (result.getTrackComment() == null) {
+				result.setNote("Reported track comment is deleted and if no longer exist.");
+			}
+		}
+		case 2002: {
+			result.setPlaylistComment(commentPlaylistRepository.findById(targetRef).orElse(null));
+			if (result.getPlaylistComment() == null) {
+				result.setNote("Reported playlist comment is deleted and if no longer exist.");
+			}
+		}
+		case 3001: {
+			result.setNote("This is a bug report.");
+		}
+		}
 		return result;
 	}
 
@@ -131,6 +115,20 @@ public class ReportController {
 			result = reportGroupRepository.listReportGroup(getPageRequest(page, pageSize));
 		} else {
 			result = reportGroupRepository.listReportGroup(getPageRequest(page, pageSize), searchKey);
+		}
+		return result;
+	}
+
+	// ▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬
+	// DB-V6 OK!
+	// Get report list made by a specific user, most likely be used by the user.
+	public Page<ReportGroupModel> getOwnedReport(int page, int pageSize, HttpServletRequest request) {
+		UserAccountModel owner = generalFunctionController.getUserAccount(request);
+		Page<ReportGroupModel> result;
+		result = reportGroupRepository.listReportGroupByOwner(getPageRequest(page, pageSize), owner.getAccountId());
+		if (result.getTotalElements() <= 0) {
+			throw new ExceptionFoundation(EXCEPTION_CODES.BROWSE_NO_RECORD_EXISTS, HttpStatus.NOT_FOUND,
+					"[ BROWSE_NO_RECORD_EXISTS ] This user has no report made against anything.");
 		}
 		return result;
 	}
@@ -180,26 +178,28 @@ public class ReportController {
 	}
 
 	// ▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬
-	//
+	// DB-V.6 OK!
 	// Mark as resolved.
 	// NOTE | Keeps history when resolve status is changed.
-	public void markResolved(int reportGroupId, HttpServletRequest request) {
+	public boolean markResolved(int reportGroupId, HttpServletRequest request) {
 		UserAccountModel staff = generalFunctionController.getUserAccount(request);
 		ReportGroupModel reportGroup = reportGroupRepository.findById(reportGroupId)
 				.orElseThrow(() -> new ExceptionFoundation(EXCEPTION_CODES.BROWSE_NO_RECORD_EXISTS,
 						HttpStatus.NOT_FOUND, "[ BROWSE_NO_RECORD_EXISTS ]"));
 		if (reportGroup.isSolved()) {
-			reportGroupRepository.updateIsSolved(false);
+			reportGroupRepository.updateIsSolved(reportGroupId, false);
 			// Save history
 			actionHistoryController.addNewRecord(new ActionForm(staff, reportGroup.getId(), 502,
 					"Staff or admin ID " + staff.getAccountId() + " or known as \"" + staff.getUsername()
 							+ "\"removed solved status from report group ID " + reportGroup.getId() + "."));
+			return false;
 		} else {
-			reportGroupRepository.updateIsSolved(true);
+			reportGroupRepository.updateIsSolved(reportGroupId, true);
 			// Save history
 			actionHistoryController.addNewRecord(new ActionForm(staff, reportGroup.getId(), 501,
 					"Staff or admin ID " + staff.getAccountId() + " or known as \"" + staff.getUsername()
 							+ "\" marked report group id [ " + reportGroup.getId() + " ] as solved."));
+			return true;
 		}
 	}
 
@@ -310,10 +310,10 @@ public class ReportController {
 	// Get pageRequest
 	private Pageable getPageRequest(int page, int pageSize) {
 		if (page < 0) {
-			page = defaultPageSize;
+			page = 0;
 		}
-		if (pageSize > defauleMaxPageSize) {
-			pageSize = defauleMaxPageSize;
+		if (pageSize > defauleMaxPageSize || pageSize <= 1) {
+			pageSize = defaultPageSize;
 		}
 		Pageable sendPageRequest = PageRequest.of(page, pageSize);
 		return sendPageRequest;
