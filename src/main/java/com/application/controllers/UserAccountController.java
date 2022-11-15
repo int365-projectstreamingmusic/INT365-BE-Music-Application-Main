@@ -1,6 +1,6 @@
 package com.application.controllers;
 
-import java.sql.Timestamp;
+import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -11,23 +11,20 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import com.application.entities.copmskeys.UserRolesCompKey;
-import com.application.entities.models.ReportModel;
 import com.application.entities.models.RolesModel;
 import com.application.entities.models.UserAccountModel;
 import com.application.entities.models.UserRolesModel;
+import com.application.entities.submittionforms.ActionForm;
 import com.application.exceptons.ExceptionFoundation;
 import com.application.exceptons.ExceptionResponseModel.EXCEPTION_CODES;
-import com.application.repositories.ReportTypeRepository;
-import com.application.repositories.ReportsRepository;
 import com.application.repositories.RolesRepository;
 import com.application.repositories.UserAccountRepository;
 import com.application.repositories.UserRoleModelRepository;
+import com.application.services.GeneralFunctionController;
 import com.application.utilities.JwtTokenUtills;
-import com.application.utilities.StringGenerateService;
 
 @Service
 @PropertySource("generalsetting.properties")
@@ -39,12 +36,12 @@ public class UserAccountController {
 	private RolesRepository rolesRepository;
 	@Autowired
 	private UserRoleModelRepository userRoleModelRepository;
-	@Autowired
-	private ReportsRepository reportsRepository;
-	@Autowired
-	private ReportTypeRepository reportTypeRepository;
 
-	private BCryptPasswordEncoder passwordEncoder;
+	@Autowired
+	private ActionHistoryController actionHistoryController;
+
+	@Autowired
+	private GeneralFunctionController generalFunctionController;
 
 	private int adminRoleNumber = 99001;
 	private int suspendingRoleNumber = 2003;
@@ -58,6 +55,101 @@ public class UserAccountController {
 
 	@Value("${general.useraccount.max-page-size}")
 	private int maxPageSize;
+
+	// ▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬
+	// DB-V6 OK!
+	// Assign a single role from user.
+	// EXCEPTION | 11001 | ROLE_NOT_FOUND
+	// EXCEPTION | 11002 | ROLE_INSUFFICIENT_PRIVILEGE
+	// EXCEPTION | 11003 | ROLE_FORBIDDEN_STRENGTH
+	// EXCEPTION | 11004 | ROLE_ALREADY_EXIST
+	// EXCEPTION | 12002 | USER_SEARCH_NOT_FOUND
+	public String grantRole(int userId, int roleId, HttpServletRequest request) {
+		UserAccountModel user = generalFunctionController.getUserAccount(request);
+		UserAccountModel targetUser = userAccountModelRepository.findById(userId)
+				.orElseThrow(() -> new ExceptionFoundation(EXCEPTION_CODES.USER_SEARCH_NOT_FOUND, HttpStatus.NOT_FOUND,
+						"[ USER_SEARCH_NOT_FOUND ] The user with this ID does not exist."));
+
+		int userRoleStrength = isAllowedToManageRole(user.getUserRoles(), targetUser.getUserRoles());
+		RolesModel targetRole = rolesRepository.findById(roleId).orElseThrow(() -> new ExceptionFoundation(
+				EXCEPTION_CODES.ROLE_NOT_FOUND, HttpStatus.NOT_FOUND,
+				"[ ROLE_NOT_FOUND ] Role that you are looking for does not exist with this ID. Please see the /api/public/listRole for available roles. "));
+
+		if (targetRole.getRoleStrength() >= userRoleStrength) {
+			throw new ExceptionFoundation(EXCEPTION_CODES.ROLE_FORBIDDEN_STRENGTH, HttpStatus.I_AM_A_TEAPOT,
+					"[ ROLE_FORBIDDEN_STRENGTH ] You can't add or remove a role to or from the user with similar or higher strength. ( As know as a priority. ) YOu need a person with higher rank do that for you.");
+		} else if (userRoleModelRepository.existsById(new UserRolesCompKey(userId, roleId))) {
+			throw new ExceptionFoundation(EXCEPTION_CODES.ROLE_ALREADY_EXIST, HttpStatus.I_AM_A_TEAPOT,
+					"[ ROLE_ALREADY_EXIST ] The user already has this role.");
+		}
+
+		String successMessage = "[ Role added ] The user " + user.getUsername() + " added role '"
+				+ targetRole.getRoles() + " " + targetRole.getRoles_id() + "' to '" + targetUser.getUsername() + "'.";
+		userRoleModelRepository.addRoleToUser(userId, roleId);
+		actionHistoryController.addNewRecord(new ActionForm(user, targetUser.getAccountId(), 105, successMessage));
+		return successMessage;
+	}
+
+	// ▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬
+	// DB-V6 OK!
+	// Remove a single role from user.
+	// EXCEPTION | 11001 | ROLE_NOT_FOUND
+	// EXCEPTION | 11002 | ROLE_INSUFFICIENT_PRIVILEGE
+	// EXCEPTION | 11003 | ROLE_FORBIDDEN_STRENGTH
+	// EXCEPTION | 11005 | ROLE_ALREADY_GONE
+	// EXCEPTION | 12002 | USER_SEARCH_NOT_FOUND
+	public String revokeRole(int userId, int roleId, HttpServletRequest request) {
+		UserAccountModel user = generalFunctionController.getUserAccount(request);
+		UserAccountModel targetUser = userAccountModelRepository.findById(userId)
+				.orElseThrow(() -> new ExceptionFoundation(EXCEPTION_CODES.USER_SEARCH_NOT_FOUND, HttpStatus.NOT_FOUND,
+						"[ USER_SEARCH_NOT_FOUND ] The user with this ID does not exist."));
+
+		isAllowedToManageRole(user.getUserRoles(), targetUser.getUserRoles());
+		RolesModel targetRole = rolesRepository.findById(roleId).orElseThrow(() -> new ExceptionFoundation(
+				EXCEPTION_CODES.ROLE_NOT_FOUND, HttpStatus.NOT_FOUND,
+				"[ ROLE_NOT_FOUND ] Role that you are looking for does not exist with this ID. Please see the /api/public/listRole for available roles. "));
+
+		if (!userRoleModelRepository.existsById(new UserRolesCompKey(userId, roleId))) {
+			throw new ExceptionFoundation(EXCEPTION_CODES.ROLE_ALREADY_GONE, HttpStatus.I_AM_A_TEAPOT, "");
+		}
+		String successMessage = "[ Role removed ] The user " + user.getUsername() + " removed role '"
+				+ targetRole.getRoles() + " " + targetRole.getRoles_id() + "' from '" + targetUser.getUsername() + "'.";
+		userRoleModelRepository.removeRoleFromUser(userId, roleId);
+		actionHistoryController.addNewRecord(new ActionForm(user, targetUser.getAccountId(), 105, successMessage));
+		return successMessage;
+	}
+
+	// Check if allowed
+	private int isAllowedToManageRole(List<UserRolesModel> requestedUserRoleList,
+			List<UserRolesModel> targetUserRoleList) {
+		int requestedUserStrength = requestedUserRoleList.get(0).getRoles().getRoleStrength();
+		int targetUserStrength = targetUserRoleList.get(0).getRoles().getRoleStrength();
+
+		if (requestedUserRoleList.size() > 1) {
+			for (int i = 1; i < requestedUserRoleList.size(); i++) {
+				int currentStrength = requestedUserRoleList.get(i).getRoles().getRoleStrength();
+				if (currentStrength > requestedUserStrength) {
+					requestedUserStrength = currentStrength;
+				}
+			}
+		}
+
+		if (targetUserRoleList.size() > 1) {
+			for (int i = 1; i < targetUserRoleList.size(); i++) {
+				int currentStrength = targetUserRoleList.get(i).getRoles().getRoleStrength();
+				if (currentStrength > targetUserStrength) {
+					targetUserStrength = currentStrength;
+				}
+			}
+		}
+
+		if (requestedUserStrength > targetUserStrength) {
+			return requestedUserStrength;
+		} else {
+			throw new ExceptionFoundation(EXCEPTION_CODES.ROLE_INSUFFICIENT_PRIVILEGE, HttpStatus.I_AM_A_TEAPOT,
+					"[ ROLE_INSUFFICIENT_PRIVILEGE ] You can't assign or remove role to or from the user with higher ranks.");
+		}
+	}
 
 	// ▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬
 	// DB-V5 OK!
@@ -149,57 +241,6 @@ public class UserAccountController {
 
 		userRoleModelRepository.deleteById(userRoleId);
 	}
-
-	// ▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬
-	// DB-V5 OK!
-	// DeleteUserAccountRequestedByUser
-	/*public void deleteUserAccountRequestedByUser(String password, HttpServletRequest request) {
-
-		String userName = JwtTokenUtills.getUserNameFromToken(request);
-		UserAccountModel targetUser = userAccountModelRepository.findByUsername(userName);
-
-		if (targetUser == null) {
-			throw new ExceptionFoundation(EXCEPTION_CODES.AUTHEN_NOT_FOUND, HttpStatus.NOT_FOUND,
-					"[ UserAccountManagerController ] The user with the name " + userName + " does not exist.");
-		}
-
-		if (!passwordEncoder.matches(password, targetUser.getUserPasscode())) {
-			throw new ExceptionFoundation(EXCEPTION_CODES.AUTHEN_INCORRECT_CREDENTIALS, HttpStatus.FORBIDDEN,
-					"[ REJECTED ] To delete the account, the owner must know what the password is.");
-		}
-
-		targetUser.setEmail(
-				StringGenerateService.generateUserUUID() + "-deleted-" + StringGenerateService.generateUserUUID());
-		targetUser.setUsername("Deleted-account-" + StringGenerateService.generateUserUUID());
-		targetUser.setFirstName(null);
-		targetUser.setLastName(null);
-		targetUser.setUserPasscode("DELETED-NO-PASSWORD");
-		targetUser.setLast_seen(null);
-		targetUser.setUserBios(null);
-
-		userRoleModelRepository.deleteAllByUserId(targetUser.getAccountId());
-		userRoleModelRepository.insertNewRecord(targetUser.getAccountId(), deletedRole);
-		userRoleModelRepository.insertNewRecord(targetUser.getAccountId(), suspendingRoleNumber);
-
-		ReportModel newReport = new ReportModel();
-		newReport.setSolved(true);
-		newReport.setReportedBy(targetUser);
-		newReport.setReportedToUser(targetUser);
-
-		newReport.setType(reportTypeRepository.findById(reportRypeDeleteAction)
-				.orElseThrow(() -> new ExceptionFoundation(EXCEPTION_CODES.SEARCH_NOT_FOUND, HttpStatus.NOT_FOUND,
-						"[ UserAccountManagerController ] This user can't be deleted because the report type does not exist.")));
-
-		newReport.setReportDate(new Timestamp(System.currentTimeMillis()).toString());
-
-		newReport.setReportText("This user deleted their account on their own on " + newReport.getReportDate());
-		newReport.setSolveDate(new Timestamp(System.currentTimeMillis()).toString());
-
-		reportsRepository.save(newReport);
-
-	}*/
-
-	// --------------- WIP ---------------
 
 	// SearchUserByNameOrEmail
 	public Page<UserAccountModel> searchUserByNameOrEmail(String searchContent, int pageNumber, int pageSize) {

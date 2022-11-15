@@ -21,16 +21,16 @@ public class ExceptionResponseModel {
 		SAVE_FORBIDDEN(2005), // ---------
 
 		// Authentication
-		AUTHEN_BAD_CREDENTIALS(3001), // Username or password is incorrect. Or both!
-		AUTHEN_USERNAME_ALREADY_EXISTED(3002), // When registering the username but someone already took it.
-		AUTHEN_REGISTERATION_FAILED(3003), // Maybe the user forgot to create their password.
-		AUTHEN_PHONE_NUMBER_ALREADY_EXISTED(3004), // Someone owned this phone number.
-		AUTHEN_TOKEN_MALFUNCTION(3005), // Token is broken.
-		AUTHEN_ILLEGAL_CHAR(3006), // This character of the string is not allowed.
-		AUTHEN_NOT_ALLOWED(3007), // When the account is suspended.
-		AUTHEN_HORRIBLE_TOKEN(3008), // This token is invalid, nothing can be found here.
-		AUTHEN_EMAIL_ALREADY_EXIST(3009), // Email is taken
-		AUTHEN_IS_TAKEN(3010), AUTHEN_PASSWORD_MISSMATCH(3011),
+		AUTHEN_BAD_CREDENTIALS(101), // Username or password is incorrect. Or both!
+		AUTHEN_USERNAME_ALREADY_EXISTED(102), // When registering the username but someone already took it.
+		AUTHEN_REGISTERATION_FAILED(103), // Maybe the user forgot to create their password.
+		AUTHEN_PHONE_NUMBER_ALREADY_EXISTED(104), // Someone owned this phone number.
+		AUTHEN_TOKEN_MALFUNCTION(105), // Token is broken.
+		AUTHEN_ILLEGAL_CHAR(106), // This character of the string is not allowed.
+		AUTHEN_NOT_ALLOWED(107), // When the account is suspended.
+		AUTHEN_HORRIBLE_TOKEN(108), // This token is invalid, nothing can be found here.
+		AUTHEN_EMAIL_ALREADY_EXIST(109), // Email is taken
+		AUTHEN_IS_TAKEN(110), AUTHEN_PASSWORD_MISSMATCH(111), AUTHEN_NOT_SUFFICIENT_PRIVILEGE(112),
 
 		// User application
 		SHOP_NOT_ON_STORE(6001), // Sorry! they don't want to sell this product!
@@ -67,10 +67,6 @@ public class ExceptionResponseModel {
 		AUTHEN_BAD_TOKEN(20006), // ---------
 
 		// User action
-		USER_ACCOUNT_NOT_FOUND(30001), // ---------
-		USER_SEARCH_NOT_FOUND(30002), // ---------
-		USER_SAVE_REJECTED(30003), // ---------
-		USER_ILLEGAL_NAME(30004), // ---------
 
 		// Browsing
 		BROWSE_NO_RECORD_EXISTS(40001), // ---------
@@ -96,7 +92,20 @@ public class ExceptionResponseModel {
 		CORE_COMPRESSION_FAILURE(70004), // ---------
 		CORE_MINIO_NOT_FOUND(70005), // ---------
 		CORE_NOT_IMPLEMENTED(70006), // ---------
-		CORE_INTERNAL_SERVER_ERROR(70007);// ---------
+		CORE_INTERNAL_SERVER_ERROR(70007), // ---------
+
+		// Related to role browsing
+		ROLE_NOT_FOUND(11001), // ---------
+		ROLE_INSUFFICIENT_PRIVILEGE(11002), // ---------
+		ROLE_FORBIDDEN_STRENGTH(11003), // ---------
+		ROLE_ALREADY_EXIST(11004), // ---------
+		ROLE_ALREADY_GONE(11005), // ---------
+
+		USER_ACCOUNT_NOT_FOUND(12001), // ---------
+		USER_SEARCH_NOT_FOUND(12002), // ---------
+		USER_SAVE_REJECTED(12003), // ---------
+		USER_ILLEGAL_NAME(12004), // ---------
+		USER_TOKEN_NOT_FOUND(12005); // ---------
 
 		private final int codeValue;
 
