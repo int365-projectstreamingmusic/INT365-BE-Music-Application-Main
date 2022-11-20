@@ -342,7 +342,7 @@ public class TrackController {
 	// ▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬
 	// DB-V5.2 OK!
 	// AddNewTrack
-	public TracksModel addNewTrack(TrackForm newTrackForm, MultipartFile trackFile, MultipartFile imageFile,
+	public TracksModel addNewTrack(TrackForm form, MultipartFile trackFile, MultipartFile imageFile,
 			HttpServletRequest request) {
 		UserAccountModel requestedBy = generalFunctionController.getUserAccount(request);
 
@@ -352,8 +352,8 @@ public class TrackController {
 		newTrack.setAccountId(requestedBy.getAccountId());
 
 		// Information given in the form.
-		newTrack.setTrackDesc(newTrackForm.getTrackDesc());
-		newTrack.setTrackName(newTrackForm.getTrackName());
+		newTrack.setTrackDesc(form.getTrackDesc());
+		newTrack.setTrackName(form.getTrackName());
 
 		// No view or favorite at the begining.
 		newTrack.setViewCount(0);
@@ -361,7 +361,7 @@ public class TrackController {
 		newTrack.setDuration(0);
 
 		// Track status is hiden when first uploaded.
-		newTrack.setPlayTrackStatus(playTrackStatusRepository.findById(newTrackForm.getStatusId())
+		newTrack.setPlayTrackStatus(playTrackStatusRepository.findById(form.getStatusId())
 				.orElseThrow(() -> new ExceptionFoundation(EXCEPTION_CODES.SAVE_FILE_INVALID, HttpStatus.I_AM_A_TEAPOT,
 						"[ SAVE_FILE_INVALID ] Invalid track status ID.")));
 
@@ -374,34 +374,33 @@ public class TrackController {
 		newTrack = tracksRepository.save(newTrack);
 
 		// Adding genre to the track
-		if (newTrackForm.getGenreList() != null && !(newTrackForm.getGenreList().size() <= 0)) {
-			newTrack.setGenreTrack(genreController.addGenreToTrack(newTrack.getId(), newTrackForm.getGenreList()));
+		if (form.getGenreList() != null && !(form.getGenreList().size() <= 0)) {
+			newTrack.setGenreTrack(genreController.addGenreToTrack(newTrack.getId(), form.getGenreList()));
 		}
-		if (newTrackForm.getMoodList() != null && !(newTrackForm.getMoodList().size() <= 0)) {
-			newTrack.setMoods(moodController.addMoodToTrack(newTrack.getId(), newTrackForm.getMoodList()));
+		if (form.getMoodList() != null && !(form.getMoodList().size() <= 0)) {
+			newTrack.setMoods(moodController.addMoodToTrack(newTrack.getId(), form.getMoodList()));
 		}
 
 		// Saving artist
-		if (newTrackForm.getArtist() != "") {
-			ArtistForm form = new ArtistForm();
-			form.setArtistName(newTrackForm.getArtist());
-			form.setArtistBio(
-					"An artist " + newTrackForm.getArtist() + " is added by " + requestedBy.getProfileIamge());
-			ArtistsModel artist = artistController.newArtist(form, requestedBy);
+		if (form.getArtist() != null || form.getArtist() != "") {
+			ArtistForm artistForm = new ArtistForm();
+			artistForm.setArtistName(form.getArtist());
+			artistForm.setArtistBio("An artist " + form.getArtist() + " is added by " + requestedBy.getProfileIamge());
+			ArtistsModel artist = artistController.newArtist(artistForm, requestedBy);
 			artistController.newArtistTrack(newTrack.getId(), artist);
 			newTrack.setArtistTracks(artistController.listArtistTrack(newTrack.getId()));
 		}
 
 		// Saving new album
-		if (newTrackForm.getAlbumName() != null && newTrackForm.getAlbumName() != "") {
-			if (albumRepository.existsByAlbumName(newTrackForm.getAlbumName())) {
-				newTrack.setAlbums(albumRepository.findByAlbumName(newTrackForm.getAlbumName()));
+		if (form.getAlbumName() != null && form.getAlbumName() != "") {
+			if (albumRepository.existsByAlbumName(form.getAlbumName())) {
+				newTrack.setAlbums(albumRepository.findByAlbumName(form.getAlbumName()));
 				tracksRepository.updateTrackAlbum(newTrack.getId(), newTrack.getAlbums().getId());
 			} else {
 				AlbumModel newAlbum = new AlbumModel();
-				newAlbum.setAlbumName(newTrackForm.getAlbumName());
+				newAlbum.setAlbumName(form.getAlbumName());
 				newAlbum.setAlbumDescription(
-						"The album " + newTrackForm.getAlbumName() + " is created by " + requestedBy.getUsername());
+						"The album " + form.getAlbumName() + " is created by " + requestedBy.getUsername());
 				newAlbum.setStatus(playTrackStatusRepository.findById(3001).orElse(null));
 				newAlbum.setOwner(requestedBy);
 				albumRepository.save(newAlbum);
@@ -433,12 +432,11 @@ public class TrackController {
 				.orElseThrow(() -> new ExceptionFoundation(EXCEPTION_CODES.BROWSE_NO_RECORD_EXISTS,
 						HttpStatus.NOT_FOUND, "[ BROWSE_NO_RECORD_EXISTS ] Track with this ID does not exist."));
 		generalFunctionController.checkOwnerShipForRecord(requestedBy.getAccountId(), target.getAccountId());
-		
+
 		if (form.getAlbumName() != "" && albumRepository.existsById(target.getAlbums().getId())) {
 			albumRepository.updateNewAlbumName(target.getAlbums().getId(), form.getAlbumName());
 		}
-		
-		
+
 		if (form.getTrackName() != "") {
 			target.setTrackName(form.getTrackName());
 		}
@@ -463,7 +461,7 @@ public class TrackController {
 					target.getId());
 			tracksRepository.updateTrackThumbnail(target.getId(), trackThumbnailFileName);
 		}
-	
+
 		return tracksRepository.findById(target.getId())
 				.orElseThrow(() -> new ExceptionFoundation(EXCEPTION_CODES.CORE_INTERNAL_SERVER_ERROR,
 						HttpStatus.INTERNAL_SERVER_ERROR,
