@@ -27,16 +27,16 @@ public class GeneralFunctionController {
 	public final long TIME_DIF_DAY = 86400000;
 	public final long TIME_DIF = 25200000;
 
+	// ▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬
+	// DB-V6 OK!
+	// Get user role from Token
+	// EXCEPTION | USER_ACCOUNT_NOT_FOUND
 	public UserAccountModel getUserAccount(HttpServletRequest request) {
 		UserAccountModel userProfile = userAccountRepository
 				.findByUsername(JwtTokenUtills.getUserNameFromToken(request));
 		if (userProfile == null) {
 			throw new ExceptionFoundation(EXCEPTION_CODES.USER_ACCOUNT_NOT_FOUND, HttpStatus.NOT_FOUND,
 					"[ USER_ACCOUNT_NOT_FOUND ] This user does not exist in our database.");
-		}
-		if (userAccountRepository.checkUserAccountIdIfSuspended(userProfile.getAccountId()) != 0) {
-			throw new ExceptionFoundation(EXCEPTION_CODES.AUTHEN_ACCOUNT_SUSPENDED, HttpStatus.FORBIDDEN,
-					"[ AUTHEN_ACCOUNT_SUSPENDED ] This account is suspended and is not allowd to commit any action");
 		}
 		return userProfile;
 	}

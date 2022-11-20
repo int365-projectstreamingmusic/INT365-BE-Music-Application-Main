@@ -27,6 +27,7 @@ import com.application.entities.submittionforms.UserLoginForm;
 import com.application.entities.submittionforms.UserRegiserationForm;
 import com.application.exceptons.ExceptionFoundation;
 import com.application.exceptons.ExceptionResponseModel.EXCEPTION_CODES;
+import com.application.repositories.AccountProviderRepository;
 import com.application.repositories.RolesRepository;
 import com.application.repositories.UserAccountRepository;
 import com.application.repositories.UserRoleModelRepository;
@@ -51,6 +52,8 @@ public class UserAuthenticationController {
 	private UserRoleModelRepository userRoleModelRepository;
 	@Autowired
 	private ValidatorServices validatorServices;
+	@Autowired
+	private AccountProviderRepository accountProviderRepository;
 
 	@Value("${general.role.user}")
 	private int userRoleMemberId;
@@ -62,31 +65,36 @@ public class UserAuthenticationController {
 	// ▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬
 	// DB-V5 OK!
 	// userRegistration
+	// NOTE | Registeration using the LOCAL account provider.
+	// EXCEPTION |
+	// EXCEPTION | 20007 | AUTHEN_PROVIDER_NOT_FOUND
 	public Map<String, Object> userRegistration(UserRegiserationForm incomingRegisteration) {
 		UserAccountModel registeration = new UserAccountModel();
 
 		if (userAccountModelRepository.existsByUsernameIgnoreCase(incomingRegisteration.getUsername())) {
 			throw new ExceptionFoundation(EXCEPTION_CODES.REGISTERATION_TAKEN_USERNAME, HttpStatus.I_AM_A_TEAPOT,
-					"[ userRegistration ] This usename is in use.");
+					"[ REGISTERATION_TAKEN_USERNAME ] This usename is in use.");
 		}
 
 		if (userAccountModelRepository.existsByEmailIgnoreCase(incomingRegisteration.getEmail())) {
 			throw new ExceptionFoundation(EXCEPTION_CODES.REGISTERATION_TAKEN_EMAIL, HttpStatus.I_AM_A_TEAPOT,
-					"[ userRegistration ] This email is in use by another account.");
+					"[ REGISTERATION_TAKEN_EMAIL ] This email is in use by another account.");
 		}
 
 		// Validation
 		if (!validatorServices.validateEmail(incomingRegisteration.getEmail())) {
-			throw new ExceptionFoundation(EXCEPTION_CODES.REGISTERATION_INVALID_EMAIL, HttpStatus.I_AM_A_TEAPOT,
-					"[ userRegistration ] This is not a valid email.");
+			throw new ExceptionFoundation(EXCEPTION_CODES.REGISTERATION_INVALID_EMAIL_FORMAT, HttpStatus.I_AM_A_TEAPOT,
+					"[ REGISTERATION_INVALID_EMAIL_FORMAT ] This is not a valid email format.");
 		}
 		if (!validatorServices.validateUsername(incomingRegisteration.getUsername())) {
-			throw new ExceptionFoundation(EXCEPTION_CODES.REGISTERATION_INVALID_USERNAME, HttpStatus.I_AM_A_TEAPOT,
-					"[ userRegistration ] This username is invalid. The username must have at least 6 characters and not more than 45 characters");
+			throw new ExceptionFoundation(EXCEPTION_CODES.REGISTERATION_INVALID_USERNAME_FORMAT,
+					HttpStatus.I_AM_A_TEAPOT,
+					"[ REGISTERATION_INVALID_USERNAME_FORMAT ] This username is invalid. The username must have at least 6 characters and not more than 45 characters");
 		}
 		if (!validatorServices.validatePassword(incomingRegisteration.getUser_passcode())) {
-			throw new ExceptionFoundation(EXCEPTION_CODES.REGISTERATION_INVALID_PASSWORD, HttpStatus.I_AM_A_TEAPOT,
-					"[ userRegistration ] This password has less than 8 characters and is not strong enough. The password should have capital and small letter, and a number.");
+			throw new ExceptionFoundation(EXCEPTION_CODES.REGISTERATION_INVALID_PASSWORD_FORMAT,
+					HttpStatus.I_AM_A_TEAPOT,
+					"[ REGISTERATION_INVALID_PASSWORD_FORMAT ] This password has less than 8 characters and is not strong enough. The password should have capital and small letter, and a number. For example '123acbABC'");
 		}
 
 		List<UserRolesModel> userFirstRolesGroup = new ArrayList<>();
@@ -102,7 +110,13 @@ public class UserAuthenticationController {
 		registeration.setRegistered_date(getRegisterationTimeStamp);
 		registeration.setUserBios("");
 		registeration.setProfileName(incomingRegisteration.getUsername());
-		registeration.setProfileIamge(null);
+		registeration.setProfileIamge("101-PROFILE-NOT-AVAILABLE.png");
+
+		// Assign authentication provider
+		registeration.setAccountProvider(accountProviderRepository.findById(1)
+				.orElseThrow(() -> new ExceptionFoundation(EXCEPTION_CODES.AUTHEN_PROVIDER_NOT_FOUND,
+						HttpStatus.NOT_FOUND,
+						"[ AUTHEN_PROVIDER_NOT_FOUND ] Please check the database if the records for 'account_provider' table is inserted correctly.")));
 
 		registeration = userAccountModelRepository.save(registeration);
 

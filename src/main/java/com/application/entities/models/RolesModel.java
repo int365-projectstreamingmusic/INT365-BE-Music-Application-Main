@@ -1,5 +1,6 @@
 package com.application.entities.models;
 
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Table;
@@ -18,5 +19,8 @@ public class RolesModel {
 	@Id
 	private int roles_id;
 	private String roles;
+
+	@Column(name = "roles_strength")
+	private int roleStrength;
 
 }

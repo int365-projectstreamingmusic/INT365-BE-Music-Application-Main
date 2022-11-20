@@ -9,6 +9,7 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
@@ -45,7 +46,11 @@ public class UserAccountModel {
 	private String registered_date;
 	@JsonFormat(pattern = "yyyy/mm/dd")
 	private String last_seen;
-
+	
+	@ManyToOne
+	@JoinColumn(name = "account_provider_id", referencedColumnName = "id")
+	private AccountProviderModel accountProvider;
+	
 	@JsonIgnore
 	@Column(name = "user_passcode")
 	private String userPasscode;

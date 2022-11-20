@@ -1,7 +1,5 @@
 package com.application.repositories;
 
-import java.util.List;
-
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -16,6 +14,16 @@ public interface UserRoleModelRepository extends JpaRepository<UserRolesModel, U
 
 	@Query(value = "SELECT case when count(u)> 0 then true else false end FROM UserRolesModel u WHERE u.id = :id")
 	boolean existByUserIdAndRoleId(UserRolesCompKey id);
+
+	@Modifying
+	@Transactional
+	@Query(nativeQuery = true, value = "INSERT INTO user_roles VALUES(:userId,:roleId)")
+	void addRoleToUser(int userId, int roleId);
+
+	@Modifying
+	@Transactional
+	@Query(nativeQuery = true, value = "DELETE FROM user_roles WHERE account_id = :userId AND roles_id = :roleId")
+	void removeRoleFromUser(int userId, int roleId);
 
 	// OK!
 	@Modifying

@@ -30,10 +30,12 @@ public class JwtTokenUtills {
 
 	@Autowired
 	private static String secret = "A0fzwr2zfklJ1nnapakMyL0ve1y2001dfgry4xcf5rycf";
+	private static String issuedBy = "NatureGeckoGroup";
 	private static int expireInMili = 43200000;
-	private static String issuedBy = "KakioStaffAtThanaphat";
 
-	// Only use user info
+	// ▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬
+	// DB-V.6 OK!
+	// NOTE | Create a new token to user
 	public static String createToken(User userLogin) {
 		String accessToken = JWT.create().withSubject(userLogin.getUsername())
 				.withExpiresAt(new Date(System.currentTimeMillis() + expireInMili)).withIssuer(issuedBy)
@@ -43,7 +45,7 @@ public class JwtTokenUtills {
 		return accessToken;
 	}
 
-	// With user info and roles.
+	// NOTE | With user info and roles.
 	public static String createToken(String username, String[] roles) {
 		String accessToken = JWT.create().withSubject(username)
 				.withExpiresAt(new Date(System.currentTimeMillis() + expireInMili)).withIssuer(issuedBy)
@@ -51,7 +53,7 @@ public class JwtTokenUtills {
 		return accessToken;
 	}
 
-	// Create refresh token when an old token is about ti expire.
+	// NOTE | Create refresh token when an old token is about to expire.
 	public static String createRefreshToken(User userLogin) {
 		String accessToken = JWT.create().withSubject(userLogin.getUsername())
 				.withExpiresAt(new Date(System.currentTimeMillis() + expireInMili + 60000)).withIssuer(issuedBy)
@@ -59,11 +61,16 @@ public class JwtTokenUtills {
 		return accessToken;
 	}
 
+	// NOTE | An algorithm
 	public static Algorithm getAlgorithm() {
 		return Algorithm.HMAC256(secret.getBytes());
 	}
 
+	// ▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬
+	// DB-V.6 OK!
 	// GetUsernameFromToken
+	// NOTE | Will get user name from the token
+	// EXCEPTION | 12005 | USER_TOKEN_NOT_FOUND
 	public static String getUserNameFromToken(HttpServletRequest request) {
 		String userName;
 		String authenHeader = request.getHeader(HttpHeaders.AUTHORIZATION);
@@ -74,18 +81,22 @@ public class JwtTokenUtills {
 			userName = decodedJWT.getSubject();
 			return userName;
 		} else {
-			throw new ExceptionFoundation(EXCEPTION_CODES.AUTHEN_EMAIL_ALREADY_EXIST, HttpStatus.UNAUTHORIZED,
-					authenHeader);
+			throw new ExceptionFoundation(EXCEPTION_CODES.USER_TOKEN_NOT_FOUND, HttpStatus.UNAUTHORIZED,
+					"[ USER_ACCOUNT_NOT_FOUND ] Can't look for an account with this toke.");
 		}
 	}
 
-	// GetUserAvvountFromToken
+	// ▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬
+	// DB-V.6 OK!
+	// getUserAccountFromToken
+	// NOTE | Will get user account entity from the token
+	// EXCEPTION | 12005 | USER_TOKEN_NOT_FOUND
 	public UserAccountModel getUserAccountFromToken(HttpServletRequest request) {
 		String targetUserName = JwtTokenUtills.getUserNameFromToken(request);
 		UserAccountModel targetUser = userAccountRepository.findByUsername(targetUserName);
 		if (targetUser == null) {
-			throw new ExceptionFoundation(EXCEPTION_CODES.USER_ACCOUNT_NOT_FOUND, HttpStatus.NOT_FOUND,
-					"[ EXCEPTION ] The user with this name does not exist.");
+			throw new ExceptionFoundation(EXCEPTION_CODES.USER_TOKEN_NOT_FOUND, HttpStatus.NOT_FOUND,
+					"[ USER_TOKEN_NOT_FOUND ] The user with this name does not exist.");
 		}
 		return targetUser;
 	}
