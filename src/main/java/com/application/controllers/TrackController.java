@@ -382,7 +382,7 @@ public class TrackController {
 		}
 
 		// Saving artist
-		if (form.getArtist() != null || form.getArtist() != "") {
+		if (form.getArtist() != null && form.getArtist() != "") {
 			ArtistForm artistForm = new ArtistForm();
 			artistForm.setArtistName(form.getArtist());
 			artistForm.setArtistBio("An artist " + form.getArtist() + " is added by " + requestedBy.getProfileIamge());
