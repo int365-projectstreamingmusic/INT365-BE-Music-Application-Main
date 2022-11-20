@@ -22,15 +22,15 @@ public class ExceptionResponseModel {
 
 		// Authentication
 		AUTHEN_BAD_CREDENTIALS(101), // Username or password is incorrect. Or both!
-		AUTHEN_USERNAME_ALREADY_EXISTED(102), // When registering the username but someone already took it.
-		AUTHEN_REGISTERATION_FAILED(103), // Maybe the user forgot to create their password.
-		AUTHEN_PHONE_NUMBER_ALREADY_EXISTED(104), // Someone owned this phone number.
+	//	AUTHEN_USERNAME_ALREADY_EXISTED(102), // When registering the username but someone already took it.
+		//AUTHEN_REGISTERATION_FAILED(103), // Maybe the user forgot to create their password.
+		//AUTHEN_PHONE_NUMBER_ALREADY_EXISTED(104), // Someone owned this phone number.
 		AUTHEN_TOKEN_MALFUNCTION(105), // Token is broken.
-		AUTHEN_ILLEGAL_CHAR(106), // This character of the string is not allowed.
-		AUTHEN_NOT_ALLOWED(107), // When the account is suspended.
-		AUTHEN_HORRIBLE_TOKEN(108), // This token is invalid, nothing can be found here.
-		AUTHEN_EMAIL_ALREADY_EXIST(109), // Email is taken
-		AUTHEN_IS_TAKEN(110), AUTHEN_PASSWORD_MISSMATCH(111), AUTHEN_NOT_SUFFICIENT_PRIVILEGE(112),
+		//AUTHEN_ILLEGAL_CHAR(106), // This character of the string is not allowed.
+		//AUTHEN_NOT_ALLOWED(107), // When the account is suspended.
+		//AUTHEN_HORRIBLE_TOKEN(108), // This token is invalid, nothing can be found here.
+		//AUTHEN_EMAIL_ALREADY_EXIST(109), // Email is taken
+		//AUTHEN_IS_TAKEN(110), AUTHEN_PASSWORD_MISSMATCH(111), AUTHEN_NOT_SUFFICIENT_PRIVILEGE(112),
 
 		// User application
 		SHOP_NOT_ON_STORE(6001), // Sorry! they don't want to sell this product!
@@ -51,9 +51,9 @@ public class ExceptionResponseModel {
 		DEAD(9999), // Just stupidly died with an unknown reason.
 
 		// User registeration
-		REGISTERATION_INVALID_EMAIL(10001), // ---------
-		REGISTERATION_INVALID_PASSWORD(10002), // ---------
-		REGISTERATION_INVALID_USERNAME(10003), // ---------
+		REGISTERATION_INVALID_EMAIL_FORMAT(10001), // ---------
+		REGISTERATION_INVALID_PASSWORD_FORMAT(10002), // ---------
+		REGISTERATION_INVALID_USERNAME_FORMAT(10003), // ---------
 		REGISTERATION_TAKEN_EMAIL(10004), // ---------
 		REGISTERATION_TAKEN_USERNAME(10005), // ---------
 		REGISTERATION_PASSWORD_MISMATCH(10006), // ---------
@@ -65,6 +65,8 @@ public class ExceptionResponseModel {
 		AUTHEN_NOT_THE_OWNER(20004), // ---------
 		AUTHEN_NOT_FOUND(20005), // ---------
 		AUTHEN_BAD_TOKEN(20006), // ---------
+		
+		AUTHEN_PROVIDER_NOT_FOUND(20007),
 
 		// User action
 
@@ -100,13 +102,15 @@ public class ExceptionResponseModel {
 		ROLE_FORBIDDEN_STRENGTH(11003), // ---------
 		ROLE_ALREADY_EXIST(11004), // ---------
 		ROLE_ALREADY_GONE(11005), // ---------
+		ROLE_FORBIDDEN(11006), // ---------
 
 		USER_ACCOUNT_NOT_FOUND(12001), // ---------
 		USER_SEARCH_NOT_FOUND(12002), // ---------
 		USER_SAVE_REJECTED(12003), // ---------
 		USER_ILLEGAL_NAME(12004), // ---------
-		USER_TOKEN_NOT_FOUND(12005); // ---------
-
+		USER_TOKEN_NOT_FOUND(12005), // ---------
+		USER_NO_SELF_SUSPEND(12006); // ---------
+		
 		private final int codeValue;
 
 		private EXCEPTION_CODES(int codeValue) {

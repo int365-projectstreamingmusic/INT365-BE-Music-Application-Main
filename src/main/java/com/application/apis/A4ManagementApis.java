@@ -55,12 +55,6 @@ public class A4ManagementApis {
 		return ResponseEntity.ok().body(commentsController.listUserComment(userId, page, pageSize));
 	}
 
-	// ▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬
-	// User Management
-	// ---------------------
-
-	// USER : Suspend user or unsuspend user.
-
 	// ▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬
 	// DB-V6 OK!
 	// USER : Assign role to user.
@@ -81,6 +75,19 @@ public class A4ManagementApis {
 		URI uri = URI
 				.create(ServletUriComponentsBuilder.fromCurrentContextPath().path(mapping + "role/revoke").toString());
 		return ResponseEntity.created(uri).body(userAccountManagerController.revokeRole(userId, roleId, request));
+	}
+
+	// ▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬
+	// User Management
+	// ---------------------
+
+	// ▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬
+	// DB-V6 OK!
+	// USER : Suspend user or unsuspend user.
+	@PutMapping("suspend")
+	public ResponseEntity<String> suspendUser(@RequestParam(required = true) int userId, HttpServletRequest request) {
+		URI uri = URI.create(ServletUriComponentsBuilder.fromCurrentContextPath().path(mapping + "suspend").toString());
+		return ResponseEntity.created(uri).body(userAccountManagerController.switchSuspendUser(userId, request));
 	}
 
 	// COMMENT : Delete comment from specific playlist.

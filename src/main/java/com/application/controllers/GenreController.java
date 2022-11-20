@@ -89,6 +89,7 @@ public class GenreController {
 	}
 
 	// AddGenreToTrack
+	// EXCEPTION | 20004 | AUTHEN_NOT_THE_OWNER
 	public void addGenreToTrack(int genreId, int trackId, HttpServletRequest request) {
 
 		UserAccountModel requestedBy = userAccountModelRepository
@@ -103,8 +104,8 @@ public class GenreController {
 						"[ addGenreToTrack ] Genre with this ID does not exist."));
 
 		if (requestedBy.getAccountId() != targetTrack.getAccountId()) {
-			throw new ExceptionFoundation(EXCEPTION_CODES.AUTHEN_NOT_ALLOWED, HttpStatus.UNAUTHORIZED,
-					"[ addGenreToTrack ] This user is not the owner of this track.");
+			throw new ExceptionFoundation(EXCEPTION_CODES.AUTHEN_NOT_THE_OWNER, HttpStatus.UNAUTHORIZED,
+					"[ AUTHEN_NOT_THE_OWNER ] This user is not the owner of this track.");
 		}
 
 		GenresTracksModel newGenreTrack = new GenresTracksModel();

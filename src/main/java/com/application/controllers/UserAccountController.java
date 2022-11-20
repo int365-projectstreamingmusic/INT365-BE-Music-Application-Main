@@ -43,13 +43,6 @@ public class UserAccountController {
 	@Autowired
 	private GeneralFunctionController generalFunctionController;
 
-	private int adminRoleNumber = 99001;
-	private int suspendingRoleNumber = 2003;
-	private int deletedRole = 2004;
-	// private int superUserRole = 99999;
-
-	private int reportRypeDeleteAction = 8002;
-
 	@Value("${general.useraccount.default-page-size}")
 	private int defaultPageSize;
 
@@ -69,11 +62,11 @@ public class UserAccountController {
 		UserAccountModel targetUser = userAccountModelRepository.findById(userId)
 				.orElseThrow(() -> new ExceptionFoundation(EXCEPTION_CODES.USER_SEARCH_NOT_FOUND, HttpStatus.NOT_FOUND,
 						"[ USER_SEARCH_NOT_FOUND ] The user with this ID does not exist."));
-
-		int userRoleStrength = isAllowedToManageRole(user.getUserRoles(), targetUser.getUserRoles());
 		RolesModel targetRole = rolesRepository.findById(roleId).orElseThrow(() -> new ExceptionFoundation(
 				EXCEPTION_CODES.ROLE_NOT_FOUND, HttpStatus.NOT_FOUND,
 				"[ ROLE_NOT_FOUND ] Role that you are looking for does not exist with this ID. Please see the /api/public/listRole for available roles. "));
+
+		int userRoleStrength = isAllowedToManageRole(user.getUserRoles(), targetUser.getUserRoles());
 
 		if (targetRole.getRoleStrength() >= userRoleStrength) {
 			throw new ExceptionFoundation(EXCEPTION_CODES.ROLE_FORBIDDEN_STRENGTH, HttpStatus.I_AM_A_TEAPOT,
@@ -97,6 +90,7 @@ public class UserAccountController {
 	// EXCEPTION | 11002 | ROLE_INSUFFICIENT_PRIVILEGE
 	// EXCEPTION | 11003 | ROLE_FORBIDDEN_STRENGTH
 	// EXCEPTION | 11005 | ROLE_ALREADY_GONE
+	// EXCEPTION | 11006 | ROLE_FORBIDDEN
 	// EXCEPTION | 12002 | USER_SEARCH_NOT_FOUND
 	public String revokeRole(int userId, int roleId, HttpServletRequest request) {
 		UserAccountModel user = generalFunctionController.getUserAccount(request);
@@ -104,11 +98,11 @@ public class UserAccountController {
 				.orElseThrow(() -> new ExceptionFoundation(EXCEPTION_CODES.USER_SEARCH_NOT_FOUND, HttpStatus.NOT_FOUND,
 						"[ USER_SEARCH_NOT_FOUND ] The user with this ID does not exist."));
 
-		isAllowedToManageRole(user.getUserRoles(), targetUser.getUserRoles());
 		RolesModel targetRole = rolesRepository.findById(roleId).orElseThrow(() -> new ExceptionFoundation(
 				EXCEPTION_CODES.ROLE_NOT_FOUND, HttpStatus.NOT_FOUND,
 				"[ ROLE_NOT_FOUND ] Role that you are looking for does not exist with this ID. Please see the /api/public/listRole for available roles. "));
 
+		isAllowedToManageRole(user.getUserRoles(), targetUser.getUserRoles());
 		if (!userRoleModelRepository.existsById(new UserRolesCompKey(userId, roleId))) {
 			throw new ExceptionFoundation(EXCEPTION_CODES.ROLE_ALREADY_GONE, HttpStatus.I_AM_A_TEAPOT, "");
 		}
@@ -119,6 +113,45 @@ public class UserAccountController {
 		return successMessage;
 	}
 
+	// ▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬
+	// DB-V6 OK!
+	// SwitchSuspendUser
+	// NOTE : If the user is suspended, delete the suspended role after used this
+	// function.
+	// EXCEPTION | 12002 | USER_SEARCH_NOT_FOUND
+	// EXCELTION | 12006 | USER_NO_SELF_SUSPEND
+	public String switchSuspendUser(int userId, HttpServletRequest request) {
+		UserAccountModel requestedBy = userAccountModelRepository
+				.findByUsername(JwtTokenUtills.getUserNameFromToken(request));
+		UserAccountModel targetUser = userAccountModelRepository.findById(userId)
+				.orElseThrow(() -> new ExceptionFoundation(EXCEPTION_CODES.USER_SEARCH_NOT_FOUND, HttpStatus.NOT_FOUND,
+						"[ USER_SEARCH_NOT_FOUND ] The user with id " + userId + " does not exist."));
+
+		isAllowedToManageRole(requestedBy.getUserRoles(), targetUser.getUserRoles());
+		if (targetUser.getUsername().equals(requestedBy.getUsername())) {
+			throw new ExceptionFoundation(EXCEPTION_CODES.USER_NO_SELF_SUSPEND, HttpStatus.FORBIDDEN,
+					"[ USER_NO_SELF_SUSPEND ] You are not allowed to suspend yourself. Why would you do that?");
+		}
+
+		String successMessage = "";
+		if (userRoleModelRepository.existByUserIdAndRoleId(new UserRolesCompKey(userId, 2003))) {
+			userRoleModelRepository.deleteByUserIdAndRoleId(new UserRolesCompKey(userId, 2003));
+			successMessage = "[ Unsuspended ] The staff " + requestedBy.getUsername() + " unsuspended the user "
+					+ targetUser.getUsername() + ".";
+			actionHistoryController
+					.addNewRecord(new ActionForm(requestedBy, targetUser.getAccountId(), 104, successMessage));
+		} else {
+			userRoleModelRepository.insertNewRecord(userId, 2003);
+			successMessage = "[ Suspended ] The staff " + requestedBy.getUsername() + " suspended the user "
+					+ targetUser.getUsername() + ".";
+			actionHistoryController
+					.addNewRecord(new ActionForm(requestedBy, targetUser.getAccountId(), 104, successMessage));
+		}
+		return successMessage;
+	}
+
+	// ▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬
+	// DB-V6 OK!
 	// Check if allowed
 	private int isAllowedToManageRole(List<UserRolesModel> requestedUserRoleList,
 			List<UserRolesModel> targetUserRoleList) {
@@ -153,6 +186,7 @@ public class UserAccountController {
 
 	// ▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬
 	// DB-V5 OK!
+	// NOTE : Once user logged in, will get their own profile information.
 	// getProfileFromToken
 	public UserAccountModel getProfileFromToken(HttpServletRequest request) {
 		UserAccountModel userProfile = userAccountModelRepository
@@ -160,89 +194,9 @@ public class UserAccountController {
 		return userProfile;
 	}
 
-	// ▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬
-	// DB-V5 OK!
-	// SwitchSuspendUser
-	public boolean switchSuspendUser(int id, HttpServletRequest request) {
-		boolean isSuspended;
-		UserAccountModel requestedBy = userAccountModelRepository
-				.findByUsername(JwtTokenUtills.getUserNameFromToken(request));
-
-		if (!userRoleModelRepository
-				.existByUserIdAndRoleId(new UserRolesCompKey(requestedBy.getAccountId(), adminRoleNumber))) {
-			throw new ExceptionFoundation(EXCEPTION_CODES.AUTHEN_NOT_ALLOWED, HttpStatus.UNAUTHORIZED,
-					"[ UserAccountController ] The user id " + id + " has no admin authority.");
-		}
-
-		UserAccountModel targetUser = userAccountModelRepository.findById(id)
-				.orElseThrow(() -> new ExceptionFoundation(EXCEPTION_CODES.SEARCH_NOT_FOUND, HttpStatus.NOT_FOUND,
-						"[ UserAccountController ] The user with id " + id + " does not exist."));
-		if (targetUser.getUsername().equals(requestedBy.getUsername())) {
-			throw new ExceptionFoundation(EXCEPTION_CODES.AUTHEN_NOT_ALLOWED, HttpStatus.FORBIDDEN,
-					"[ UserAccountController ] You are not allowed to suspend yourself. Why would you do that?");
-		}
-		if (userRoleModelRepository.existByUserIdAndRoleId(new UserRolesCompKey(id, suspendingRoleNumber))) {
-			userRoleModelRepository.deleteByUserIdAndRoleId(new UserRolesCompKey(id, suspendingRoleNumber));
-			isSuspended = false;
-		} else {
-			userRoleModelRepository.insertNewRecord(id, suspendingRoleNumber);
-			isSuspended = true;
-		}
-
-		return isSuspended;
-	}
-
-	// ▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬
-	// DB-V5 OK!
-	// AddUserRole
-	public UserRolesModel addUserRole(int id, int targetRoleId, HttpServletRequest request) {
-		UserAccountModel targetUser = userAccountModelRepository.findById(id)
-				.orElseThrow(() -> new ExceptionFoundation(EXCEPTION_CODES.SEARCH_NOT_FOUND, HttpStatus.NOT_FOUND,
-						"[ UserAccountController ] Can't add role to this user because the user with id " + id
-								+ " does not exist."));
-
-		RolesModel targetRole = rolesRepository.findById(targetRoleId)
-				.orElseThrow(() -> new ExceptionFoundation(EXCEPTION_CODES.SEARCH_NOT_FOUND, HttpStatus.NOT_FOUND,
-						"[ UserAccountController ] The role with ID " + targetRoleId + " does not exist."));
-
-		if (userRoleModelRepository
-				.existByUserIdAndRoleId(new UserRolesCompKey(targetUser.getAccountId(), targetRoleId))) {
-			throw new ExceptionFoundation(EXCEPTION_CODES.SAVE_EXISTS, HttpStatus.I_AM_A_TEAPOT,
-					"[ UserAccountController ] This user alrealdy have this role assigned.");
-		} else if (userRoleModelRepository
-				.existByUserIdAndRoleId(new UserRolesCompKey(targetUser.getAccountId(), suspendingRoleNumber))) {
-			throw new ExceptionFoundation(EXCEPTION_CODES.SAVE_FORBIDDEN, HttpStatus.FORBIDDEN,
-					"[ UserAccountController ] You can't add role to the user who has been suspended.");
-		}
-
-		UserRolesModel newRole = new UserRolesModel();
-		newRole.setId(new UserRolesCompKey(id, targetRoleId));
-		newRole.setRoles(targetRole);
-		userRoleModelRepository.save(newRole);
-		return newRole;
-	}
-
-	// ▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬
-	// DB-V5 OK!
-	// DeleteUserRole
-	public void deleteUserROle(int id, int targetRoleId, HttpServletRequest request) {
-		UserAccountModel targetUser = userAccountModelRepository.findById(id)
-				.orElseThrow(() -> new ExceptionFoundation(EXCEPTION_CODES.SEARCH_NOT_FOUND, HttpStatus.NOT_FOUND,
-						"[ UserAccountController ] Can't add role to this user because the user with id " + id
-								+ " does not exist."));
-
-		UserRolesCompKey userRoleId = new UserRolesCompKey(targetUser.getAccountId(), targetRoleId);
-
-		if (!userRoleModelRepository.existByUserIdAndRoleId(userRoleId)) {
-			throw new ExceptionFoundation(EXCEPTION_CODES.SEARCH_NOT_FOUND, HttpStatus.NOT_FOUND,
-					"[ UserAccountController ] This user does not have role id " + targetRoleId
-							+ " presented in their account.");
-		}
-
-		userRoleModelRepository.deleteById(userRoleId);
-	}
-
 	// SearchUserByNameOrEmail
+	// NOTE : List all user in the application.
+	// EXCEPTION | 40001 | BROWSE_NO_RECORD_EXISTS
 	public Page<UserAccountModel> searchUserByNameOrEmail(String searchContent, int pageNumber, int pageSize) {
 		if (pageNumber < 0) {
 			pageNumber = 0;
@@ -260,17 +214,10 @@ public class UserAccountController {
 			result = userAccountModelRepository.findByUsernameContainingOrEmailContaining(searchContent,
 					sendPageRequest);
 			if (result.getTotalPages() < pageNumber + 1) {
-				throw new ExceptionFoundation(EXCEPTION_CODES.SEARCH_NOT_FOUND, HttpStatus.NOT_FOUND,
-						"[ UserAccountManagerController ]  Found nothing here.");
+				throw new ExceptionFoundation(EXCEPTION_CODES.BROWSE_NO_RECORD_EXISTS, HttpStatus.NOT_FOUND,
+						"[ BROWSE_NO_RECORD_EXISTS ]  No user found.");
 			}
 		}
-
 		return result;
 	}
-
-	// ListUserByNameOrEmail
-	public void listUserByNameOrEmail(String searchContent, int pageNumber, int pageSize) {
-
-	}
-
 }
