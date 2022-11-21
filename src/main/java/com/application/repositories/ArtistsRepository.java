@@ -22,9 +22,12 @@ public interface ArtistsRepository extends JpaRepository<ArtistsModel, Integer> 
 
 	@Query(nativeQuery = true, value = "SELECT * FROM artists WHERE AND artist_name LIKE LOWER(CONCAT('%',:searchName,'%'))")
 	Page<ArtistsModel> listArtistByArtistName(String searchName, Pageable pageable);
-	
+
 	@Query(nativeQuery = true, value = "SELECT a.* FROM (artists a RIGHT JOIN artist_tracks ar ON a.artist_id = ar.artist_id) LEFT JOIN tracks t ON t.track_id = ar.track_id WHERE t.track_id = :trackId")
 	Page<ArtistsModel> listArtistInCurrentTrack(int trackId, Pageable pageable);
+
+	@Query(nativeQuery = true, value = "SELECT * FROM artists WHERE artist_name = :artistName")
+	ArtistsModel getArtistByName(String artistName);
 
 	@Query(nativeQuery = true, value = "SELECT EXISTS(SELECT a.* FROM (artists a RIGHT JOIN artist_tracks ar ON a.artist_id = ar.artist_id) LEFT JOIN tracks t ON t.track_id = ar.track_id WHERE t.track_id = :trackId)")
 	int isExistInTrackId(int trackId);
