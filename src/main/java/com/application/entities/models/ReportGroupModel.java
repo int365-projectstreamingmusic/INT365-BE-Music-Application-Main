@@ -55,4 +55,15 @@ public class ReportGroupModel {
 	@JoinColumn(name = "report_group_id", referencedColumnName = "id")
 	private List<ReportModel> reports;
 
+	@Transient
+	private int numberOfReport;
+	@Transient
+	private TracksModel track;
+	@Transient
+	private CommentTrackModel commentTrack;
+	@Transient
+	private CommentPlaylistModel commentPlaylist;
+	@Transient
+	private String note;
+
 }

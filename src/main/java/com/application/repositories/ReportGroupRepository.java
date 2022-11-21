@@ -15,15 +15,17 @@ public interface ReportGroupRepository extends JpaRepository<ReportGroupModel, I
 
 	@Query(value = "SELECT r FROM ReportGroupModel r WHERE r.startedBy = :userId ORDER BY r.recentDate DESC")
 	Page<ReportGroupModel> listReportGroupByOwner(Pageable pageable, int userId);
-	
+
 	@Query(value = "SELECT r FROM ReportGroupModel r ORDER BY r.recentDate DESC")
 	Page<ReportGroupModel> listReportGroup(Pageable pageable);
 
 	@Query(value = "SELECT r FROM ReportGroupModel r WHERE r.title LIKE LOWER(CONCAT('%',:searchKey,'%')) ORDER BY r.recentDate DESC")
 	Page<ReportGroupModel> listReportGroup(Pageable pageable, String searchKey);
 
-	@Query(nativeQuery = true, value = "SELECT * FROM report_group WHERE ref_id = :targetRef AND type_id = :typeId ORDER BY recent_date DESC")
-	Page<ReportGroupModel> listReportGroup(Pageable pageable, int typeId, int targetRef);
+	@Query(nativeQuery = true, value = "SELECT * FROM report_group "
+			+ "WHERE group_name LIKE LOWER(CONCAT('%',:searchKey,'%')) "
+			+ "AND type_id LIKE LOWER(CONCAT('%',:typeId,'%')) ORDER BY recent_date DESC")
+	Page<ReportGroupModel> listReportGroup(Pageable pageable, String searchKey, int typeId);
 
 	@Query(nativeQuery = true, value = "SELECT * FROM report_group WHERE recent_date = (SELECT MIN(recent_date) FROM report_group WHERE ref_id = :targetRef AND type_id = :typeId) AND ref_id = :targetRef AND type_id = :typeId")
 	ReportGroupModel getOldestReportGroup(int typeId, int targetRef);
@@ -33,6 +35,9 @@ public interface ReportGroupRepository extends JpaRepository<ReportGroupModel, I
 
 	@Query(nativeQuery = true, value = "SELECT * FROM report_group WHERE ref_id = :targetRef AND type_id = :typeId AND startedBy = :userId")
 	ReportGroupModel getByUserIdAndRefAndType(int userId, int typeId, int targetRef);
+
+	@Query(nativeQuery = true, value = "SELECT * FROM report_group WHERE ref_id = :targetRef AND type_id = :typeId AND is_solved = 0")
+	ReportGroupModel getByRefIdAndType(int typeId, int targetRef);
 
 	@Query(nativeQuery = true, value = "SELECT COUNT(r.id) FROM (SELECT id FROM report_group WHERE ref_id = :targetRef AND type_id = :typeId) r")
 	int numberOfReportToTarget(int targetRef, int typeId);
@@ -45,7 +50,7 @@ public interface ReportGroupRepository extends JpaRepository<ReportGroupModel, I
 	@Transactional
 	@Modifying
 	@Query(value = "UPDATE ReportGroupModel SET isSolved = :isSolved WHERE id = :id")
-	void updateIsSolved(int id,boolean isSolved);
+	void updateIsSolved(int id, boolean isSolved);
 
 	@Transactional
 	@Modifying

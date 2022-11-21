@@ -22,7 +22,7 @@ public class ReportOutput {
 	private int hoursAfterFirstReport;
 	private String firstReportDate;
 
-	private Page<ReportGroupModel> reportGroup;
+	//private Page<ReportGroupModel> reportGroup;
 
 	@Basic(optional = true)
 	private TracksModel track;

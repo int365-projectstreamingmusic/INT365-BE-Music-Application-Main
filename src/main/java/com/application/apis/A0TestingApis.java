@@ -8,7 +8,6 @@ import javax.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -32,7 +31,6 @@ public class A0TestingApis {
 	private TrackStatisticController trackCountController;
 	@Autowired
 	private AlbumController albumController;
-	
 	@Autowired
 	private AlbumRepository albumRepository;
 
@@ -43,15 +41,15 @@ public class A0TestingApis {
 	// -----------------------
 	// VIEW COUNT
 	// -----------------------
-	
+
 	@PostMapping("2")
-	public ResponseEntity<AlbumModel> test2(@RequestParam String one, @RequestParam int id){
+	public ResponseEntity<AlbumModel> test2(@RequestParam String one, @RequestParam int id) {
 		albumRepository.updateNewAlbumName(id, one);
 		return ResponseEntity.ok().body(albumRepository.findById(id).orElse(null));
 	}
-	
+
 	@GetMapping("1")
-	public ResponseEntity<List<AlbumModel>> getAlbums(){
+	public ResponseEntity<List<AlbumModel>> getAlbums() {
 		return ResponseEntity.ok().body(albumRepository.findAll());
 	}
 

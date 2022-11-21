@@ -84,7 +84,7 @@ public interface TracksRepository extends JpaRepository<TracksModel, Integer> {
 	@Transactional
 	@Modifying
 	@Query(nativeQuery = true, value = "DELETE FROM tracks WHERE track_id = :id")
-	void deleteFromDatabase(int id);
+	void eraseById(int id);
 
 	// ▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬
 

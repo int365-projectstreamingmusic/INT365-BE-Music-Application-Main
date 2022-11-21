@@ -212,12 +212,11 @@ public class A2UserApis {
 	// DB-V5.2 OK
 	// COMMENT TRACK : Delete by Id
 	@DeleteMapping("comment/track")
-	public ResponseEntity<HttpStatus> deleteTrackComment(@RequestParam(required = true) int commentId,
+	public ResponseEntity<String> deleteTrackComment(@RequestParam(required = true) int commentId,
 			HttpServletRequest request) {
 		URI uri = URI.create(
 				ServletUriComponentsBuilder.fromCurrentContextPath().path(mapping + "comment/track").toString());
-		commentsController.deleteTrackComment(commentId, request);
-		return ResponseEntity.created(uri).body(HttpStatus.CREATED);
+		return ResponseEntity.created(uri).body(commentsController.deleteTrackComment(commentId, request));
 	}
 
 	// ▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬
@@ -235,12 +234,11 @@ public class A2UserApis {
 	// DB-V5.2 OK
 	// COMMENT PLAYLIST: Delete by Id
 	@DeleteMapping("comment/playlist")
-	public ResponseEntity<HttpStatus> deletePlaylistComment(@RequestParam(required = true) int commentId,
+	public ResponseEntity<String> deletePlaylistComment(@RequestParam(required = true) int commentId,
 			HttpServletRequest request) {
 		URI uri = URI.create(
 				ServletUriComponentsBuilder.fromCurrentContextPath().path(mapping + "comment/playlist").toString());
-		commentsController.deletePlaylistComment(commentId, request);
-		return ResponseEntity.created(uri).body(HttpStatus.CREATED);
+		return ResponseEntity.created(uri).body(commentsController.deletePlaylistComment(commentId, request));
 	}
 
 	// COMMENT TRACK : Edit comment
@@ -450,18 +448,7 @@ public class A2UserApis {
 	public ResponseEntity<ReportModel> reportTrack(@RequestBody(required = true) ReportForm form,
 			HttpServletRequest request) {
 		URI uri = URI.create(ServletUriComponentsBuilder.fromCurrentContextPath().path(mapping + "report").toString());
-		return ResponseEntity.created(uri).body(reportController.createReport(form, request));
-	}
-
-	// ▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬
-	// DB-V6 OK
-	// REPORT : Delete report
-	@DeleteMapping("report/{id}")
-	public ResponseEntity<String> deleteReport(@PathVariable int id, HttpServletRequest request) {
-		URI uri = URI
-				.create(ServletUriComponentsBuilder.fromCurrentContextPath().path(mapping + "report/" + id).toString());
-		reportController.deleteReportGroup(id, request);
-		return ResponseEntity.created(uri).body("Report is deleted.");
+		return ResponseEntity.created(uri).body(reportController.createNewReport(form, request));
 	}
 
 }

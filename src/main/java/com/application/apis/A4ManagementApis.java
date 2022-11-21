@@ -8,6 +8,7 @@ import javax.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -18,6 +19,7 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import com.application.controllers.CommentsController;
 import com.application.controllers.ReportController;
+import com.application.controllers.TrackController;
 import com.application.controllers.UserAccountController;
 import com.application.entities.models.ReportGroupModel;
 import com.application.entities.models.UserAccountModel;
@@ -35,6 +37,8 @@ public class A4ManagementApis {
 	private CommentsController commentsController;
 	@Autowired
 	private ReportController reportController;
+	@Autowired
+	private TrackController trackController;
 
 	// ▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬
 	// DB-V5. OK!
@@ -90,15 +94,25 @@ public class A4ManagementApis {
 		return ResponseEntity.created(uri).body(userAccountManagerController.switchSuspendUser(userId, request));
 	}
 
-	// COMMENT : Delete comment from specific playlist.
-
 	// COMMENT : Delete comment from specific track.
+	@DeleteMapping("comment/track")
+	public ResponseEntity<String> deleteTrackComment(@RequestParam(required = true) int commentId,
+			@RequestParam(defaultValue = "") String reason, HttpServletRequest request) {
+		URI uri = URI.create(
+				ServletUriComponentsBuilder.fromCurrentContextPath().path(mapping + "comment/track").toString());
+		return ResponseEntity.created(uri).body(commentsController.deleteTrackComment(commentId, reason, request));
+	}
+
+	// COMMENT : Delete comment from specific playlist.
+	@DeleteMapping("comment/playlist")
+	public ResponseEntity<String> deletePlaylistComment(@RequestParam(required = true) int commentId,
+			@RequestParam(defaultValue = "") String reason, HttpServletRequest request) {
+		URI uri = URI.create(
+				ServletUriComponentsBuilder.fromCurrentContextPath().path(mapping + "comment/playlist").toString());
+		return ResponseEntity.created(uri).body(commentsController.deletePlaylistComment(commentId, reason, request));
+	}
 
 	// ACTION : Browse all action
-
-	// ACTION : Browse all action by staff name.
-
-	// REPORT : Reply to report
 
 	// REPORT : Close report solved.
 
@@ -111,8 +125,9 @@ public class A4ManagementApis {
 	// REPORT : Get all reports.
 	@GetMapping("report")
 	public ResponseEntity<Page<ReportGroupModel>> listAllReports(@RequestParam(defaultValue = "0") int page,
-			@RequestParam(defaultValue = "50") int pageSize, @RequestParam(defaultValue = "") String searchKey) {
-		return ResponseEntity.ok().body(reportController.getReportGroupList(page, pageSize, searchKey));
+			@RequestParam(defaultValue = "50") int pageSize, @RequestParam(defaultValue = "") String searchKey,
+			@RequestParam(defaultValue = "0") int reportType) {
+		return ResponseEntity.ok().body(reportController.getReportList(page, pageSize, searchKey, reportType));
 	}
 
 	// ▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬
@@ -124,19 +139,6 @@ public class A4ManagementApis {
 	}
 
 	// ▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬
-	//
-	// REPORT : Get by track
-	// NOTE | reportType : 1001 = tracks, 2001 = track comment, 2002 = playlist
-	// comment, 3001 = general bug
-	// NOTE | targetRef : ID of either track or comments.
-	@GetMapping("report/detail")
-	public ResponseEntity<ReportOutput> getReportById(@RequestParam(defaultValue = "0") int page,
-			@RequestParam(defaultValue = "30") int pageSize, @RequestParam(required = true) int targetRef,
-			@RequestParam(required = true) int reportType) {
-		return ResponseEntity.ok().body(reportController.getReportStatistic(page, pageSize, targetRef, reportType));
-	}
-
-	// ▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬
 	// DB-V6 OK!
 	// REPORT : Solve Report
 	@PutMapping("report/solve")
@@ -144,6 +146,28 @@ public class A4ManagementApis {
 		URI uri = URI
 				.create(ServletUriComponentsBuilder.fromCurrentContextPath().path(mapping + "report/solve").toString());
 		return ResponseEntity.created(uri).body("Is solved, now : " + reportController.markResolved(id, request));
+	}
+
+	// ▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬
+	// DB-V6 OK
+	// REPORT : Delete report
+	@DeleteMapping("report/{id}")
+	public ResponseEntity<String> deleteReport(@PathVariable int id, HttpServletRequest request) {
+		URI uri = URI
+				.create(ServletUriComponentsBuilder.fromCurrentContextPath().path(mapping + "report/" + id).toString());
+		reportController.deleteReportGroup(id, request);
+		return ResponseEntity.created(uri).body("Report is deleted.");
+	}
+
+	// ▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬
+	// Tracks
+	// ---------------------
+	@DeleteMapping("track")
+	public ResponseEntity<String> deleteTrack(@RequestParam(required = true) int trackId,
+			@RequestParam(defaultValue = "") String reason, HttpServletRequest request) {
+		URI uri = URI.create(
+				ServletUriComponentsBuilder.fromCurrentContextPath().path(mapping + "comment/playlist").toString());
+		return ResponseEntity.created(uri).body(trackController.deleteTrack(trackId, reason, request));
 	}
 
 }
