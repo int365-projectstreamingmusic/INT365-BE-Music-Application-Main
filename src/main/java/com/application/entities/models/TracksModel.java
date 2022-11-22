@@ -84,11 +84,15 @@ public class TracksModel {
 	@OnDelete(action = OnDeleteAction.CASCADE)
 	private List<ArtistsTrackModel> artistTracks;
 
-	@JsonIgnore
+	/*@JsonIgnore
 	@Basic(optional = false)
 	@Column(name = "account_id")
-	private int accountId;
-
+	private int accountId;*/
+	
+	@ManyToOne
+	@JoinColumn(name = "account_id",referencedColumnName = "account_id")
+	private UserAccountModel owner;
+	
 	@Transient
 	private List<CommentTrackModel> comments;
 

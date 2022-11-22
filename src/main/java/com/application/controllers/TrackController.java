@@ -7,7 +7,6 @@ import java.util.stream.Collectors;
 
 import javax.servlet.http.HttpServletRequest;
 
-import org.checkerframework.checker.units.qual.g;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.PropertySource;
@@ -295,7 +294,7 @@ public class TrackController {
 				PlaylistOutputTrack current = new PlaylistOutputTrack();
 				// If not public, set null.
 				if (trackList.get(i).getPlayTrackStatus().getId() != 1001
-						&& trackList.get(i).getAccountId() != user.getAccountId()
+						&& trackList.get(i).getOwner().getAccountId() != user.getAccountId()
 						&& user.getAccountId() == playlist.getUserAccountModel().getAccountId()) {
 					current.setFavorite(trackList.get(i).isFavorite());
 					current.setId(trackList.get(i).getId());
@@ -362,7 +361,7 @@ public class TrackController {
 		TracksModel newTrack = new TracksModel();
 		// General information.
 		newTrack.setTimestamp(new Timestamp(System.currentTimeMillis()).toString());
-		newTrack.setAccountId(requestedBy.getAccountId());
+		newTrack.setOwner(requestedBy);
 
 		// Information given in the form.
 		newTrack.setTrackDesc(form.getTrackDesc());
@@ -451,7 +450,7 @@ public class TrackController {
 		TracksModel target = tracksRepository.findById(form.getId())
 				.orElseThrow(() -> new ExceptionFoundation(EXCEPTION_CODES.BROWSE_NO_RECORD_EXISTS,
 						HttpStatus.NOT_FOUND, "[ BROWSE_NO_RECORD_EXISTS ] Track with this ID does not exist."));
-		generalFunctionController.checkOwnerShipForRecord(requestedBy.getAccountId(), target.getAccountId());
+		generalFunctionController.checkOwnerShipForRecord(requestedBy.getAccountId(), target.getOwner().getAccountId());
 
 		if (form.getAlbumName() != "" && albumRepository.existsById(target.getAlbums().getId())) {
 			albumRepository.updateNewAlbumName(target.getAlbums().getId(), form.getAlbumName());
@@ -500,7 +499,7 @@ public class TrackController {
 		TracksModel target = tracksRepository.findById(trackId)
 				.orElseThrow(() -> new ExceptionFoundation(EXCEPTION_CODES.BROWSE_NO_RECORD_EXISTS,
 						HttpStatus.NOT_FOUND, "[ BROWSE_NO_RECORD_EXISTS ] Track with this ID does not exist."));
-		generalFunctionController.checkOwnerShipForRecord(owner.getAccountId(), target.getAccountId());
+		generalFunctionController.checkOwnerShipForRecord(owner.getAccountId(), target.getOwner().getAccountId());
 
 		if (target.getPlayTrackStatus().getId() == 1001) {
 			tracksRepository.updateTrackStatus(trackId, 1002);
@@ -523,7 +522,7 @@ public class TrackController {
 		TracksModel target = tracksRepository.findById(trackId).orElseThrow(
 				() -> new ExceptionFoundation(EXCEPTION_CODES.BROWSE_NO_RECORD_EXISTS, HttpStatus.NOT_FOUND,
 						"[ BROWSE_NO_RECORD_EXISTS ] Track with this ID does not exist. Nothing is deleted."));
-		generalFunctionController.checkOwnerShipForRecord(owner.getAccountId(), target.getAccountId());
+		generalFunctionController.checkOwnerShipForRecord(owner.getAccountId(), target.getOwner().getAccountId());
 		tracksRepository.eraseById(trackId);
 	}
 

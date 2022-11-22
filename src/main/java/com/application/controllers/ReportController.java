@@ -31,6 +31,7 @@ import com.application.repositories.ReportGroupRepository;
 import com.application.repositories.ReportTypeRepository;
 import com.application.repositories.ReportsRepository;
 import com.application.repositories.TracksRepository;
+import com.application.repositories.UserAccountRepository;
 import com.application.services.GeneralFunctionController;
 
 @Service
@@ -49,6 +50,8 @@ public class ReportController {
 	private CommentPlaylistRepository commentPlaylistRepository;
 	@Autowired
 	private CommentTrackRepository commentTrackRepository;
+	@Autowired
+	private UserAccountRepository userAccountRepository;
 
 	@Autowired
 	private ActionHistoryController actionHistoryController;
@@ -68,7 +71,7 @@ public class ReportController {
 		result = reportGroupRepository.listReportGroup(getPageRequest(page, pageSize), searchKey, reportType);
 		if (result.getTotalElements() <= 0) {
 			throw new ExceptionFoundation(EXCEPTION_CODES.BROWSE_NO_RECORD_EXISTS, HttpStatus.NOT_FOUND,
-					"[ BROWSE_NO_RECORD_EXISTS ] This user has no report made against anything.");
+					"[ BROWSE_NO_RECORD_EXISTS ] There is no report of this search or type that needs to be handled for a moment..");
 		}
 		List<ReportGroupModel> reportlLst = new ArrayList<>();
 		for (int i = 0; i < result.getContent().size(); i++) {
@@ -76,24 +79,22 @@ public class ReportController {
 			current.setNumberOfReport(result.getContent().get(i).getReports().size());
 			current.setReports(null);
 			reportlLst.add(current);
-			if (current.getType().getId() == 1001) {
-
-			}
 
 			switch (current.getType().getId()) {
 			case 1001: {
-				current.setTrack(tracksRepository.findById(current.getTarget()).orElse(null));
-				current.setNote(current.getTrack() == null ? "This track is no longer exist." : "");
+				TracksModel track = tracksRepository.findById(current.getTarget()).orElse(null);
+				current.setTrack(track);
+				current.setNote(current.getTrack() == null ? "This track is no longer exist. " : "");
 				break;
 			}
 			case 2001: {
 				current.setCommentTrack(commentTrackRepository.findById(current.getTarget()).orElse(null));
-				current.setNote(current.getCommentTrack() == null ? "This track is no longer exist." : "");
+				current.setNote(current.getCommentTrack() == null ? "This comment is no longer exist. " : "");
 				break;
 			}
 			case 2002: {
 				current.setCommentPlaylist(commentPlaylistRepository.findById(current.getTarget()).orElse(null));
-				current.setNote(current.getCommentPlaylist() == null ? "This track is no longer exist." : "");
+				current.setNote(current.getCommentPlaylist() == null ? "This comment is no longer exist. " : "");
 				break;
 			}
 			}
