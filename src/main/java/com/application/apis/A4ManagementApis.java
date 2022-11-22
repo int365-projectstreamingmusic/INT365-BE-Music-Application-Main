@@ -120,7 +120,14 @@ public class A4ManagementApis {
 	public ResponseEntity<Page<ReportGroupModel>> listAllReports(@RequestParam(defaultValue = "0") int page,
 			@RequestParam(defaultValue = "50") int pageSize, @RequestParam(defaultValue = "") String searchKey,
 			@RequestParam(defaultValue = "0") int reportType) {
-		return ResponseEntity.ok().body(reportController.getReportList(page, pageSize, searchKey, reportType));
+		return ResponseEntity.ok().body(reportController.getReportList(page, pageSize, searchKey, reportType, false));
+	}
+
+	@GetMapping("report/solved")
+	public ResponseEntity<Page<ReportGroupModel>> listAllSolvedReports(@RequestParam(defaultValue = "0") int page,
+			@RequestParam(defaultValue = "50") int pageSize, @RequestParam(defaultValue = "") String searchKey,
+			@RequestParam(defaultValue = "0") int reportType) {
+		return ResponseEntity.ok().body(reportController.getReportList(page, pageSize, searchKey, reportType, true));
 	}
 
 	// ▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬

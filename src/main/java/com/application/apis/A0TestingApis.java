@@ -21,6 +21,8 @@ import com.application.controllers.TrackStatisticController;
 import com.application.entities.models.AlbumModel;
 import com.application.entities.models.TrackStatisticModel;
 import com.application.repositories.AlbumRepository;
+import com.application.repositories.ReportGroupRepository;
+import com.application.repositories.ReportsRepository;
 import com.application.services.GeneralFunctionController;
 
 @RestController
@@ -33,6 +35,8 @@ public class A0TestingApis {
 	private AlbumController albumController;
 	@Autowired
 	private AlbumRepository albumRepository;
+	@Autowired
+	private ReportGroupRepository reportGroupRepository;
 
 	@Autowired
 	private GeneralFunctionController generalFunctionController;
@@ -42,6 +46,11 @@ public class A0TestingApis {
 	// VIEW COUNT
 	// -----------------------
 
+	@GetMapping("test1")
+	public int test1() {
+		return reportGroupRepository.existsByTrack(1);
+	}
+	
 	@PostMapping("2")
 	public ResponseEntity<AlbumModel> test2(@RequestParam String one, @RequestParam int id) {
 		albumRepository.updateNewAlbumName(id, one);

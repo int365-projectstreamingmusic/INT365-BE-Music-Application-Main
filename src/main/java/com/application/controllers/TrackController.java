@@ -433,6 +433,8 @@ public class TrackController {
 					newTrack.getId());
 			newTrack.setTrackThumbnail(trackThumbnailFileName);
 			tracksRepository.updateTrackThumbnail(newTrack.getId(), trackThumbnailFileName);
+		} else {
+			tracksRepository.updateTrackThumbnail(newTrack.getId(), defaultTrackImage);
 		}
 		String uploadedTrack = minioStorageService.uploadTrackToStorage(trackFile, minioTrackLocation);
 		newTrack.setTrackFile(uploadedTrack);
@@ -464,8 +466,6 @@ public class TrackController {
 		}
 
 		tracksRepository.save(target);
-		// tracksRepository.updateBasicTrackInfo(target.getId(), target.getTrackName(),
-		// target.getTrackDesc());
 
 		if (form.getGenreList() != null) {
 			target.setGenreTrack(genreController.addGenreToTrack(target.getId(), form.getGenreList()));
@@ -473,7 +473,8 @@ public class TrackController {
 
 		// If with image, do the following.
 		if (image != null) {
-			if (fileLinkRelController.isExistsInRecord(target.getTrackThumbnail())) {
+			if (fileLinkRelController.isExistsInRecord(target.getTrackThumbnail())
+					&& target.getTrackThumbnail() != defaultTrackImage) {
 				fileLinkRelController.deleteTargetFileByName(target.getTrackThumbnail());
 			}
 			String trackThumbnailFileName = fileLinkRelController.insertNewTrackObjectLinkRel(image, 201,
@@ -523,6 +524,8 @@ public class TrackController {
 				() -> new ExceptionFoundation(EXCEPTION_CODES.BROWSE_NO_RECORD_EXISTS, HttpStatus.NOT_FOUND,
 						"[ BROWSE_NO_RECORD_EXISTS ] Track with this ID does not exist. Nothing is deleted."));
 		generalFunctionController.checkOwnerShipForRecord(owner.getAccountId(), target.getOwner().getAccountId());
+		String message = owner.getUsername() + " deleted their owned track named " + target.getTrackName();
+		actionHistoryController.addNewRecord(new ActionForm(owner, target.getId(), 201, message));
 		tracksRepository.eraseById(trackId);
 	}
 

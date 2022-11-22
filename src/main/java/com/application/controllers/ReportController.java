@@ -17,6 +17,7 @@ import org.springframework.stereotype.Service;
 
 import com.application.entities.models.CommentPlaylistModel;
 import com.application.entities.models.CommentTrackModel;
+import com.application.entities.models.ReportGenreModel;
 import com.application.entities.models.ReportGroupModel;
 import com.application.entities.models.ReportModel;
 import com.application.entities.models.TracksModel;
@@ -27,6 +28,7 @@ import com.application.exceptons.ExceptionFoundation;
 import com.application.exceptons.ExceptionResponseModel.EXCEPTION_CODES;
 import com.application.repositories.CommentPlaylistRepository;
 import com.application.repositories.CommentTrackRepository;
+import com.application.repositories.ReportGenreRepository;
 import com.application.repositories.ReportGroupRepository;
 import com.application.repositories.ReportTypeRepository;
 import com.application.repositories.ReportsRepository;
@@ -49,6 +51,8 @@ public class ReportController {
 	private CommentPlaylistRepository commentPlaylistRepository;
 	@Autowired
 	private CommentTrackRepository commentTrackRepository;
+	@Autowired
+	private ReportGenreRepository reportGenreRepository;
 
 	@Autowired
 	private ActionHistoryController actionHistoryController;
@@ -61,11 +65,19 @@ public class ReportController {
 
 	// ▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬
 	// DB-V6 OK!
+	// Get report genre
+	public List<ReportGenreModel> getReportGenre(int typeId) {
+		return reportGenreRepository.listGenres(typeId);
+	}
+
+	// ▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬
+	// DB-V6 OK!
 	// Get report list.
 	// EXCEPTION | 40001 | BROWSE_NO_RECORD_EXISTS
-	public Page<ReportGroupModel> getReportList(int page, int pageSize, String searchKey, int reportType) {
+	public Page<ReportGroupModel> getReportList(int page, int pageSize, String searchKey, int reportType,
+			boolean isSolved) {
 		Page<ReportGroupModel> result;
-		result = reportGroupRepository.listReportGroup(getPageRequest(page, pageSize), searchKey, reportType);
+		result = reportGroupRepository.listReportGroup(getPageRequest(page, pageSize), searchKey, reportType, isSolved);
 		if (result.getTotalElements() <= 0) {
 			throw new ExceptionFoundation(EXCEPTION_CODES.BROWSE_NO_RECORD_EXISTS, HttpStatus.NOT_FOUND,
 					"[ BROWSE_NO_RECORD_EXISTS ] There is no report of this search or type that needs to be handled for a moment..");
@@ -74,13 +86,15 @@ public class ReportController {
 		for (int i = 0; i < result.getContent().size(); i++) {
 			ReportGroupModel current = result.getContent().get(i);
 			current.setNumberOfReport(result.getContent().get(i).getReports().size());
-			//current.setReports(null);
+			// current.setReports(null);
 
 			switch (current.getType().getId()) {
 			case 1001: {
 				TracksModel track = tracksRepository.findById(current.getTarget()).orElse(null);
 				current.setTrack(track);
 				current.setNote(current.getTrack() == null ? "This track is no longer exist. " : "");
+				current.setReportedReason(
+						reportGenreRepository.listGenreReported(reportType, track.getId()).toString());
 				if (track != null) {
 					reportlLst.add(current);
 				}
@@ -89,6 +103,8 @@ public class ReportController {
 			case 2001: {
 				current.setCommentTrack(commentTrackRepository.findById(current.getTarget()).orElse(null));
 				current.setNote(current.getCommentTrack() == null ? "This comment is no longer exist. " : "");
+				current.setReportedReason(reportGenreRepository
+						.listGenreReported(reportType, current.getCommentTrack().getId()).toString());
 				if (current.getCommentTrack() != null || current.getCommentPlaylist() != null) {
 					reportlLst.add(current);
 				}
@@ -97,6 +113,8 @@ public class ReportController {
 			case 2002: {
 				current.setCommentPlaylist(commentPlaylistRepository.findById(current.getTarget()).orElse(null));
 				current.setNote(current.getCommentPlaylist() == null ? "This comment is no longer exist. " : "");
+				current.setReportedReason(reportGenreRepository
+						.listGenreReported(reportType, current.getCommentPlaylist().getId()).toString());
 				if (current.getCommentTrack() != null || current.getCommentPlaylist() != null) {
 					reportlLst.add(current);
 				}
@@ -217,6 +235,7 @@ public class ReportController {
 	// EXCEPTION | 80001 | REPORT_ALREADY_MADE
 	// EXCEPTION | 80002 | REPORT_INVALID_TYPE
 	// EXCEPTION | 40001 | BROWSE_NO_RECORD_EXISTS
+	// EXCPETION | 40008 | REPORT_INVALID_GENRE
 	public ReportModel createNewReport(ReportForm form, HttpServletRequest request) {
 		UserAccountModel userMakingReport = generalFunctionController.getUserAccount(request);
 		String currentdate = new Timestamp(Calendar.getInstance().getTimeInMillis()).toString();
@@ -228,7 +247,19 @@ public class ReportController {
 					"[ REPORT_ALREADY_MADE ] You've already made a report for this target.");
 		}
 
+		ReportGenreModel genre;
+		if (form.getReportGenreId() != 0) {
+			genre = reportGenreRepository.findById(form.getReportGenreId())
+					.orElseThrow(() -> new ExceptionFoundation(EXCEPTION_CODES.REPORT_INVALID_GENRE,
+							HttpStatus.I_AM_A_TEAPOT, "[ REPORT_INVALID_GENRE ] Invalid report genre ID."));
+		} else {
+			genre = reportGenreRepository.findById(10).orElseThrow(() -> new ExceptionFoundation(
+					EXCEPTION_CODES.REPORT_INVALID_GENRE, HttpStatus.I_AM_A_TEAPOT,
+					"[ REPORT_INVALID_GENRE ] The database records are not initialized correctly, please see the database creation insert again."));
+		}
+
 		ReportModel newReport = new ReportModel();
+		newReport.setReportGenre(genre);
 		newReport.setReportedDate(currentdate);
 		newReport.setReportText(form.getReportMsg());
 		newReport.setReportGroupId(form.getReportGroupId());
@@ -292,11 +323,11 @@ public class ReportController {
 	private String getReportedTrackComment(ReportForm form, UserAccountModel user) {
 		CommentTrackModel target = commentTrackRepository.findById(form.getTargetRef()).orElseThrow(
 				() -> new ExceptionFoundation(EXCEPTION_CODES.BROWSE_NO_RECORD_EXISTS, HttpStatus.NOT_FOUND,
-						"[ BROWSE_NO_RECORD_EXISTS ] The playlist comment with this ID does not exist."));
+						"[ BROWSE_NO_RECORD_EXISTS ] The track comment with this ID does not exist."));
 
 		String message = "";
 		if (form.getReportTitle() == "") {
-			message = "User Playlist Comment Report : User " + user.getUsername() + " reported "
+			message = "User Track Comment Report : User " + user.getUsername() + " reported "
 					+ target.getUser().getUsername() + "'s comment.";
 		} else {
 			message = form.getReportTitle();
@@ -308,11 +339,11 @@ public class ReportController {
 	private String getReportedPlaylistComment(ReportForm form, UserAccountModel user) {
 		CommentPlaylistModel target = commentPlaylistRepository.findById(form.getTargetRef()).orElseThrow(
 				() -> new ExceptionFoundation(EXCEPTION_CODES.BROWSE_NO_RECORD_EXISTS, HttpStatus.NOT_FOUND,
-						"[ BROWSE_NO_RECORD_EXISTS ] The track comment with this ID does not exist."));
+						"[ BROWSE_NO_RECORD_EXISTS ] The playlist comment with this ID does not exist."));
 
 		String message = "";
 		if (form.getReportTitle() == "") {
-			message = "User track Comment Report : User " + user.getUsername() + " reported "
+			message = "User Playlist Comment Report : User " + user.getUsername() + " reported "
 					+ target.getUser().getUsername() + "'s comment.";
 		} else {
 			message = form.getReportTitle();

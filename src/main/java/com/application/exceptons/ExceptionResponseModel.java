@@ -103,6 +103,7 @@ public class ExceptionResponseModel {
 
 		// REPORTS
 		REPORT_ALREADY_MADE(80001), REPORT_INVALID_TYPE(80002), REPORT_INVALID_STATUS(80003),
+		REPORT_INVALID_GENRE(80004),
 
 		// Related to role browsing
 		ROLE_NOT_FOUND(11001), // ---------
