@@ -24,8 +24,7 @@ public interface ReportGroupRepository extends JpaRepository<ReportGroupModel, I
 
 	@Query(nativeQuery = true, value = "SELECT * FROM report_group "
 			+ "WHERE group_name LIKE LOWER(CONCAT('%',:searchKey,'%')) "
-			+ "AND type_id LIKE LOWER(CONCAT(:typeId,'%')) " 
-			+ "AND is_solved = :isSolved ORDER BY recent_date DESC")
+			+ "AND type_id LIKE LOWER(CONCAT(:typeId,'%')) " + "AND is_solved = :isSolved ORDER BY recent_date DESC")
 	Page<ReportGroupModel> listReportGroup(Pageable pageable, String searchKey, int typeId, boolean isSolved);
 
 	@Query(nativeQuery = true, value = "SELECT * FROM report_group WHERE recent_date = (SELECT MIN(recent_date) FROM report_group WHERE ref_id = :targetRef AND type_id = :typeId) AND ref_id = :targetRef AND type_id = :typeId")
@@ -50,8 +49,8 @@ public interface ReportGroupRepository extends JpaRepository<ReportGroupModel, I
 
 	@Transactional
 	@Modifying
-	@Query(value = "UPDATE ReportGroupModel SET isSolved = :isSolved WHERE id = :id")
-	void updateIsSolved(int id, boolean isSolved);
+	@Query(value = "UPDATE ReportGroupModel SET is_solved = :isSolved,solved_date = :newDate WHERE id = :id")
+	void updateIsSolved(int id, String newDate, boolean isSolved);
 
 	@Transactional
 	@Modifying

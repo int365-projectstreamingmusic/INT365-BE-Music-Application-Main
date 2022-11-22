@@ -6,7 +6,6 @@ import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
-import javax.persistence.Transient;
 
 import com.application.entities.copmskeys.MoodTrackCompKey;
 
@@ -28,12 +27,6 @@ public class MoodTrackModel {
 	private int ratio;
 
 	@ManyToOne
-	@Transient
-	@JoinColumn(name = "mood_id", referencedColumnName = "mood_id")
+	@JoinColumn(name = "mood_id", referencedColumnName = "id", insertable = false, updatable = false)
 	private MoodModel mood;
-
-	@ManyToOne
-	@Transient
-	@JoinColumn(name = "track_id", referencedColumnName = "track_id")
-	private TracksModel track;
 }

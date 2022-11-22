@@ -37,6 +37,7 @@ import com.application.utilities.ValidatorServices;
 
 @Service
 @PropertySource("generalsetting.properties")
+@PropertySource("application.properties")
 public class UserAuthenticationController {
 
 	@Autowired
@@ -62,8 +63,11 @@ public class UserAuthenticationController {
 	@Value("${general.role.suspended}")
 	private int userRoleSuspendedId;
 
+	@Value("${application.default.image.username}")
+	private String defaultUserProfileImage;
+
 	// ▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬
-	// DB-V5 OK!
+	// DB-V6 OK!
 	// userRegistration
 	// NOTE | Registeration using the LOCAL account provider.
 	// EXCEPTION |
@@ -110,7 +114,7 @@ public class UserAuthenticationController {
 		registeration.setRegistered_date(getRegisterationTimeStamp);
 		registeration.setUserBios("");
 		registeration.setProfileName(incomingRegisteration.getUsername());
-		registeration.setProfileIamge("101-PROFILE-NOT-AVAILABLE.png");
+		registeration.setProfileIamge(defaultUserProfileImage);
 
 		// Assign authentication provider
 		registeration.setAccountProvider(accountProviderRepository.findById(1)
@@ -155,7 +159,7 @@ public class UserAuthenticationController {
 	}
 
 	// ▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬
-	// DB-V5 OK!
+	// DB-V6 OK!
 	// userAuthentication
 	public Map<String, Object> userAuthentication(UserLoginForm userLoginModel, HttpServletResponse response) {
 		UserAccountModel requestedUser = userAccountModelRepository.findByUsername(userLoginModel.getUserName());
@@ -189,7 +193,7 @@ public class UserAuthenticationController {
 	}
 
 	// ▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬
-	// DB-V5 OK!
+	// DB-V6 OK!
 	// userChangePassword
 	public ResponseEntity<HttpStatus> userChangePassword(ChangePasswordForm passwordform, HttpServletRequest request,
 			HttpServletResponse response) {
@@ -218,7 +222,7 @@ public class UserAuthenticationController {
 	}
 
 	// ▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬
-	// DB-V5 OK!
+	// DB-V6 OK!
 	// userLogOut
 	public ResponseEntity<HttpStatus> userLogOut(HttpServletResponse response) {
 		response.setHeader(HttpHeaders.AUTHORIZATION, "");

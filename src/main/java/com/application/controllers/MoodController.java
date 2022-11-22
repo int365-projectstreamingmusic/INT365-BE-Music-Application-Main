@@ -42,6 +42,33 @@ public class MoodController {
 	public static int maxMoodlist = 100;
 
 	// ▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬
+	// DB-V6 OK!
+	// NOTE | Will add all moods in the playlist with incoming one.
+	// NOTE | Will skip if the mood ID given is wrong.
+	public List<MoodPlaylistModel> addMoodPlaylist(int playlistId, List<MoodModel> moodForm) {
+		List<MoodPlaylistModel> result = new ArrayList<>();
+		for (int i = 0; i < moodForm.size(); i++) {
+			if (moodRepository.existsById(moodForm.get(i).getId())) {
+				moodPlaylistRepository.insertMoodPlaylist(playlistId, moodForm.get(i).getId());
+				result.add(new MoodPlaylistModel(new MoodPlaylistCompKey(playlistId, moodForm.get(i).getId()), 1,
+						moodForm.get(i)));
+			}
+		}
+		return result;
+	}
+
+	// ▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬
+	// DB-V6 OK!
+	// NOTE | Purge all moods from either track or playlist.
+	public void purgeMoodTrack(int trackId) {
+		moodTrackRepository.deleteMoodTrack(trackId);
+	}
+
+	public void purgeMoodPlaylist(int playlistId) {
+		moodPlaylistRepository.deleteMoodPlaylist(playlistId);
+	}
+
+	// ▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬
 	// DB-V5.1 OK!
 	// List all mood
 	public Page<MoodModel> listMood(int page, int pageSize, String searchContent) {
@@ -81,29 +108,6 @@ public class MoodController {
 		} else {
 			moodRepository.deleteById(moodId);
 		}
-	}
-
-	// ▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬
-	// DB-V5.1 OK!
-	// Insert mood into playlist
-	public List<MoodPlaylistModel> addMoodToPlaylist(int playlistId, List<MoodModel> moodList) {
-		List<MoodModel> existingMoods = moodRepository.listMoodByPlaylist(playlistId);
-		List<MoodPlaylistModel> playlistMood = new ArrayList<>();
-
-		for (int i = 0; i < moodList.size(); i++) {
-			if (!existingMoods.contains(moodList.get(i))) {
-				MoodPlaylistModel newMood = new MoodPlaylistModel();
-				newMood.setId(new MoodPlaylistCompKey(playlistId, moodList.get(i).getId()));
-				newMood.setRatio(1);
-				try {
-					newMood = moodPlaylistRepository.save(newMood);
-					playlistMood.add(newMood);
-				} catch (Exception e) {
-					System.out.println("[ WARNING ] No mood or user found. Skip adding mood to user.");
-				}
-			}
-		}
-		return playlistMood;
 	}
 
 	// ▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬
