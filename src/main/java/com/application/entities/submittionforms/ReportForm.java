@@ -19,6 +19,8 @@ public class ReportForm {
 	private String reportMsg;
 	@Basic(optional = true)
 	private int reportGroupId;
+	@Basic(optional = true)
+	private int reportGenreId;
 
 	// Related to report group.
 	@Basic(optional = true)

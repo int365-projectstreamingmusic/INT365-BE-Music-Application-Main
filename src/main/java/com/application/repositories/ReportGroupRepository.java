@@ -24,8 +24,9 @@ public interface ReportGroupRepository extends JpaRepository<ReportGroupModel, I
 
 	@Query(nativeQuery = true, value = "SELECT * FROM report_group "
 			+ "WHERE group_name LIKE LOWER(CONCAT('%',:searchKey,'%')) "
-			+ "AND type_id LIKE LOWER(CONCAT('%',:typeId,'%')) ORDER BY recent_date DESC")
-	Page<ReportGroupModel> listReportGroup(Pageable pageable, String searchKey, int typeId);
+			+ "AND type_id LIKE LOWER(CONCAT(:typeId,'%')) " 
+			+ "AND is_solved = :isSolved ORDER BY recent_date DESC")
+	Page<ReportGroupModel> listReportGroup(Pageable pageable, String searchKey, int typeId, boolean isSolved);
 
 	@Query(nativeQuery = true, value = "SELECT * FROM report_group WHERE recent_date = (SELECT MIN(recent_date) FROM report_group WHERE ref_id = :targetRef AND type_id = :typeId) AND ref_id = :targetRef AND type_id = :typeId")
 	ReportGroupModel getOldestReportGroup(int typeId, int targetRef);
@@ -56,5 +57,14 @@ public interface ReportGroupRepository extends JpaRepository<ReportGroupModel, I
 	@Modifying
 	@Query(nativeQuery = true, value = "UPDATE report_group SET recent_date = :newDate WHERE id = :id")
 	void updateCurrentDate(int id, String newDate);
+
+	@Query(nativeQuery = true, value = "SELECT EXISTS(SELECT * FROM report_group WHERE ref_id = :trackId AND is_solved = 0 AND type_id = 1001)")
+	int existsByTrack(int trackId);
+
+	@Query(nativeQuery = true, value = "SELECT EXISTS(SELECT * FROM report_group WHERE ref_id = :commentId AND is_solved = 0 AND type_id = 2001)")
+	int existsByTrackComment(int commentId);
+
+	@Query(nativeQuery = true, value = "SELECT EXISTS(SELECT * FROM report_group WHERE ref_id = :commentId AND is_solved = 0 AND type_id = 2002)")
+	int existsByPlaylistComment(int commentId);
 
 }

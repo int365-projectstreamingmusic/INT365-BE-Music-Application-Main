@@ -65,5 +65,7 @@ public class ReportGroupModel {
 	private CommentPlaylistModel commentPlaylist;
 	@Transient
 	private String note;
+	@Transient
+	private String reportedReason;
 
 }
