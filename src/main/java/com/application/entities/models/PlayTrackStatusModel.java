@@ -9,11 +9,11 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-@Table(name = "playtrack_status", schema = "sitgarden")
-@Entity
 @Data
+@Entity
 @AllArgsConstructor
 @NoArgsConstructor
+@Table(name = "playtrack_status", schema = "sitgarden")
 public class PlayTrackStatusModel {
 
 	@Id
@@ -22,4 +22,5 @@ public class PlayTrackStatusModel {
 
 	@Column(name = "status_desc")
 	private String statusDesc;
+	
 }

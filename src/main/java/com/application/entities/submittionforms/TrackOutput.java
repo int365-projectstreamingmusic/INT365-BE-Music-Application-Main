@@ -1,6 +1,8 @@
-package com.application.entities.models;
+package com.application.entities.submittionforms;
 
 import javax.persistence.Basic;
+
+import com.application.entities.models.TracksModel;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -19,4 +21,5 @@ public class TrackOutput {
 
 	@Basic(optional = true)
 	private boolean isInPlayground;
+	
 }

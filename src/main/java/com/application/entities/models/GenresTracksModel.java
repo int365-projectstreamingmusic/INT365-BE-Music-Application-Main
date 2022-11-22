@@ -14,11 +14,11 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-@Entity
 @Data
-@Table(name = "genre_tracks", schema = "sitgarden")
+@Entity
 @AllArgsConstructor
 @NoArgsConstructor
+@Table(name = "genre_tracks", schema = "sitgarden")
 public class GenresTracksModel {
 
 	@JsonIgnore

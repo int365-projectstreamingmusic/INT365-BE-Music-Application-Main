@@ -1,15 +1,17 @@
 package com.application.controllers;
 
 import java.sql.Timestamp;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
@@ -18,6 +20,7 @@ import com.application.entities.models.CommentTrackModel;
 import com.application.entities.models.PlaylistModel;
 import com.application.entities.models.TracksModel;
 import com.application.entities.models.UserAccountModel;
+import com.application.entities.submittionforms.ActionForm;
 import com.application.entities.submittionforms.CommentForm;
 import com.application.exceptons.ExceptionFoundation;
 import com.application.exceptons.ExceptionResponseModel.EXCEPTION_CODES;
@@ -41,69 +44,105 @@ public class CommentsController {
 
 	@Autowired
 	private GeneralFunctionController generalFunctionController;
+	@Autowired
+	private ActionHistoryController actionHistoryController;
 
 	private int commentDefaultSize = 100;
 	private int commentMaxPageSize = 500;
 
 	// ▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬
-	// DB-V5.2 OK!
-	// List only my comment.
+	// DB-V6 OK!
+	// List comments of the user.
+	// EXCEPTION | 40001 | BROWSE_NO_RECORD_EXISTS
 	public Map<String, Object> listMyComment(int page, int pageSize, HttpServletRequest request) {
 		UserAccountModel owner = generalFunctionController.getUserAccount(request);
 		return listUserComment(owner.getAccountId(), page, pageSize);
 	}
 
-	// ▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬
-	// DB-V5.2 OK!
-	// List comments of the user.
 	public Map<String, Object> listUserComment(int userId, int page, int pageSize) {
-		if (page < 0) {
-			page = 0;
-		}
-		if (pageSize < 1 || pageSize > commentMaxPageSize) {
-			pageSize = commentDefaultSize;
-		}
-		Pageable sendPageRequest = PageRequest.of(page, pageSize);
+		Page<CommentTrackModel> trackCommentRaw = commentTrackRepository.listAllCommentsByUser(userId,
+				getPageRequest(page, pageSize));
+		Page<CommentPlaylistModel> playlistCommentRaw = commentPlaylistRepository.listAllCommentsByUser(userId,
+				getPageRequest(page, pageSize));
+
 		Map<String, Object> result = new HashMap<>();
-		result.put("commentTrack", commentTrackRepository.listAllCommentsByUser(userId, sendPageRequest));
-		result.put("commmentPlaylist", commentPlaylistRepository.listAllCommentsByUser(userId, sendPageRequest));
+
+		if (trackCommentRaw.getTotalElements() <= 0 && playlistCommentRaw.getTotalElements() < +0) {
+			throw new ExceptionFoundation(EXCEPTION_CODES.BROWSE_NO_RECORD_EXISTS, HttpStatus.NOT_FOUND,
+					"[ BROWSE_NO_RECORD_EXISTS ] You are not having any comment for a moment.");
+		}
+
+		if (trackCommentRaw.getTotalElements() > 0) {
+			List<CommentTrackModel> trackCommentList = new ArrayList<>();
+			for (int i = 0; i < trackCommentRaw.getContent().size(); i++) {
+				CommentTrackModel current = trackCommentRaw.getContent().get(i);
+				current.setUser(null);
+				trackCommentList.add(current);
+			}
+			result.put("commentTrack", new PageImpl<>(trackCommentList, getPageRequest(page, pageSize),
+					playlistCommentRaw.getTotalElements()));
+		} else {
+			result.put("commentTrack", trackCommentRaw);
+		}
+
+		if (playlistCommentRaw.getTotalElements() > 0) {
+			List<CommentPlaylistModel> playlistCommentList = new ArrayList<>();
+			for (int i = 0; i < playlistCommentRaw.getContent().size(); i++) {
+				CommentPlaylistModel current = playlistCommentRaw.getContent().get(i);
+				current.setUser(null);
+				playlistCommentList.add(current);
+			}
+			result.put("commentTrack", new PageImpl<>(playlistCommentList, getPageRequest(page, pageSize),
+					playlistCommentRaw.getTotalElements()));
+		} else {
+			result.put("commmentPlaylist", playlistCommentRaw);
+		}
+
 		return result;
+
 	}
 
 	// ▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬
 	// DB-V5.2 OK!
 	// List all comments in the current playlist.
+	// EXCEPTION | 40001 | BROWSE_NO_RECORD_EXISTS
 	public Page<CommentPlaylistModel> listCommentsInPlaylist(int playlistId, int page, int pageSize) {
-		if (page < 0) {
-			page = 0;
-		}
-		if (pageSize < 1 || pageSize > commentMaxPageSize) {
-			pageSize = commentDefaultSize;
-		}
-		Pageable sendPageRequest = PageRequest.of(page, pageSize);
 		Page<CommentPlaylistModel> result;
-		result = commentPlaylistRepository.listAllComments(playlistId, sendPageRequest);
+		result = commentPlaylistRepository.listAllComments(playlistId, getPageRequest(page, pageSize));
+		if (result.getTotalElements() <= 0) {
+			throw new ExceptionFoundation(EXCEPTION_CODES.BROWSE_NO_RECORD_EXISTS, HttpStatus.OK,
+					"[ BROWSE_NO_RECORD_EXISTS ] This playlist has no comment.");
+		}
 		return result;
 	}
 
 	// ▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬
 	// DB-V5.2 OK!
 	// List all comments in the current track.
+	// EXCEPTION | 40001 | BROWSE_NO_RECORD_EXISTS
 	public Page<CommentTrackModel> listCommentsInTrack(int trackId, int page, int pageSize) {
+		Page<CommentTrackModel> result;
+		result = commentTrackRepository.listAllComments(trackId, getPageRequest(page, pageSize));
+		if (result.getTotalElements() <= 0) {
+			throw new ExceptionFoundation(EXCEPTION_CODES.BROWSE_NO_RECORD_EXISTS, HttpStatus.OK,
+					"[ BROWSE_NO_RECORD_EXISTS ] This track has no comment.");
+		}
+		return result;
+	}
+
+	// Get page request.
+	private PageRequest getPageRequest(int page, int pageSize) {
 		if (page < 0) {
 			page = 0;
 		}
 		if (pageSize < 1 || pageSize > commentMaxPageSize) {
 			pageSize = commentDefaultSize;
 		}
-		Pageable sendPageRequest = PageRequest.of(page, pageSize);
-		Page<CommentTrackModel> result;
-		result = commentTrackRepository.listAllComments(trackId, sendPageRequest);
-		return result;
+		return PageRequest.of(page, pageSize);
 	}
 
 	// ▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬
-	// DB-V5.2 OK!
+	// DB-V6 OK!
 	// Post new comment in playlist.
 	public CommentPlaylistModel postNewPlaylistComment(CommentForm form, HttpServletRequest request) {
 		if (form.getPlaylistId() <= 0) {
@@ -127,7 +166,7 @@ public class CommentsController {
 	}
 
 	// ▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬
-	// DB-V5.2 OK!
+	// DB-V6 OK!
 	// Post new comment in track.
 	public CommentTrackModel postNewTrackComment(CommentForm form, HttpServletRequest request) {
 		if (form.getTrackId() <= 0) {
@@ -151,7 +190,7 @@ public class CommentsController {
 	}
 
 	// ▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬
-	// DB-V5.2 OK!
+	// DB-V6 OK!
 	// Edit track comment
 	public CommentTrackModel editTrackComment(CommentForm form, HttpServletRequest request) {
 		UserAccountModel owner = generalFunctionController.getUserAccount(request);
@@ -165,7 +204,7 @@ public class CommentsController {
 	}
 
 	// ▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬
-	// DB-V5.2 OK!
+	// DB-V6 OK!
 	// Edit Playlist comment
 	public CommentPlaylistModel editPlaylistComment(CommentForm form, HttpServletRequest request) {
 		UserAccountModel owner = generalFunctionController.getUserAccount(request);
@@ -179,27 +218,82 @@ public class CommentsController {
 	}
 
 	// ▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬
-	// DB-V5.2 OK!
-	// Delete playlist comment
-	public void deletePlaylistComment(int commentId, HttpServletRequest request) {
-		UserAccountModel owner = generalFunctionController.getUserAccount(request);
-		CommentPlaylistModel comment = commentPlaylistRepository.findById(commentId)
-				.orElseThrow(() -> new ExceptionFoundation(EXCEPTION_CODES.BROWSE_NO_RECORD_EXISTS,
-						HttpStatus.NOT_FOUND, "[ BROWSE_NO_RECORD_EXISTS ] The comment with this ID does not exist."));
-		generalFunctionController.checkOwnerShipForRecord(owner.getAccountId(), comment.getUser().getAccountId());
-		commentPlaylistRepository.deleteById(commentId);
-	}
-
-	// ▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬
-	// DB-V5.2 OK!
+	// DB-V6 OK!
 	// Delete track comment
-	public void deleteTrackComment(int commentId, HttpServletRequest request) {
+	// NOTE : By user
+	public String deleteTrackComment(int commentId, HttpServletRequest request) {
 		UserAccountModel owner = generalFunctionController.getUserAccount(request);
 		CommentTrackModel comment = commentTrackRepository.findById(commentId)
 				.orElseThrow(() -> new ExceptionFoundation(EXCEPTION_CODES.BROWSE_NO_RECORD_EXISTS,
 						HttpStatus.NOT_FOUND, "[ BROWSE_NO_RECORD_EXISTS ] The comment with this ID does not exist."));
 		generalFunctionController.checkOwnerShipForRecord(owner.getAccountId(), comment.getUser().getAccountId());
 		commentTrackRepository.deleteById(commentId);
+		String message = "The user " + owner.getUsername() + " deleted their comment on a track ID " + comment.getId();
+		actionHistoryController.addNewRecord(new ActionForm(owner, commentId, 401, message));
+		return message;
+	}
+
+	// ▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬
+	// DB-V6 OK!
+	// Delete playlist comment
+	// NOTE : By user
+	public String deletePlaylistComment(int commentId, HttpServletRequest request) {
+		UserAccountModel owner = generalFunctionController.getUserAccount(request);
+		CommentPlaylistModel comment = commentPlaylistRepository.findById(commentId)
+				.orElseThrow(() -> new ExceptionFoundation(EXCEPTION_CODES.BROWSE_NO_RECORD_EXISTS,
+						HttpStatus.NOT_FOUND, "[ BROWSE_NO_RECORD_EXISTS ] The comment with this ID does not exist."));
+		generalFunctionController.checkOwnerShipForRecord(owner.getAccountId(), comment.getUser().getAccountId());
+		commentPlaylistRepository.deleteById(commentId);
+		String message = "The user " + owner.getUsername() + " deleted their comment on a playlist ID "
+				+ comment.getId();
+		actionHistoryController.addNewRecord(new ActionForm(owner, commentId, 401, message));
+		return message;
+
+	}
+
+	// ▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬
+	// DB-V6 OK!
+	// Delete Track or playlist comment
+	// NOTE : By staff
+	// commentType | 2001 | Track Comment
+	// commentType | 2002 | Playlist Comment
+	public String deleteComment(int commentId, int commentType, String reason, HttpServletRequest request) {
+		UserAccountModel staff = generalFunctionController.getUserAccount(request);
+
+		String message = "";
+		switch (commentType) {
+		case 2001: {
+			CommentTrackModel comment = commentTrackRepository.findById(commentId).orElseThrow(
+					() -> new ExceptionFoundation(EXCEPTION_CODES.BROWSE_NO_RECORD_EXISTS, HttpStatus.NOT_FOUND,
+							"[ BROWSE_NO_RECORD_EXISTS ] The comment with this ID does not exist."));
+			UserAccountModel owner = comment.getUser();
+			commentTrackRepository.deleteById(commentId);
+
+			message = "Staff, " + staff.getUsername() + " deleted a user comment of " + owner.getUsername()
+					+ " from the track ID " + comment.getTrack().getId() + ". Reason : "
+					+ (reason == "" ? "NONE" : reason);
+			actionHistoryController.addNewRecord(new ActionForm(staff, commentId, 402, message));
+			break;
+		}
+		case 2002: {
+			CommentPlaylistModel comment = commentPlaylistRepository.findById(commentId).orElseThrow(
+					() -> new ExceptionFoundation(EXCEPTION_CODES.BROWSE_NO_RECORD_EXISTS, HttpStatus.NOT_FOUND,
+							"[ BROWSE_NO_RECORD_EXISTS ] The comment with this ID does not exist."));
+			UserAccountModel owner = comment.getUser();
+			commentPlaylistRepository.deleteById(commentId);
+
+			message = "Staff, " + staff.getUsername() + " deleted a user comment of " + owner.getUsername()
+					+ " from the playlist ID " + comment.getPlaylist().getId() + ". Reason : "
+					+ (reason == "" ? "NONE" : reason);
+			actionHistoryController.addNewRecord(new ActionForm(staff, commentId, 402, message));
+			break;
+		}
+		default: {
+			throw new ExceptionFoundation(EXCEPTION_CODES.RECORD_INVALID_STATUS, HttpStatus.I_AM_A_TEAPOT,
+					"[ RECORD_INVALID_STATUS ] Comment type is invalid. Please check the comment type ID.");
+		}
+		}
+		return message;
 	}
 
 }

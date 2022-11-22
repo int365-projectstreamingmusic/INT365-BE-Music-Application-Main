@@ -11,9 +11,9 @@ import lombok.NoArgsConstructor;
 
 @Data
 @Entity
-@Table(name = "file_types", schema = "sitgarden")
 @AllArgsConstructor
 @NoArgsConstructor
+@Table(name = "file_types", schema = "sitgarden")
 public class FileTypeModel {
 
 	@Id

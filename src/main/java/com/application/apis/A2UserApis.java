@@ -27,6 +27,7 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import com.application.controllers.CommentsController;
 import com.application.controllers.PlayHistoryController;
 import com.application.controllers.PlaylistController;
+import com.application.controllers.ReportController;
 import com.application.controllers.TrackMarkingController;
 import com.application.controllers.UserProfileController;
 import com.application.entities.models.CommentPlaylistModel;
@@ -34,11 +35,15 @@ import com.application.entities.models.CommentTrackModel;
 import com.application.entities.models.PlayHistoryModel;
 import com.application.entities.models.PlaylistModel;
 import com.application.entities.models.PlaylistTrackListModel;
+import com.application.entities.models.ReportGenreModel;
+import com.application.entities.models.ReportGroupModel;
+import com.application.entities.models.ReportModel;
 import com.application.entities.models.UserAccountModel;
 import com.application.entities.models.UserTrackMarkingModel;
 import com.application.entities.submittionforms.CommentForm;
 import com.application.entities.submittionforms.PlaylistForm;
 import com.application.entities.submittionforms.PlaylistOutput;
+import com.application.entities.submittionforms.ReportForm;
 import com.application.entities.submittionforms.TrackMarkingForm;
 import com.application.entities.submittionforms.UserProfileForm;
 import com.application.exceptons.ExceptionFoundation;
@@ -60,6 +65,8 @@ public class A2UserApis {
 	private PlayHistoryController playHistoryController;
 	@Autowired
 	private CommentsController commentsController;
+	@Autowired
+	private ReportController reportController;
 
 	// ▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬
 	// DB-V5.1 OK!
@@ -205,12 +212,11 @@ public class A2UserApis {
 	// DB-V5.2 OK
 	// COMMENT TRACK : Delete by Id
 	@DeleteMapping("comment/track")
-	public ResponseEntity<HttpStatus> deleteTrackComment(@RequestParam(required = true) int commentId,
+	public ResponseEntity<String> deleteTrackComment(@RequestParam(required = true) int commentId,
 			HttpServletRequest request) {
 		URI uri = URI.create(
 				ServletUriComponentsBuilder.fromCurrentContextPath().path(mapping + "comment/track").toString());
-		commentsController.deleteTrackComment(commentId, request);
-		return ResponseEntity.created(uri).body(HttpStatus.CREATED);
+		return ResponseEntity.created(uri).body(commentsController.deleteTrackComment(commentId, request));
 	}
 
 	// ▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬
@@ -228,12 +234,11 @@ public class A2UserApis {
 	// DB-V5.2 OK
 	// COMMENT PLAYLIST: Delete by Id
 	@DeleteMapping("comment/playlist")
-	public ResponseEntity<HttpStatus> deletePlaylistComment(@RequestParam(required = true) int commentId,
+	public ResponseEntity<String> deletePlaylistComment(@RequestParam(required = true) int commentId,
 			HttpServletRequest request) {
 		URI uri = URI.create(
 				ServletUriComponentsBuilder.fromCurrentContextPath().path(mapping + "comment/playlist").toString());
-		commentsController.deletePlaylistComment(commentId, request);
-		return ResponseEntity.created(uri).body(HttpStatus.CREATED);
+		return ResponseEntity.created(uri).body(commentsController.deletePlaylistComment(commentId, request));
 	}
 
 	// COMMENT TRACK : Edit comment
@@ -421,6 +426,37 @@ public class A2UserApis {
 		URI uri = URI.create(ServletUriComponentsBuilder.fromCurrentContextPath()
 				.path(mapping + "history/DeleteSpecificHistory").toString());
 		return ResponseEntity.created(uri).body(HttpStatus.CREATED);
+	}
+
+	// ▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬
+	// Reports
+	// ---------------------
+
+	// ▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬
+	// DB-V6 OK
+	// REPORT : Get my reports
+	@GetMapping("report/genre")
+	public ResponseEntity<List<ReportGenreModel>> getReportGenre(@RequestParam(defaultValue = "0") int typeId) {
+		return ResponseEntity.ok().body(reportController.getReportGenre(typeId));
+	}
+
+	// ▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬
+	// DB-V6 OK
+	// REPORT : Get my reports
+	@GetMapping("report")
+	public ResponseEntity<Page<ReportGroupModel>> getReports(@RequestParam(defaultValue = "0") int page,
+			@RequestParam(defaultValue = "30") int pageSize, HttpServletRequest request) {
+		return ResponseEntity.ok().body(reportController.getOwnedReport(page, pageSize, request));
+	}
+
+	// ▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬
+	// DB-V6 OK
+	// REPORT : Create report
+	@PostMapping("report")
+	public ResponseEntity<ReportModel> reportTrack(@RequestBody(required = true) ReportForm form,
+			HttpServletRequest request) {
+		URI uri = URI.create(ServletUriComponentsBuilder.fromCurrentContextPath().path(mapping + "report").toString());
+		return ResponseEntity.created(uri).body(reportController.createNewReport(form, request));
 	}
 
 }

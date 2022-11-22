@@ -24,6 +24,7 @@ import com.application.entities.models.ArtistsModel;
 import com.application.entities.models.PlaylistModel;
 import com.application.entities.models.TracksModel;
 import com.application.entities.models.UserAccountModel;
+import com.application.entities.submittionforms.ActionForm;
 import com.application.entities.submittionforms.AlbumOutput;
 import com.application.entities.submittionforms.ArtistForm;
 import com.application.entities.submittionforms.PlaylistOutputTrack;
@@ -31,6 +32,7 @@ import com.application.entities.submittionforms.TrackForm;
 import com.application.exceptons.ExceptionFoundation;
 import com.application.exceptons.ExceptionResponseModel.EXCEPTION_CODES;
 import com.application.repositories.AlbumRepository;
+import com.application.repositories.ArtistsRepository;
 import com.application.repositories.PlayTrackStatusRepository;
 import com.application.repositories.TracksRepository;
 import com.application.services.GeneralFunctionController;
@@ -53,6 +55,8 @@ public class TrackController {
 	private PlayTrackStatusRepository playTrackStatusRepository;
 	@Autowired
 	private AlbumRepository albumRepository;
+	@Autowired
+	private ArtistsRepository artistsRepository;
 
 	@Autowired
 	private GenreController genreController;
@@ -71,6 +75,8 @@ public class TrackController {
 	private MoodController moodController;
 	@Autowired
 	private ArtistController artistController;
+	@Autowired
+	private ActionHistoryController actionHistoryController;
 
 	@Value("${minio.storage.track.music}")
 	String minioTrackLocation;
@@ -79,49 +85,70 @@ public class TrackController {
 	String minioTrackThumbnailLocation;
 
 	// ▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬
-	// DB-V5.1 OK!
+	// DB-V6 OK!
+	// Delete track of the user. Will also erase all trace of comments.
+	// NOTE : By staff
+	// EXCEPTION | 40001 | BROWSE_NO_RECORD_EXISTS
+	public String deleteTrack(int trackId, String reason, HttpServletRequest request) {
+		UserAccountModel staff = generalFunctionController.getUserAccount(request);
+		TracksModel target = tracksRepository.findById(trackId).orElseThrow(
+				() -> new ExceptionFoundation(EXCEPTION_CODES.BROWSE_NO_RECORD_EXISTS, HttpStatus.NOT_FOUND,
+						"[ BROWSE_NO_RECORD_EXISTS ] Track with ID " + trackId + " does not exist."));
+		tracksRepository.eraseById(trackId);
+		String message = "Staff, " + staff.getUsername() + " deleted a track ID " + trackId + " or named ["
+				+ target.getTrackName() + "] with a reason : " + (reason == "" ? "NONE" : reason);
+		actionHistoryController.addNewRecord(new ActionForm(staff, trackId, 201, message));
+		return message;
+	}
+
+	// ▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬
+	// DB-V6 OK!
 	// ListTrackByPageAndName
+	// EXCEPTION | 40001 | BROWSE_NO_RECORD_EXISTS
 	public Page<TracksModel> listTrackByPageAndName(int page, int pageSize, String searchContent,
 			HttpServletRequest request) {
+		Page<TracksModel> result;
 
+		// Chech if they were looking for something.
+		if (searchContent == "") {
+			result = tracksRepository.findAll(getPageRequest(page, pageSize));
+		} else {
+			result = tracksRepository.findByTrackName(searchContent, getPageRequest(page, pageSize));
+			if (result.getTotalPages() < page + 1) {
+				throw new ExceptionFoundation(EXCEPTION_CODES.BROWSE_NO_RECORD_EXISTS, HttpStatus.NOT_FOUND,
+						"[ BROWSE_NO_RECORD_EXISTS ] Found nothing here. Seems like there is no track here.");
+			}
+		}
+		// If logged in, search for user' favorite. If not, will just send a result.
+		if (request.getHeader(HttpHeaders.AUTHORIZATION) != null) {
+			UserAccountModel user = generalFunctionController.getUserAccount(request);
+			return new PageImpl<>(getTrackMarking(result.stream().collect(Collectors.toList()), user),
+					getPageRequest(page, pageSize), result.getTotalElements());
+		} else {
+			return result;
+		}
+	}
+
+	// ▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬
+	// DB-V6 OK!
+	// Send page request back to another function.
+	public Pageable getPageRequest(int page, int pageSize) {
 		if (page < 0) {
 			page = 0;
 		}
 		if (pageSize < 1 || pageSize > trackMaxPageSize) {
 			pageSize = trackDefaultSize;
 		}
-		Pageable sendPageRequest = PageRequest.of(page, pageSize);
-		Page<TracksModel> result;
 
-		// Chech if they were looking for something.
-		if (searchContent == "") {
-			result = tracksRepository.findAll(sendPageRequest);
-		} else {
-			result = tracksRepository.findByTrackName(searchContent, sendPageRequest);
-			if (result.getTotalPages() < page + 1) {
-				throw new ExceptionFoundation(EXCEPTION_CODES.SEARCH_NOT_FOUND, HttpStatus.NOT_FOUND,
-						"[ TrackController ] Found nothing here. Seems like there is no track here.");
-			}
-		}
-		// If logged in, search for user' favorite. If not, will just send a result.
-		if (request.getHeader(HttpHeaders.AUTHORIZATION) != null) {
-			UserAccountModel user = generalFunctionController.getUserAccount(request);
-			return new PageImpl<>(getTrackMarking(result.stream().collect(Collectors.toList()), user), sendPageRequest,
-					result.getTotalElements());
-		} else {
-			return result;
-		}
+		Pageable sendPageRequest = PageRequest.of(page, pageSize);
+		return sendPageRequest;
 	}
 
-	// █████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████
-	//
-	// Visitor zone for creator only.
-	//
-	// █████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████
-
 	// ▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬
-	// DB-V5.1 OK!
-	// getTrackById
+	// DB-V6 OK!
+	// Get track by ID.
+	// CONDITION | Not visible to public is this is private.
+	// EXCEPTION | 40003 | BROWSE_FORBIDDEN
 	public TracksModel getTrackById(int trackId, HttpServletRequest request) {
 		TracksModel track = tracksRepository.findById(trackId)
 				.orElseThrow(() -> new ExceptionFoundation(EXCEPTION_CODES.BROWSE_NO_RECORD_EXISTS,
@@ -141,7 +168,7 @@ public class TrackController {
 	}
 
 	// ▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬
-	// DB-V5.1 OK!
+	// DB-V6 OK!
 	// listLatestRelease
 	public List<TracksModel> listLatestRelease(int numberOfTracks, HttpServletRequest request) {
 		if (numberOfTracks > trackMaxPageSize) {
@@ -267,7 +294,7 @@ public class TrackController {
 				PlaylistOutputTrack current = new PlaylistOutputTrack();
 				// If not public, set null.
 				if (trackList.get(i).getPlayTrackStatus().getId() != 1001
-						&& trackList.get(i).getAccountId() != user.getAccountId()
+						&& trackList.get(i).getOwner().getAccountId() != user.getAccountId()
 						&& user.getAccountId() == playlist.getUserAccountModel().getAccountId()) {
 					current.setFavorite(trackList.get(i).isFavorite());
 					current.setId(trackList.get(i).getId());
@@ -318,21 +345,6 @@ public class TrackController {
 
 	}
 
-	// ▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬
-	// DB-V5.1 OK!
-	// Send page request back to another function.
-	public Pageable getPageRequest(int page, int pageSize) {
-		if (page < 0) {
-			page = 0;
-		}
-		if (pageSize < 1 || pageSize > trackMaxPageSize) {
-			pageSize = trackDefaultSize;
-		}
-
-		Pageable sendPageRequest = PageRequest.of(page, pageSize);
-		return sendPageRequest;
-	}
-
 	// █████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████
 	//
 	// Management zone for creator only.
@@ -342,18 +354,18 @@ public class TrackController {
 	// ▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬
 	// DB-V5.2 OK!
 	// AddNewTrack
-	public TracksModel addNewTrack(TrackForm newTrackForm, MultipartFile trackFile, MultipartFile imageFile,
+	public TracksModel addNewTrack(TrackForm form, MultipartFile trackFile, MultipartFile imageFile,
 			HttpServletRequest request) {
 		UserAccountModel requestedBy = generalFunctionController.getUserAccount(request);
 
 		TracksModel newTrack = new TracksModel();
 		// General information.
 		newTrack.setTimestamp(new Timestamp(System.currentTimeMillis()).toString());
-		newTrack.setAccountId(requestedBy.getAccountId());
+		newTrack.setOwner(requestedBy);
 
 		// Information given in the form.
-		newTrack.setTrackDesc(newTrackForm.getTrackDesc());
-		newTrack.setTrackName(newTrackForm.getTrackName());
+		newTrack.setTrackDesc(form.getTrackDesc());
+		newTrack.setTrackName(form.getTrackName());
 
 		// No view or favorite at the begining.
 		newTrack.setViewCount(0);
@@ -361,7 +373,7 @@ public class TrackController {
 		newTrack.setDuration(0);
 
 		// Track status is hiden when first uploaded.
-		newTrack.setPlayTrackStatus(playTrackStatusRepository.findById(newTrackForm.getStatusId())
+		newTrack.setPlayTrackStatus(playTrackStatusRepository.findById(form.getStatusId())
 				.orElseThrow(() -> new ExceptionFoundation(EXCEPTION_CODES.SAVE_FILE_INVALID, HttpStatus.I_AM_A_TEAPOT,
 						"[ SAVE_FILE_INVALID ] Invalid track status ID.")));
 
@@ -374,34 +386,40 @@ public class TrackController {
 		newTrack = tracksRepository.save(newTrack);
 
 		// Adding genre to the track
-		if (newTrackForm.getGenreList() != null && !(newTrackForm.getGenreList().size() <= 0)) {
-			newTrack.setGenreTrack(genreController.addGenreToTrack(newTrack.getId(), newTrackForm.getGenreList()));
+		if (form.getGenreList() != null && !(form.getGenreList().size() <= 0)) {
+			newTrack.setGenreTrack(genreController.addGenreToTrack(newTrack.getId(), form.getGenreList()));
 		}
-		if (newTrackForm.getMoodList() != null && !(newTrackForm.getMoodList().size() <= 0)) {
-			newTrack.setMoods(moodController.addMoodToTrack(newTrack.getId(), newTrackForm.getMoodList()));
+		if (form.getMoodList() != null && !(form.getMoodList().size() <= 0)) {
+			newTrack.setMoods(moodController.addMoodToTrack(newTrack.getId(), form.getMoodList()));
 		}
 
 		// Saving artist
-		if (newTrackForm.getArtist() != "") {
-			ArtistForm form = new ArtistForm();
-			form.setArtistName(newTrackForm.getArtist());
-			form.setArtistBio(
-					"An artist " + newTrackForm.getArtist() + " is added by " + requestedBy.getProfileIamge());
-			ArtistsModel artist = artistController.newArtist(form, requestedBy);
-			artistController.newArtistTrack(newTrack.getId(), artist);
-			newTrack.setArtistTracks(artistController.listArtistTrack(newTrack.getId()));
+		if (form.getArtist() != null && form.getArtist() != "") {
+			ArtistsModel artist = artistsRepository.getArtistByName(form.getArtist());
+			if (artist != null) {
+				artistController.newArtistTrack(newTrack.getId(), artist);
+				newTrack.setArtistTracks(artistController.listArtistTrack(newTrack.getId()));
+			} else {
+				ArtistForm artistForm = new ArtistForm();
+				artistForm.setArtistName(form.getArtist());
+				artistForm.setArtistBio(
+						"An artist " + form.getArtist() + " is added by " + requestedBy.getProfileIamge());
+				artist = artistController.newArtist(artistForm, requestedBy);
+				artistController.newArtistTrack(newTrack.getId(), artist);
+				newTrack.setArtistTracks(artistController.listArtistTrack(newTrack.getId()));
+			}
 		}
 
 		// Saving new album
-		if (newTrackForm.getAlbumName() != null && newTrackForm.getAlbumName() != "") {
-			if (albumRepository.existsByAlbumName(newTrackForm.getAlbumName())) {
-				newTrack.setAlbums(albumRepository.findByAlbumName(newTrackForm.getAlbumName()));
+		if (form.getAlbumName() != null && form.getAlbumName() != "") {
+			if (albumRepository.existsByAlbumName(form.getAlbumName())) {
+				newTrack.setAlbums(albumRepository.findByAlbumName(form.getAlbumName()));
 				tracksRepository.updateTrackAlbum(newTrack.getId(), newTrack.getAlbums().getId());
 			} else {
 				AlbumModel newAlbum = new AlbumModel();
-				newAlbum.setAlbumName(newTrackForm.getAlbumName());
+				newAlbum.setAlbumName(form.getAlbumName());
 				newAlbum.setAlbumDescription(
-						"The album " + newTrackForm.getAlbumName() + " is created by " + requestedBy.getUsername());
+						"The album " + form.getAlbumName() + " is created by " + requestedBy.getUsername());
 				newAlbum.setStatus(playTrackStatusRepository.findById(3001).orElse(null));
 				newAlbum.setOwner(requestedBy);
 				albumRepository.save(newAlbum);
@@ -415,6 +433,8 @@ public class TrackController {
 					newTrack.getId());
 			newTrack.setTrackThumbnail(trackThumbnailFileName);
 			tracksRepository.updateTrackThumbnail(newTrack.getId(), trackThumbnailFileName);
+		} else {
+			tracksRepository.updateTrackThumbnail(newTrack.getId(), defaultTrackImage);
 		}
 		String uploadedTrack = minioStorageService.uploadTrackToStorage(trackFile, minioTrackLocation);
 		newTrack.setTrackFile(uploadedTrack);
@@ -432,13 +452,12 @@ public class TrackController {
 		TracksModel target = tracksRepository.findById(form.getId())
 				.orElseThrow(() -> new ExceptionFoundation(EXCEPTION_CODES.BROWSE_NO_RECORD_EXISTS,
 						HttpStatus.NOT_FOUND, "[ BROWSE_NO_RECORD_EXISTS ] Track with this ID does not exist."));
-		generalFunctionController.checkOwnerShipForRecord(requestedBy.getAccountId(), target.getAccountId());
-		
+		generalFunctionController.checkOwnerShipForRecord(requestedBy.getAccountId(), target.getOwner().getAccountId());
+
 		if (form.getAlbumName() != "" && albumRepository.existsById(target.getAlbums().getId())) {
 			albumRepository.updateNewAlbumName(target.getAlbums().getId(), form.getAlbumName());
 		}
-		
-		
+
 		if (form.getTrackName() != "") {
 			target.setTrackName(form.getTrackName());
 		}
@@ -447,8 +466,6 @@ public class TrackController {
 		}
 
 		tracksRepository.save(target);
-		// tracksRepository.updateBasicTrackInfo(target.getId(), target.getTrackName(),
-		// target.getTrackDesc());
 
 		if (form.getGenreList() != null) {
 			target.setGenreTrack(genreController.addGenreToTrack(target.getId(), form.getGenreList()));
@@ -456,14 +473,15 @@ public class TrackController {
 
 		// If with image, do the following.
 		if (image != null) {
-			if (fileLinkRelController.isExistsInRecord(target.getTrackThumbnail())) {
+			if (fileLinkRelController.isExistsInRecord(target.getTrackThumbnail())
+					&& target.getTrackThumbnail() != defaultTrackImage) {
 				fileLinkRelController.deleteTargetFileByName(target.getTrackThumbnail());
 			}
 			String trackThumbnailFileName = fileLinkRelController.insertNewTrackObjectLinkRel(image, 201,
 					target.getId());
 			tracksRepository.updateTrackThumbnail(target.getId(), trackThumbnailFileName);
 		}
-	
+
 		return tracksRepository.findById(target.getId())
 				.orElseThrow(() -> new ExceptionFoundation(EXCEPTION_CODES.CORE_INTERNAL_SERVER_ERROR,
 						HttpStatus.INTERNAL_SERVER_ERROR,
@@ -482,7 +500,7 @@ public class TrackController {
 		TracksModel target = tracksRepository.findById(trackId)
 				.orElseThrow(() -> new ExceptionFoundation(EXCEPTION_CODES.BROWSE_NO_RECORD_EXISTS,
 						HttpStatus.NOT_FOUND, "[ BROWSE_NO_RECORD_EXISTS ] Track with this ID does not exist."));
-		generalFunctionController.checkOwnerShipForRecord(owner.getAccountId(), target.getAccountId());
+		generalFunctionController.checkOwnerShipForRecord(owner.getAccountId(), target.getOwner().getAccountId());
 
 		if (target.getPlayTrackStatus().getId() == 1001) {
 			tracksRepository.updateTrackStatus(trackId, 1002);
@@ -505,8 +523,10 @@ public class TrackController {
 		TracksModel target = tracksRepository.findById(trackId).orElseThrow(
 				() -> new ExceptionFoundation(EXCEPTION_CODES.BROWSE_NO_RECORD_EXISTS, HttpStatus.NOT_FOUND,
 						"[ BROWSE_NO_RECORD_EXISTS ] Track with this ID does not exist. Nothing is deleted."));
-		generalFunctionController.checkOwnerShipForRecord(owner.getAccountId(), target.getAccountId());
-		tracksRepository.deleteFromDatabase(trackId);
+		generalFunctionController.checkOwnerShipForRecord(owner.getAccountId(), target.getOwner().getAccountId());
+		String message = owner.getUsername() + " deleted their owned track named " + target.getTrackName();
+		actionHistoryController.addNewRecord(new ActionForm(owner, target.getId(), 201, message));
+		tracksRepository.eraseById(trackId);
 	}
 
 	// █████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████
@@ -516,7 +536,7 @@ public class TrackController {
 	// █████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████
 
 	// ▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬
-	// DB-V5 OK!
+	// DB-V6 OK!
 	// Check if the track is favorite.
 	public List<TracksModel> getTrackMarking(List<TracksModel> incomingList, UserAccountModel userAccount) {
 		try {
@@ -537,4 +557,5 @@ public class TrackController {
 					"[ CORE_INTERNAL_SERVER_ERROR ] " + e.getLocalizedMessage());
 		}
 	}
+
 }

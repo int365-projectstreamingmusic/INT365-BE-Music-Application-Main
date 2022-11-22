@@ -13,14 +13,14 @@ import lombok.NoArgsConstructor;
 
 @Data
 @Entity
-@Table(name = "file_link_ref", schema = "sitgarden")
 @AllArgsConstructor
 @NoArgsConstructor
+@Table(name = "file_link_ref", schema = "sitgarden")
 public class FileLinkRefModel {
 	
 	@Id
 	@Column(name = "file_id")
-	String fileId;
+	private String fileId;
 	
 	@Column(name = "target_ref")
 	private int targetRef;

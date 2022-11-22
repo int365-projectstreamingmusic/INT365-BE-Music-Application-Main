@@ -122,7 +122,7 @@ public class PlaylistController {
 			for (int i = 0; i < tracks.size(); i++) {
 				TracksModel current = tracks.get(i);
 				if (tracks.get(i).getPlayTrackStatus().getId() == 1001
-						|| user.getAccountId() == tracks.get(i).getAccountId()) {
+						|| user.getAccountId() == tracks.get(i).getOwner().getAccountId()) {
 					outputTrack.add(current);
 				} else {
 					current.setTrackFile(null);

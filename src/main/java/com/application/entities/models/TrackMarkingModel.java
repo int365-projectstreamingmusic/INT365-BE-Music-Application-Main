@@ -1,5 +1,6 @@
 package com.application.entities.models;
 
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -10,16 +11,21 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-@Table(name = "track_marking", schema = "sitgarden")
 @Data
+@Entity
 @AllArgsConstructor
 @NoArgsConstructor
-@Entity
+@Table(name = "track_marking", schema = "sitgarden")
 public class TrackMarkingModel {
+
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private int track_marking_id;
-	
-	private String track_marking_title;
-	private String track_marking_desc;
+
+	@Column(name = "track_marking_title")
+	private String title;
+
+	@Column(name = "track_marking_desc")
+	private String desc;
+
 }

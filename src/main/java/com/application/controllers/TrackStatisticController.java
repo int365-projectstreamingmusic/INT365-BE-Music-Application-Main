@@ -16,7 +16,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import com.application.entities.copmskeys.TrackCountCompKey;
-import com.application.entities.models.TrackCountModel;
+import com.application.entities.models.TrackStatisticModel;
 import com.application.exceptons.ExceptionFoundation;
 import com.application.exceptons.ExceptionResponseModel.EXCEPTION_CODES;
 import com.application.repositories.TracksRepository;
@@ -35,7 +35,7 @@ public class TrackStatisticController {
 
 	// ▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬
 	// DB-V5.1 OK!
-	// Get view count in the pass X days.
+	// Get view count of a track in the pass X days.
 	public int getViewCountInPassDays(int trackId, int numberOfDay) {
 		String timesTampTo = getTimestampToday().toString();
 		String timesTampFrom = getTimeStampFromMilisecond(getTimestampToday().getTime() - (numberOfDay * TIME_DIF_DAY))
@@ -78,7 +78,7 @@ public class TrackStatisticController {
 	// Increast view count by 1
 	public void increateViewCount(int trackId) {
 		TrackCountCompKey id = new TrackCountCompKey(trackId, getTimestampToday().toString());
-		TrackCountModel trackCount = trackCountRepository.findById(id).orElse(null);
+		TrackStatisticModel trackCount = trackCountRepository.findById(id).orElse(null);
 		if (trackCount == null) {
 			trackCount = createNewTrackCountRecordForToday(trackId);
 		}
@@ -92,7 +92,7 @@ public class TrackStatisticController {
 	// Increast favorite count by 1
 	public void increaseFavouriteCount(int trackId) {
 		TrackCountCompKey id = new TrackCountCompKey(trackId, getTimestampToday().toString());
-		TrackCountModel trackCount = trackCountRepository.findById(id).orElse(null);
+		TrackStatisticModel trackCount = trackCountRepository.findById(id).orElse(null);
 		if (trackCount == null) {
 			trackCount = createNewTrackCountRecordForToday(trackId);
 		}
@@ -106,7 +106,7 @@ public class TrackStatisticController {
 	// Deduct favorite count by 1
 	public void decreaseFavouriteCount(int trackId) {
 		TrackCountCompKey id = new TrackCountCompKey(trackId, getTimestampToday().toString());
-		TrackCountModel trackCount = trackCountRepository.findById(id).orElse(null);
+		TrackStatisticModel trackCount = trackCountRepository.findById(id).orElse(null);
 		if (trackCount == null) {
 			createNewTrackCountRecordForToday(trackId);
 		}
@@ -142,11 +142,11 @@ public class TrackStatisticController {
 	// DB-V5.1 OK!
 	// PRIVATE
 	// Create new record for statistic if none exist.
-	private TrackCountModel createNewTrackCountRecordForToday(int trackId) {
+	private TrackStatisticModel createNewTrackCountRecordForToday(int trackId) {
 		long currentTimeMili = Calendar.getInstance().getTimeInMillis();
 		long currentTimeRecord = currentTimeMili - (currentTimeMili % TIME_DIF_DAY) - TIME_DIF;
 		Timestamp timeStamp = new Timestamp(currentTimeRecord);
-		TrackCountModel newTrackCount = new TrackCountModel();
+		TrackStatisticModel newTrackCount = new TrackStatisticModel();
 
 		newTrackCount.setViewCount(0);
 		newTrackCount.setFavoriteCount(0);
@@ -162,7 +162,7 @@ public class TrackStatisticController {
 	// ▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬
 	// DB-V5.1 OK!
 	// Add custom view count. Only for testing.
-	public List<TrackCountModel> addCustomViewCount(int trackId, int numberOfWeek) {
+	public List<TrackStatisticModel> addCustomViewCount(int trackId, int numberOfWeek) {
 		tracksRepository.findById(trackId)
 				.orElseThrow(() -> new ExceptionFoundation(EXCEPTION_CODES.BROWSE_NO_RECORD_EXISTS,
 						HttpStatus.NOT_FOUND, "[ BROWSE_NO_RECORD_EXISTS ] Track ID " + trackId + " does not exist."));
@@ -176,7 +176,7 @@ public class TrackStatisticController {
 			Map<String, Object> resultMap = new HashMap<>();
 			resultMap.put("Today", calendarToday.toString());
 
-			List<TrackCountModel> trackCountList = new ArrayList<>();
+			List<TrackStatisticModel> trackCountList = new ArrayList<>();
 
 			int totalCount = 0;
 			for (int i = 0; i <= numberOfWeek; i++) {
@@ -188,7 +188,7 @@ public class TrackStatisticController {
 				Date currentDate = new Date(currentMili);
 				resultMap.put("day" + i, currentDate.toString());
 				Timestamp timeStamp = new Timestamp(currentMili);
-				TrackCountModel newTrackCount = new TrackCountModel();
+				TrackStatisticModel newTrackCount = new TrackStatisticModel();
 				newTrackCount.setFavoriteCount(randomizedNumberOfFavorite);
 				newTrackCount.setViewCount(randomizedNumberOfview);
 				newTrackCount.setId(new TrackCountCompKey(trackId, timeStamp.toString()));

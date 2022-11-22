@@ -8,7 +8,6 @@ import javax.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -20,8 +19,10 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import com.application.controllers.AlbumController;
 import com.application.controllers.TrackStatisticController;
 import com.application.entities.models.AlbumModel;
-import com.application.entities.models.TrackCountModel;
+import com.application.entities.models.TrackStatisticModel;
 import com.application.repositories.AlbumRepository;
+import com.application.repositories.ReportGroupRepository;
+import com.application.repositories.ReportsRepository;
 import com.application.services.GeneralFunctionController;
 
 @RestController
@@ -32,9 +33,10 @@ public class A0TestingApis {
 	private TrackStatisticController trackCountController;
 	@Autowired
 	private AlbumController albumController;
-	
 	@Autowired
 	private AlbumRepository albumRepository;
+	@Autowired
+	private ReportGroupRepository reportGroupRepository;
 
 	@Autowired
 	private GeneralFunctionController generalFunctionController;
@@ -43,15 +45,20 @@ public class A0TestingApis {
 	// -----------------------
 	// VIEW COUNT
 	// -----------------------
+
+	@GetMapping("test1")
+	public int test1() {
+		return reportGroupRepository.existsByTrack(1);
+	}
 	
 	@PostMapping("2")
-	public ResponseEntity<AlbumModel> test2(@RequestParam String one, @RequestParam int id){
+	public ResponseEntity<AlbumModel> test2(@RequestParam String one, @RequestParam int id) {
 		albumRepository.updateNewAlbumName(id, one);
 		return ResponseEntity.ok().body(albumRepository.findById(id).orElse(null));
 	}
-	
+
 	@GetMapping("1")
-	public ResponseEntity<List<AlbumModel>> getAlbums(){
+	public ResponseEntity<List<AlbumModel>> getAlbums() {
 		return ResponseEntity.ok().body(albumRepository.findAll());
 	}
 
@@ -64,7 +71,7 @@ public class A0TestingApis {
 	}
 
 	@GetMapping("AddCustomTrackCount")
-	public ResponseEntity<List<TrackCountModel>> addCustomTrackCount(@RequestParam int trackId,
+	public ResponseEntity<List<TrackStatisticModel>> addCustomTrackCount(@RequestParam int trackId,
 			@RequestParam int nDays) {
 		URI uri = URI.create(
 				ServletUriComponentsBuilder.fromCurrentContextPath().path(mapping + "addMyArtistToTrack").toString());
