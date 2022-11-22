@@ -95,21 +95,14 @@ public class A4ManagementApis {
 	}
 
 	// COMMENT : Delete comment from specific track.
-	@DeleteMapping("comment/track")
+	@DeleteMapping("comment")
 	public ResponseEntity<String> deleteTrackComment(@RequestParam(required = true) int commentId,
-			@RequestParam(defaultValue = "") String reason, HttpServletRequest request) {
+			@RequestParam(required = true) int commentType, @RequestParam(defaultValue = "") String reason,
+			HttpServletRequest request) {
 		URI uri = URI.create(
 				ServletUriComponentsBuilder.fromCurrentContextPath().path(mapping + "comment/track").toString());
-		return ResponseEntity.created(uri).body(commentsController.deleteTrackComment(commentId, reason, request));
-	}
-
-	// COMMENT : Delete comment from specific playlist.
-	@DeleteMapping("comment/playlist")
-	public ResponseEntity<String> deletePlaylistComment(@RequestParam(required = true) int commentId,
-			@RequestParam(defaultValue = "") String reason, HttpServletRequest request) {
-		URI uri = URI.create(
-				ServletUriComponentsBuilder.fromCurrentContextPath().path(mapping + "comment/playlist").toString());
-		return ResponseEntity.created(uri).body(commentsController.deletePlaylistComment(commentId, reason, request));
+		return ResponseEntity.created(uri)
+				.body(commentsController.deleteComment(commentId, commentType, reason, request));
 	}
 
 	// ACTION : Browse all action

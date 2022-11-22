@@ -253,38 +253,46 @@ public class CommentsController {
 
 	// ▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬
 	// DB-V6 OK!
-	// Delete Track comment
+	// Delete Track or playlist comment
 	// NOTE : By staff
-	public String deleteTrackComment(int commentId, String reason, HttpServletRequest request) {
+	// commentType | 2001 | Track Comment
+	// commentType | 2002 | Playlist Comment
+	public String deleteComment(int commentId, int commentType, String reason, HttpServletRequest request) {
 		UserAccountModel staff = generalFunctionController.getUserAccount(request);
-		CommentTrackModel comment = commentTrackRepository.findById(commentId)
-				.orElseThrow(() -> new ExceptionFoundation(EXCEPTION_CODES.BROWSE_NO_RECORD_EXISTS,
-						HttpStatus.NOT_FOUND, "[ BROWSE_NO_RECORD_EXISTS ] The comment with this ID does not exist."));
-		UserAccountModel owner = comment.getUser();
-		commentTrackRepository.deleteById(commentId);
 
-		String message = "Staff, " + staff.getUsername() + " deleted a user comment of " + owner.getUsername()
-				+ " from the track ID " + comment.getTrack().getId() + ". Reason : " + (reason == "" ? "NONE" : reason);
-		actionHistoryController.addNewRecord(new ActionForm(staff, commentId, 402, message));
-		return message;
-	}
+		String message = "";
+		switch (commentType) {
+		case 2001: {
+			CommentTrackModel comment = commentTrackRepository.findById(commentId).orElseThrow(
+					() -> new ExceptionFoundation(EXCEPTION_CODES.BROWSE_NO_RECORD_EXISTS, HttpStatus.NOT_FOUND,
+							"[ BROWSE_NO_RECORD_EXISTS ] The comment with this ID does not exist."));
+			UserAccountModel owner = comment.getUser();
+			commentTrackRepository.deleteById(commentId);
 
-	// ▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬
-	// DB-V6 OK!
-	// Delete playlist comment
-	// NOTE : By staff
-	public String deletePlaylistComment(int commentId, String reason, HttpServletRequest request) {
-		UserAccountModel staff = generalFunctionController.getUserAccount(request);
-		CommentPlaylistModel comment = commentPlaylistRepository.findById(commentId)
-				.orElseThrow(() -> new ExceptionFoundation(EXCEPTION_CODES.BROWSE_NO_RECORD_EXISTS,
-						HttpStatus.NOT_FOUND, "[ BROWSE_NO_RECORD_EXISTS ] The comment with this ID does not exist."));
-		UserAccountModel owner = comment.getUser();
-		commentPlaylistRepository.deleteById(commentId);
+			message = "Staff, " + staff.getUsername() + " deleted a user comment of " + owner.getUsername()
+					+ " from the track ID " + comment.getTrack().getId() + ". Reason : "
+					+ (reason == "" ? "NONE" : reason);
+			actionHistoryController.addNewRecord(new ActionForm(staff, commentId, 402, message));
+			break;
+		}
+		case 2002: {
+			CommentPlaylistModel comment = commentPlaylistRepository.findById(commentId).orElseThrow(
+					() -> new ExceptionFoundation(EXCEPTION_CODES.BROWSE_NO_RECORD_EXISTS, HttpStatus.NOT_FOUND,
+							"[ BROWSE_NO_RECORD_EXISTS ] The comment with this ID does not exist."));
+			UserAccountModel owner = comment.getUser();
+			commentPlaylistRepository.deleteById(commentId);
 
-		String message = "Staff, " + staff.getUsername() + " deleted a user comment of " + owner.getUsername()
-				+ " from the playlist ID " + comment.getPlaylist().getId() + ". Reason : "
-				+ (reason == "" ? "NONE" : reason);
-		actionHistoryController.addNewRecord(new ActionForm(staff, commentId, 402, message));
+			message = "Staff, " + staff.getUsername() + " deleted a user comment of " + owner.getUsername()
+					+ " from the playlist ID " + comment.getPlaylist().getId() + ". Reason : "
+					+ (reason == "" ? "NONE" : reason);
+			actionHistoryController.addNewRecord(new ActionForm(staff, commentId, 402, message));
+			break;
+		}
+		default: {
+			throw new ExceptionFoundation(EXCEPTION_CODES.RECORD_INVALID_STATUS, HttpStatus.I_AM_A_TEAPOT,
+					"[ RECORD_INVALID_STATUS ] Comment type is invalid. Please check the comment type ID.");
+		}
+		}
 		return message;
 	}
 
