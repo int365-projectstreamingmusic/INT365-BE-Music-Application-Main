@@ -73,6 +73,11 @@ public class ExceptionResponseModel {
 		AUTHEN_PROVIDER_NOT_FOUND(20007),
 
 		// User action
+		
+		// Database
+		INVALID_DATABASE_INIT(10001),
+		
+		FILE_INVALID_TYPE(10001),
 
 		// Browsing
 		BROWSE_NO_RECORD_EXISTS(40001), // ---------

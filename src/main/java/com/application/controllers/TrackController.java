@@ -34,11 +34,13 @@ import com.application.exceptons.ExceptionResponseModel.EXCEPTION_CODES;
 import com.application.repositories.AlbumRepository;
 import com.application.repositories.ArtistsRepository;
 import com.application.repositories.PlayTrackStatusRepository;
+import com.application.repositories.ReportGroupRepository;
 import com.application.repositories.TracksRepository;
 import com.application.services.GeneralFunctionController;
 import com.application.utilities.MinioStorageService;
 
 @Service
+@PropertySource("generalsetting.properties")
 @PropertySource("application.properties")
 public class TrackController {
 
@@ -57,6 +59,8 @@ public class TrackController {
 	private AlbumRepository albumRepository;
 	@Autowired
 	private ArtistsRepository artistsRepository;
+	@Autowired
+	private ReportGroupRepository reportGroupRepository;
 
 	@Autowired
 	private GenreController genreController;
@@ -87,18 +91,61 @@ public class TrackController {
 	// ▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬
 	// DB-V6 OK!
 	// Delete track of the user. Will also erase all trace of comments.
-	// NOTE : By staff
+	// NOTE : By staff using the HTTP request
 	// EXCEPTION | 40001 | BROWSE_NO_RECORD_EXISTS
 	public String deleteTrack(int trackId, String reason, HttpServletRequest request) {
 		UserAccountModel staff = generalFunctionController.getUserAccount(request);
+		String message = deleteTrack(trackId, reason, staff);
+		return message;
+	}
+
+	// NOTE : By staff using the user account model
+	public String deleteTrack(int trackId, String reason, UserAccountModel staff) {
 		TracksModel target = tracksRepository.findById(trackId).orElseThrow(
 				() -> new ExceptionFoundation(EXCEPTION_CODES.BROWSE_NO_RECORD_EXISTS, HttpStatus.NOT_FOUND,
 						"[ BROWSE_NO_RECORD_EXISTS ] Track with ID " + trackId + " does not exist."));
 		tracksRepository.eraseById(trackId);
+		if (target.getTrackThumbnail() != null && !target.getTrackThumbnail().equals(defaultTrackImage)) {
+			fileLinkRelController.deleteTargetFileByName(target.getTrackThumbnail());
+			fileLinkRelController.deleteTargetFileByName(target.getTrackFile());
+		}
 		String message = "Staff, " + staff.getUsername() + " deleted a track ID " + trackId + " or named ["
-				+ target.getTrackName() + "] with a reason : " + (reason == "" ? "NONE" : reason);
+				+ target.getTrackName() + (reason.length() <= 0 ? "" : " Reason : " + reason);
 		actionHistoryController.addNewRecord(new ActionForm(staff, trackId, 201, message));
 		return message;
+	}
+
+	// ▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬
+	// DB-V6 OK!
+	// NOTE : By the owner only.
+	// CONTITION | Can't delete if has unsolved report.
+	public void deleteTrack(int trackId, HttpServletRequest request) {
+		UserAccountModel owner = generalFunctionController.getUserAccount(request);
+		TracksModel target = tracksRepository.findById(trackId)
+				.orElseThrow(() -> new ExceptionFoundation(EXCEPTION_CODES.BROWSE_NO_RECORD_EXISTS,
+						HttpStatus.NOT_FOUND,
+						"[ BROWSE_NO_RECORD_EXISTS ] Track ID " + trackId + " does not exist. Nothing is deleted."));
+		generalFunctionController.checkOwnerShipForRecord(owner.getAccountId(), target.getOwner().getAccountId());
+
+		// Check if there is still a pending report.
+		if (reportGroupRepository.existsByTrack(trackId) == 1) {
+			throw new ExceptionFoundation(EXCEPTION_CODES.RECORD_HAS_REPORT, HttpStatus.I_AM_A_TEAPOT,
+					"[ RECORD_HAS_REPORT ] This track has an ongoing report to be proceeded.");
+		}
+
+		// Delete image and track file from MinIo.
+		fileLinkRelController.deleteTargetFileByName(target.getTrackFile());
+		if (target.getTrackThumbnail() != null && !target.getTrackThumbnail().equals(defaultTrackImage)) {
+			fileLinkRelController.deleteTargetFileByName(target.getTrackThumbnail());
+		}
+
+		// Delete
+		tracksRepository.eraseById(trackId);
+
+		// Add history when success
+		String message = owner.getUsername() + " deleted their owned track named " + target.getTrackName();
+		actionHistoryController.addNewRecord(new ActionForm(owner, target.getId(), 201, message));
+
 	}
 
 	// ▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬
@@ -427,8 +474,8 @@ public class TrackController {
 			}
 		}
 
-		// Save image and track file.
-		if (imageFile != null) {
+		// Save image if available.
+		if (!imageFile.isEmpty()) {
 			String trackThumbnailFileName = fileLinkRelController.insertNewTrackObjectLinkRel(imageFile, 201,
 					newTrack.getId());
 			newTrack.setTrackThumbnail(trackThumbnailFileName);
@@ -436,7 +483,9 @@ public class TrackController {
 		} else {
 			tracksRepository.updateTrackThumbnail(newTrack.getId(), defaultTrackImage);
 		}
-		String uploadedTrack = minioStorageService.uploadTrackToStorage(trackFile, minioTrackLocation);
+
+		// Save track.
+		String uploadedTrack = fileLinkRelController.uploadNewTrack(trackFile, newTrack.getId());
 		newTrack.setTrackFile(uploadedTrack);
 		tracksRepository.updateTrackFileName(uploadedTrack, newTrack.getId());
 
@@ -474,7 +523,7 @@ public class TrackController {
 		// If with image, do the following.
 		if (image != null) {
 			if (fileLinkRelController.isExistsInRecord(target.getTrackThumbnail())
-					&& target.getTrackThumbnail() != defaultTrackImage) {
+					&& !target.getTrackThumbnail().equals(defaultTrackImage)) {
 				fileLinkRelController.deleteTargetFileByName(target.getTrackThumbnail());
 			}
 			String trackThumbnailFileName = fileLinkRelController.insertNewTrackObjectLinkRel(image, 201,
@@ -513,20 +562,6 @@ public class TrackController {
 					"[ USER_SAVE_REJECTED ] This playlise is marked as removed, or in breach of the agreement.");
 		}
 
-	}
-
-	// ▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬
-	// DB-V5 OK!
-	// DeleteTrack
-	public void deleteTrack(int trackId, HttpServletRequest request) {
-		UserAccountModel owner = generalFunctionController.getUserAccount(request);
-		TracksModel target = tracksRepository.findById(trackId).orElseThrow(
-				() -> new ExceptionFoundation(EXCEPTION_CODES.BROWSE_NO_RECORD_EXISTS, HttpStatus.NOT_FOUND,
-						"[ BROWSE_NO_RECORD_EXISTS ] Track with this ID does not exist. Nothing is deleted."));
-		generalFunctionController.checkOwnerShipForRecord(owner.getAccountId(), target.getOwner().getAccountId());
-		String message = owner.getUsername() + " deleted their owned track named " + target.getTrackName();
-		actionHistoryController.addNewRecord(new ActionForm(owner, target.getId(), 201, message));
-		tracksRepository.eraseById(trackId);
 	}
 
 	// █████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████

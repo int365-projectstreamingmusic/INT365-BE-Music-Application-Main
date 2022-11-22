@@ -25,7 +25,7 @@ public class StringGenerateService {
 
 	// Generate name for tracks and music.
 	public static String generateTrackNameUUID() {
-		return "t-" + dateTimeGatherer() + generateString(12);
+		return "1001-" + dateTimeGatherer() + generateString(12);
 	}
 
 	// Generate name for all image uploaded to the storage.

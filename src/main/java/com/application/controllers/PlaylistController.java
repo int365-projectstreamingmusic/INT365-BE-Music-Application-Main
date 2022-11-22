@@ -7,6 +7,7 @@ import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -36,6 +37,7 @@ import com.application.utilities.ValidatorServices;
 
 @Service
 @PropertySource("generalsetting.properties")
+@PropertySource("application.properties")
 public class PlaylistController {
 
 	@Autowired
@@ -63,6 +65,9 @@ public class PlaylistController {
 	public static int defaultPlaylistPerPage = 50;
 	public static int maxPlaylistPerPage = 250;
 	public static int maxTrackPerPlaylist = 100;
+
+	@Value("${application.default.image.playlist}")
+	public String defaultPlaylistImage;
 
 	// ▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬
 	// DB-V5 OK!
@@ -184,7 +189,7 @@ public class PlaylistController {
 		// Assign Private Playlist when created.
 		newPlaylist.setPlayTrackStatus(playTrackStatusRepository.findById(form.getStatusId()).orElseGet(null));
 		newPlaylist.setUserAccountModel(createdBy);
-		newPlaylist.setThumbnail("");
+		newPlaylist.setThumbnail(defaultPlaylistImage);
 
 		newPlaylist = playlistRepository.save(newPlaylist);
 
@@ -227,7 +232,8 @@ public class PlaylistController {
 		target = playlistRepository.save(target);
 
 		if (image != null) {
-			if (fileLinkRelController.isExistsInRecord(target.getThumbnail())) {
+			if (fileLinkRelController.isExistsInRecord(target.getThumbnail())
+					&& !target.getThumbnail().equals(defaultPlaylistImage)) {
 				fileLinkRelController.deleteTargetFileByName(target.getThumbnail());
 			}
 			playlistRepository.updatePlaylistThumbnail(form.getId(),
@@ -248,7 +254,8 @@ public class PlaylistController {
 		generalFunctionController.checkOwnerShipForRecord(createdBy.getAccountId(),
 				target.getUserAccountModel().getAccountId());
 
-		if (fileLinkRelController.isExistsInRecord(target.getThumbnail())) {
+		if (fileLinkRelController.isExistsInRecord(target.getThumbnail())
+				&& !target.getThumbnail().equals(defaultPlaylistImage)) {
 			fileLinkRelController.deleteTargetFileByName(target.getThumbnail());
 		}
 		String playlistThumbnailName = fileLinkRelController.insertNewTrackObjectLinkRel(multipartFile, 301,

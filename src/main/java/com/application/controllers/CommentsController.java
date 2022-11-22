@@ -27,6 +27,7 @@ import com.application.exceptons.ExceptionResponseModel.EXCEPTION_CODES;
 import com.application.repositories.CommentPlaylistRepository;
 import com.application.repositories.CommentTrackRepository;
 import com.application.repositories.PlaylistRepository;
+import com.application.repositories.ReportGroupRepository;
 import com.application.repositories.TracksRepository;
 import com.application.services.GeneralFunctionController;
 
@@ -41,6 +42,8 @@ public class CommentsController {
 	private PlaylistRepository playlistRepository;
 	@Autowired
 	private TracksRepository tracksRepository;
+	@Autowired
+	private ReportGroupRepository reportGroupRepository;
 
 	@Autowired
 	private GeneralFunctionController generalFunctionController;
@@ -222,14 +225,24 @@ public class CommentsController {
 	// Delete track comment
 	// NOTE : By user
 	public String deleteTrackComment(int commentId, HttpServletRequest request) {
+		// General
 		UserAccountModel owner = generalFunctionController.getUserAccount(request);
 		CommentTrackModel comment = commentTrackRepository.findById(commentId)
 				.orElseThrow(() -> new ExceptionFoundation(EXCEPTION_CODES.BROWSE_NO_RECORD_EXISTS,
 						HttpStatus.NOT_FOUND, "[ BROWSE_NO_RECORD_EXISTS ] The comment with this ID does not exist."));
 		generalFunctionController.checkOwnerShipForRecord(owner.getAccountId(), comment.getUser().getAccountId());
+
+		// Check if there is ongoing report on this comment.
+		if (reportGroupRepository.existsByTrackComment(commentId) == 1) {
+			throw new ExceptionFoundation(EXCEPTION_CODES.RECORD_HAS_REPORT, HttpStatus.I_AM_A_TEAPOT,
+					"[ RECORD_HAS_REPORT ] This track has an ongoing report to be proceeded.");
+		}
+
+		// Delete and save history.
 		commentTrackRepository.deleteById(commentId);
-		String message = "The user " + owner.getUsername() + " deleted their comment on a track ID " + comment.getId();
+		String message = owner.getUsername() + " deleted their comment on a track ID " + comment.getId();
 		actionHistoryController.addNewRecord(new ActionForm(owner, commentId, 401, message));
+
 		return message;
 	}
 
@@ -238,14 +251,22 @@ public class CommentsController {
 	// Delete playlist comment
 	// NOTE : By user
 	public String deletePlaylistComment(int commentId, HttpServletRequest request) {
+		// General
 		UserAccountModel owner = generalFunctionController.getUserAccount(request);
 		CommentPlaylistModel comment = commentPlaylistRepository.findById(commentId)
 				.orElseThrow(() -> new ExceptionFoundation(EXCEPTION_CODES.BROWSE_NO_RECORD_EXISTS,
 						HttpStatus.NOT_FOUND, "[ BROWSE_NO_RECORD_EXISTS ] The comment with this ID does not exist."));
 		generalFunctionController.checkOwnerShipForRecord(owner.getAccountId(), comment.getUser().getAccountId());
+
+		// Check if there is ongoing report on this comment.
+		if (reportGroupRepository.existsByPlaylistComment(commentId) == 1) {
+			throw new ExceptionFoundation(EXCEPTION_CODES.RECORD_HAS_REPORT, HttpStatus.I_AM_A_TEAPOT,
+					"[ RECORD_HAS_REPORT ] This track has an ongoing report to be proceeded.");
+		}
+
+		// Delete and save history.
 		commentPlaylistRepository.deleteById(commentId);
-		String message = "The user " + owner.getUsername() + " deleted their comment on a playlist ID "
-				+ comment.getId();
+		String message = owner.getUsername() + " deleted their comment on a playlist ID " + comment.getId();
 		actionHistoryController.addNewRecord(new ActionForm(owner, commentId, 401, message));
 		return message;
 
@@ -259,7 +280,11 @@ public class CommentsController {
 	// commentType | 2002 | Playlist Comment
 	public String deleteComment(int commentId, int commentType, String reason, HttpServletRequest request) {
 		UserAccountModel staff = generalFunctionController.getUserAccount(request);
+		String message = deleteComment(commentId, commentType, reason, staff);
+		return message;
+	}
 
+	public String deleteComment(int commentId, int commentType, String reason, UserAccountModel staff) {
 		String message = "";
 		switch (commentType) {
 		case 2001: {
@@ -270,8 +295,8 @@ public class CommentsController {
 			commentTrackRepository.deleteById(commentId);
 
 			message = "Staff, " + staff.getUsername() + " deleted a user comment of " + owner.getUsername()
-					+ " from the track ID " + comment.getTrack().getId() + ". Reason : "
-					+ (reason == "" ? "NONE" : reason);
+					+ " from the track ID " + comment.getTrack().getId()
+					+ (reason.length() <= 0 ? "" : " Reason : " + reason);
 			actionHistoryController.addNewRecord(new ActionForm(staff, commentId, 402, message));
 			break;
 		}
@@ -283,8 +308,8 @@ public class CommentsController {
 			commentPlaylistRepository.deleteById(commentId);
 
 			message = "Staff, " + staff.getUsername() + " deleted a user comment of " + owner.getUsername()
-					+ " from the playlist ID " + comment.getPlaylist().getId() + ". Reason : "
-					+ (reason == "" ? "NONE" : reason);
+					+ " from the playlist ID " + comment.getPlaylist().getId()
+					+ (reason.length() <= 0 ? "" : " Reason : " + reason);
 			actionHistoryController.addNewRecord(new ActionForm(staff, commentId, 402, message));
 			break;
 		}
