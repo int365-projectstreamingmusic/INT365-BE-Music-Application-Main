@@ -108,7 +108,7 @@ public class A2UserApis {
 			@RequestPart(required = false, name = "image") MultipartFile image, HttpServletRequest request) {
 		URI uri = URI
 				.create(ServletUriComponentsBuilder.fromCurrentContextPath().path(mapping + "playlist").toString());
-		return ResponseEntity.created(uri).body(playlistController.editMyPlaylist(form, image, request));
+		return ResponseEntity.created(uri).body(playlistController.editPlaylist(form, image, request));
 	}
 
 	// ▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬

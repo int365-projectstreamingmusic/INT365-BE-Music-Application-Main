@@ -59,7 +59,7 @@ public class UserProfileController {
 
 		if (image != null) {
 			if (targetUser.getProfileIamge() != null && !targetUser.getProfileIamge().equals(defaultUserProfileImage)) {
-				fileLinkRefController.deleteTargetFileByTypeIdAndLinkRef(101, targetUser.getAccountId());
+				fileLinkRefController.deleteTargetFileByName(targetUser.getProfileIamge());
 			}
 			String profileImageFileName = fileLinkRefController.insertNewTrackObjectLinkRel(image, 101,
 					targetUser.getAccountId());
