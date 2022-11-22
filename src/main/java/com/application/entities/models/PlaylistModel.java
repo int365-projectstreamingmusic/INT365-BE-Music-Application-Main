@@ -52,6 +52,7 @@ public class PlaylistModel {
 
 	@OneToMany
 	@JoinColumn(name = "playlist_id", referencedColumnName = "playlist_id")
+	@OnDelete(action = OnDeleteAction.CASCADE)
 	private List<MoodPlaylistModel> moods;
 
 	@ManyToOne

@@ -37,7 +37,6 @@ import com.application.repositories.PlayTrackStatusRepository;
 import com.application.repositories.ReportGroupRepository;
 import com.application.repositories.TracksRepository;
 import com.application.services.GeneralFunctionController;
-import com.application.utilities.MinioStorageService;
 
 @Service
 @PropertySource("generalsetting.properties")
@@ -67,8 +66,6 @@ public class TrackController {
 	@Autowired
 	private TrackMarkingController trackMarkingController;
 
-	@Autowired
-	private MinioStorageService minioStorageService;
 	@Autowired
 	private FileLinkRelController fileLinkRelController;
 	@Autowired
@@ -117,9 +114,12 @@ public class TrackController {
 
 	// ▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬
 	// DB-V6 OK!
-	// NOTE : By the owner only.
+	// NOTE | By the owner only.
 	// CONTITION | Can't delete if has unsolved report.
+	// EXCEPTION | 40001 | BROWSE_NO_RECORD_EXISTS
+	// EXCEPTION | 50006 | RECORD_HAS_REPORT
 	public void deleteTrack(int trackId, HttpServletRequest request) {
+		// General
 		UserAccountModel owner = generalFunctionController.getUserAccount(request);
 		TracksModel target = tracksRepository.findById(trackId)
 				.orElseThrow(() -> new ExceptionFoundation(EXCEPTION_CODES.BROWSE_NO_RECORD_EXISTS,
@@ -134,7 +134,6 @@ public class TrackController {
 		}
 
 		// Delete image and track file from MinIo.
-		fileLinkRelController.deleteTargetFileByName(target.getTrackFile());
 		if (target.getTrackThumbnail() != null && !target.getTrackThumbnail().equals(defaultTrackImage)) {
 			fileLinkRelController.deleteTargetFileByName(target.getTrackThumbnail());
 		}
@@ -150,7 +149,7 @@ public class TrackController {
 
 	// ▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬
 	// DB-V6 OK!
-	// ListTrackByPageAndName
+	// NOTE | ListTrackByPageAndName
 	// EXCEPTION | 40001 | BROWSE_NO_RECORD_EXISTS
 	public Page<TracksModel> listTrackByPageAndName(int page, int pageSize, String searchContent,
 			HttpServletRequest request) {
@@ -178,7 +177,7 @@ public class TrackController {
 
 	// ▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬
 	// DB-V6 OK!
-	// Send page request back to another function.
+	// NOTE | Send page request back to another function.
 	public Pageable getPageRequest(int page, int pageSize) {
 		if (page < 0) {
 			page = 0;
@@ -193,7 +192,7 @@ public class TrackController {
 
 	// ▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬
 	// DB-V6 OK!
-	// Get track by ID.
+	// NOTE | Get track by ID.
 	// CONDITION | Not visible to public is this is private.
 	// EXCEPTION | 40003 | BROWSE_FORBIDDEN
 	public TracksModel getTrackById(int trackId, HttpServletRequest request) {
@@ -215,7 +214,7 @@ public class TrackController {
 	}
 
 	// ▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬
-	// DB-V6 OK!
+	// NOTE | DB-V6 OK!
 	// listLatestRelease
 	public List<TracksModel> listLatestRelease(int numberOfTracks, HttpServletRequest request) {
 		if (numberOfTracks > trackMaxPageSize) {
@@ -233,6 +232,54 @@ public class TrackController {
 		} else {
 			return result;
 		}
+	}
+
+	// ▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬
+	// DB-V5.1 OK!
+	// NOTE | editTrack
+	// NOTE | Only the user can edit the track.
+	public TracksModel editTrack(TrackForm form, MultipartFile image, HttpServletRequest request) {
+		// General
+		UserAccountModel requestedBy = generalFunctionController.getUserAccount(request);
+		TracksModel target = tracksRepository.findById(form.getId())
+				.orElseThrow(() -> new ExceptionFoundation(EXCEPTION_CODES.BROWSE_NO_RECORD_EXISTS,
+						HttpStatus.NOT_FOUND, "[ BROWSE_NO_RECORD_EXISTS ] Track with this ID does not exist."));
+		generalFunctionController.checkOwnerShipForRecord(requestedBy.getAccountId(), target.getOwner().getAccountId());
+
+		// Check each field if available.
+		if (form.getAlbumName() != "" && albumRepository.existsById(target.getAlbums().getId())) {
+			albumRepository.updateNewAlbumName(target.getAlbums().getId(), form.getAlbumName());
+		}
+		if (form.getTrackName() != "") {
+			target.setTrackName(form.getTrackName());
+		}
+		if (form.getTrackDesc() != "") {
+			target.setTrackDesc(form.getTrackDesc());
+		}
+
+		// Check and add genre.
+		if (form.getGenreList() != null) {
+			genreController.purgeGenreTrack(target.getId());
+			genreController.addGenreTrack(target.getId(), form.getGenreList());
+		}
+		// Check and add moods
+		if (form.getMoodList() != null) {
+			moodController.purgeMoodTrack(target.getId());
+			moodController.addMoodToTrack(target.getId(), form.getMoodList());
+		}
+
+		// If with image, do the following.
+		if (image != null && !image.isEmpty()) {
+			if (fileLinkRelController.isExistsInRecord(target.getTrackThumbnail())
+					&& !target.getTrackThumbnail().equals(defaultTrackImage)) {
+				fileLinkRelController.deleteTargetFileByName(target.getTrackThumbnail());
+			}
+			String trackThumbnailFileName = fileLinkRelController.insertNewTrackObjectLinkRel(image, 201,
+					target.getId());
+			target.setTrackThumbnail(trackThumbnailFileName);
+		}
+		tracksRepository.save(target);
+		return tracksRepository.findById(target.getId()).orElse(null);
 	}
 
 	// ▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬
@@ -392,15 +439,11 @@ public class TrackController {
 
 	}
 
-	// █████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████
-	//
-	// Management zone for creator only.
-	//
-	// █████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████
-
 	// ▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬
 	// DB-V5.2 OK!
-	// AddNewTrack
+	// NOTE | AddNewTrack
+	// NEED | trackName, statusId
+	// OPTIONAL | trackDesc, genreList, moodList, albumName, artist
 	public TracksModel addNewTrack(TrackForm form, MultipartFile trackFile, MultipartFile imageFile,
 			HttpServletRequest request) {
 		UserAccountModel requestedBy = generalFunctionController.getUserAccount(request);
@@ -425,6 +468,7 @@ public class TrackController {
 						"[ SAVE_FILE_INVALID ] Invalid track status ID.")));
 
 		// Thinks to add later.
+		newTrack.setTrackThumbnail(defaultTrackImage);
 		newTrack.setGenreTrack(null);
 		newTrack.setMoods(null);
 		newTrack.setTrackFile("-");
@@ -475,13 +519,11 @@ public class TrackController {
 		}
 
 		// Save image if available.
-		if (!imageFile.isEmpty()) {
+		if (imageFile != null && !imageFile.isEmpty()) {
 			String trackThumbnailFileName = fileLinkRelController.insertNewTrackObjectLinkRel(imageFile, 201,
 					newTrack.getId());
 			newTrack.setTrackThumbnail(trackThumbnailFileName);
 			tracksRepository.updateTrackThumbnail(newTrack.getId(), trackThumbnailFileName);
-		} else {
-			tracksRepository.updateTrackThumbnail(newTrack.getId(), defaultTrackImage);
 		}
 
 		// Save track.
@@ -494,63 +536,18 @@ public class TrackController {
 	}
 
 	// ▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬
-	// DB-V5.1 OK!
-	// editTrack
-	public TracksModel editTrack(TrackForm form, MultipartFile image, HttpServletRequest request) {
-		UserAccountModel requestedBy = generalFunctionController.getUserAccount(request);
-		TracksModel target = tracksRepository.findById(form.getId())
-				.orElseThrow(() -> new ExceptionFoundation(EXCEPTION_CODES.BROWSE_NO_RECORD_EXISTS,
-						HttpStatus.NOT_FOUND, "[ BROWSE_NO_RECORD_EXISTS ] Track with this ID does not exist."));
-		generalFunctionController.checkOwnerShipForRecord(requestedBy.getAccountId(), target.getOwner().getAccountId());
-
-		if (form.getAlbumName() != "" && albumRepository.existsById(target.getAlbums().getId())) {
-			albumRepository.updateNewAlbumName(target.getAlbums().getId(), form.getAlbumName());
-		}
-
-		if (form.getTrackName() != "") {
-			target.setTrackName(form.getTrackName());
-		}
-		if (form.getTrackDesc() != "") {
-			target.setTrackDesc(form.getTrackDesc());
-		}
-
-		tracksRepository.save(target);
-
-		if (form.getGenreList() != null) {
-			target.setGenreTrack(genreController.addGenreToTrack(target.getId(), form.getGenreList()));
-		}
-
-		// If with image, do the following.
-		if (image != null) {
-			if (fileLinkRelController.isExistsInRecord(target.getTrackThumbnail())
-					&& !target.getTrackThumbnail().equals(defaultTrackImage)) {
-				fileLinkRelController.deleteTargetFileByName(target.getTrackThumbnail());
-			}
-			String trackThumbnailFileName = fileLinkRelController.insertNewTrackObjectLinkRel(image, 201,
-					target.getId());
-			tracksRepository.updateTrackThumbnail(target.getId(), trackThumbnailFileName);
-		}
-
-		return tracksRepository.findById(target.getId())
-				.orElseThrow(() -> new ExceptionFoundation(EXCEPTION_CODES.CORE_INTERNAL_SERVER_ERROR,
-						HttpStatus.INTERNAL_SERVER_ERROR,
-						"[ CORE_INTERNAL_SERVER_ERROR ] Unknown reason at EDITTRACK function."));
-	}
-
-	public void updateAlbumName(int id, String newName) {
-		albumRepository.updateNewAlbumName(id, newName);
-	}
-
-	// ▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬
 	// DB-V5 OK!
-	// SwitchTrackStatus
+	// NOTE | Switch status between pribate and publish.
+	//
 	public String switchTrackStatus(int trackId, HttpServletRequest request) {
+		// General
 		UserAccountModel owner = generalFunctionController.getUserAccount(request);
 		TracksModel target = tracksRepository.findById(trackId)
 				.orElseThrow(() -> new ExceptionFoundation(EXCEPTION_CODES.BROWSE_NO_RECORD_EXISTS,
 						HttpStatus.NOT_FOUND, "[ BROWSE_NO_RECORD_EXISTS ] Track with this ID does not exist."));
 		generalFunctionController.checkOwnerShipForRecord(owner.getAccountId(), target.getOwner().getAccountId());
 
+		// Switching
 		if (target.getPlayTrackStatus().getId() == 1001) {
 			tracksRepository.updateTrackStatus(trackId, 1002);
 			return "The track ID " + trackId + ":" + target.getTrackName() + " is now hiden.";
@@ -558,21 +555,17 @@ public class TrackController {
 			tracksRepository.updateTrackStatus(trackId, 1001);
 			return "The track ID " + trackId + ":" + target.getTrackName() + " is now visible.";
 		} else {
+			// If invalid status, wll reject.
 			throw new ExceptionFoundation(EXCEPTION_CODES.USER_SAVE_REJECTED, HttpStatus.FORBIDDEN,
 					"[ USER_SAVE_REJECTED ] This playlise is marked as removed, or in breach of the agreement.");
 		}
 
 	}
 
-	// █████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████
-	//
-	// Automation - No API
-	//
-	// █████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████
-
+	// AUTOMATED
 	// ▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬
 	// DB-V6 OK!
-	// Check if the track is favorite.
+	// NOTE | heck if the track is favorite.
 	public List<TracksModel> getTrackMarking(List<TracksModel> incomingList, UserAccountModel userAccount) {
 		try {
 			List<TracksModel> result = new ArrayList<>();

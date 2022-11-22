@@ -52,8 +52,9 @@ public class MinioStorageService {
 		this.minioConfiguration = minioConfiguration;
 	}
 
-	// OK!
-	// pingBucket
+	// ▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬
+	// DB-V6 OK!
+	// NOTE | This will ping a bucket to see if it is there.
 	public boolean pingBucket(String bucketName) {
 		try {
 			return minioClient.bucketExists(BucketExistsArgs.builder().bucket(bucketname).build());
@@ -63,8 +64,9 @@ public class MinioStorageService {
 		}
 	}
 
-	// OK!
-	// getStatObjectFromObject
+	// ▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬
+	// DB-V6 OK!
+	// NOTE | getStatObjectFromObject
 	public StatObjectResponse getStatObjectFromObject(String objectName) {
 		if (!pingBucket(objectName)) {
 			throw new ExceptionFoundation(EXCEPTION_CODES.CORE_INTERNAL_SERVER_ERROR, HttpStatus.INTERNAL_SERVER_ERROR,
@@ -76,7 +78,8 @@ public class MinioStorageService {
 			return statObject;
 		} catch (Exception exc) {
 			throw new ExceptionFoundation(EXCEPTION_CODES.CORE_INTERNAL_SERVER_ERROR, HttpStatus.INTERNAL_SERVER_ERROR,
-					"[ getStatObjectFromObject ] The requested object is unreachable." + exc.getLocalizedMessage());
+					"[ getStatObjectFromObject ] The requested object is unreachable. This could be because of MINIO malfunction."
+							+ exc.getLocalizedMessage());
 		}
 	}
 

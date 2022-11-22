@@ -21,7 +21,7 @@ public interface GenreRepository extends JpaRepository<GenreModel, Integer> {
 	@Query(nativeQuery = true, value = "SELECT g.* FROM genre g RIGHT JOIN genre_tracks t ON g.genre_id = t.genre_id WHERE t.track_id = :trackId")
 	List<GenreModel> findGenreByTrackId(int trackId);
 
-	@Query(nativeQuery = true, value = "SELECT g.* FROM genre g RIGHT JOIN playlist_genre p ON g.genre_id = p.genre_id WHERE p.playlist_id = :playlistId")
+	@Query(nativeQuery = true, value = "SELECT g.* FROM genre g RIGHT JOIN genre_playlist p ON g.genre_id = p.genre_id WHERE p.playlist_id = :playlistId")
 	List<GenreModel> fineGenreByPlaylistId(int playlistId);
 
 }

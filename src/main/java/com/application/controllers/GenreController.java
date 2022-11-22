@@ -21,9 +21,9 @@ import com.application.entities.models.TracksModel;
 import com.application.entities.models.UserAccountModel;
 import com.application.exceptons.ExceptionFoundation;
 import com.application.exceptons.ExceptionResponseModel.EXCEPTION_CODES;
+import com.application.repositories.GenrePlaylistRepository;
 import com.application.repositories.GenreRepository;
 import com.application.repositories.GenresTracksRepository;
-import com.application.repositories.PlaylistGenreRepository;
 import com.application.repositories.TracksRepository;
 import com.application.repositories.UserAccountRepository;
 import com.application.utilities.JwtTokenUtills;
@@ -43,7 +43,50 @@ public class GenreController {
 	@Autowired
 	private GenresTracksRepository genresTracksRepository;
 	@Autowired
-	private PlaylistGenreRepository playlistGenreRepository;
+	private GenrePlaylistRepository genrePlaylistRepository;
+
+	// ▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬
+	// DB-V6 OK!
+	// NOTE | Will add all genres in the track with incoming one.
+	// NOTE | Will skip if the genre ID given is wrong.
+	public List<GenresTracksModel> addGenreTrack(int trackId, List<GenreModel> genreForm) {
+		List<GenresTracksModel> result = new ArrayList<>();
+		for (int i = 0; i < genreForm.size(); i++) {
+			if (genreRepository.existsById(genreForm.get(i).getGenreId())) {
+				genresTracksRepository.insertNewGenreTrack(trackId, genreForm.get(i).getGenreId());
+				result.add(new GenresTracksModel(new GenreTracksCompkey(trackId, genreForm.get(i).getGenreId()),
+						genreForm.get(i)));
+			}
+		}
+		return result;
+	}
+
+	// ▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬
+	// DB-V6 OK!
+	// NOTE | Will add all genres in the playlist with incoming one.
+	// NOTE | Will skip if the genre ID given is wrong.
+	public List<GenrePlaylistModel> addGenrePlaylist(int playlistId, List<GenreModel> genreForm) {
+		List<GenrePlaylistModel> result = new ArrayList<>();
+		for (int i = 0; i < genreForm.size(); i++) {
+			if (genreRepository.existsById(genreForm.get(i).getGenreId())) {
+				genrePlaylistRepository.insertNewGenrePlaylist(playlistId, genreForm.get(i).getGenreId());
+				result.add(new GenrePlaylistModel(new PlaylistGenreCompKey(playlistId, genreForm.get(i).getGenreId()),
+						genreForm.get(i)));
+			}
+		}
+		return result;
+	}
+
+	// ▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬
+	// DB-V6 OK!
+	// NOTE | Purge all genres from either track or playlist.
+	public void purgeGenreTrack(int trackId) {
+		genresTracksRepository.deleteGenreTrack(trackId);
+	}
+
+	public void purgeGenrePlaylist(int playlistId) {
+		genrePlaylistRepository.deleteGenrePlaylist(playlistId);
+	}
 
 	// ListGenreListByPage
 	public Page<GenreModel> listGenreListByPage(int page, int size, String searchContent) {
@@ -151,16 +194,16 @@ public class GenreController {
 	}
 
 	// Add genre into playlist
-	public List<GenrePlaylistModel> addPlaylistGenre(int playlistId, List<GenreModel> incomingGenreList) {
+	public List<GenrePlaylistModel> addPlaylistGenre(int playlistId, List<GenreModel> genreForm) {
 		List<GenreModel> existingGenre = genreRepository.fineGenreByPlaylistId(playlistId);
 		List<GenrePlaylistModel> genreList = new ArrayList<>();
-		for (int i = 0; i < incomingGenreList.size(); i++) {
-			if (!existingGenre.contains(incomingGenreList.get(i))) {
+		for (int i = 0; i < genreForm.size(); i++) {
+			if (!existingGenre.contains(genreForm.get(i))) {
 				GenrePlaylistModel playlistGenre = new GenrePlaylistModel();
-				playlistGenre.setId(new PlaylistGenreCompKey(playlistId, incomingGenreList.get(i).getGenreId()));
+				playlistGenre.setId(new PlaylistGenreCompKey(playlistId, genreForm.get(i).getGenreId()));
 				genreList.add(playlistGenre);
 				try {
-					playlistGenreRepository.save(playlistGenre);
+					genrePlaylistRepository.save(playlistGenre);
 				} catch (Exception exc) {
 					System.out.println("[ WARN ] Genre ID is invlid.");
 				}

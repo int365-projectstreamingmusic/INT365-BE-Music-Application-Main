@@ -21,4 +21,18 @@ public interface GenresTracksRepository extends JpaRepository<GenresTracksModel,
 	@Modifying
 	@Query(nativeQuery = true, value = "INSERT INTO genre_tracks VALUES(:trackId,:genreId)")
 	void insertNewGenreTrack(int trackId, int genreId);
+	
+	@Query(nativeQuery = true, value = "SELECT EXISTS(SELECT * FROM genre_tracks WHERE track_id = :trackId)")
+	int existsByTrackId(int trackId);
+
+	@Transactional
+	@Modifying
+	@Query(nativeQuery = true, value = "DELETE FROM genre_tracks WHERE track_id = :trackId")
+	void deleteGenreTrack(int trackId);
+
+	@Transactional
+	@Modifying
+	@Query(nativeQuery = true, value = "DELETE FROM genre_tracks WHERE track_id = :trackId AND genre_id = :genreid")
+	void deleteGenreTrack(int trackId, int genreid);
+
 }

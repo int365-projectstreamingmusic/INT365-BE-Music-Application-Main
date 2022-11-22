@@ -44,10 +44,11 @@ public class ExceptionResponseModel {
 		SHOP_THIS_IS_YOUR_PRODUCT(6005), // What is the reason you buy an item that you are currently selling.
 
 		// MINIO SERVER
-		MINIO_BUCKET_UNREACHABLE(7001), // Minio bucket is not reachable.
-		MINIO_OBJECT_UNREACHABLE(7002), // Minio object is unreachable.
-		MINIO_OBJECT_INVALID(7003), // What they have and what we need are not the same.
-		MINIO_OBJECT_FORMAT_NOT_SUPPORT(7004),
+		MINIO_BUCKET_UNREACHABLE(1001), // Minio bucket is not reachable.
+		MINIO_OBJECT_UNREACHABLE(1002), // Minio object is unreachable.
+		MINIO_OBJECT_INVALID(1003), // What they have and what we need are not the same.
+		MINIO_OBJECT_FORMAT_NOT_SUPPORT(1004),
+		MINIO_OBJECT_DOES_NOT_EXIST(1005),
 
 		// User
 

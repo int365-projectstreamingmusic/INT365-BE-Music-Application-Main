@@ -224,6 +224,7 @@ public class CommentsController {
 	// DB-V6 OK!
 	// Delete track comment
 	// NOTE : By user
+	// EXCEPTION | 40001 | BROWSE_NO_RECORD_EXISTS
 	public String deleteTrackComment(int commentId, HttpServletRequest request) {
 		// General
 		UserAccountModel owner = generalFunctionController.getUserAccount(request);
@@ -250,6 +251,7 @@ public class CommentsController {
 	// DB-V6 OK!
 	// Delete playlist comment
 	// NOTE : By user
+	// EXCEPTION | 40001 | BROWSE_NO_RECORD_EXISTS
 	public String deletePlaylistComment(int commentId, HttpServletRequest request) {
 		// General
 		UserAccountModel owner = generalFunctionController.getUserAccount(request);

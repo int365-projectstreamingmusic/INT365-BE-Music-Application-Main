@@ -1,3 +1,4 @@
+
 package com.application.entities.models;
 
 import javax.persistence.Column;
@@ -6,7 +7,6 @@ import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
-import javax.persistence.Transient;
 
 import com.application.entities.copmskeys.MoodPlaylistCompKey;
 
@@ -28,12 +28,7 @@ public class MoodPlaylistModel {
 	private int ratio;
 
 	@ManyToOne
-	@Transient
-	@JoinColumn(name = "mood_id", referencedColumnName = "mood_id")
+	@JoinColumn(name = "mood_id", referencedColumnName = "id", updatable = false, insertable = false)
 	private MoodModel mood;
 
-	@ManyToOne
-	@Transient
-	@JoinColumn(name = "playlist_id", referencedColumnName = "playlist_id")
-	private PlaylistModel playlist;
 }

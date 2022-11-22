@@ -81,27 +81,27 @@ public class ReportController {
 	public Page<ReportGroupModel> getReportList(int page, int pageSize, String searchKey, int reportType,
 			boolean isSolved) {
 		Page<ReportGroupModel> result;
-		result = reportGroupRepository.listReportGroup(getPageRequest(page, pageSize), searchKey, reportType, isSolved);
+		Pageable pageRequest = getPageRequest(page, pageSize);
+		result = reportGroupRepository.listReportGroup(pageRequest, searchKey, reportType, isSolved);
 		if (result.getTotalElements() <= 0) {
 			throw new ExceptionFoundation(EXCEPTION_CODES.BROWSE_NO_RECORD_EXISTS, HttpStatus.NOT_FOUND,
 					"[ BROWSE_NO_RECORD_EXISTS ] There is no report of this search or type that needs to be handled for a moment..");
 		}
-		List<ReportGroupModel> reportlLst = new ArrayList<>();
+		List<ReportGroupModel> reportList = new ArrayList<>();
 		for (int i = 0; i < result.getContent().size(); i++) {
 			ReportGroupModel current = result.getContent().get(i);
 			current.setNumberOfReport(result.getContent().get(i).getReports().size());
-			// current.setReports(null);
-
 			switch (current.getType().getId()) {
 			case 1001: {
 				TracksModel track = tracksRepository.findById(current.getTarget()).orElse(null);
 				current.setTrack(track);
 				current.setNote(current.getTrack() == null ? "This track is no longer exist. " : "");
-
 				if (track != null) {
 					current.setReportedReason(
 							reportGenreRepository.listGenreReported(reportType, track.getId()).toString());
-					reportlLst.add(current);
+					reportList.add(current);
+				} else if (isSolved) {
+					reportList.add(current);
 				}
 				break;
 			}
@@ -109,9 +109,11 @@ public class ReportController {
 				current.setCommentTrack(commentTrackRepository.findById(current.getTarget()).orElse(null));
 				current.setNote(current.getCommentTrack() == null ? "This comment is no longer exist. " : "");
 				if (current.getCommentTrack() != null || current.getCommentPlaylist() != null) {
-					reportlLst.add(current);
+					reportList.add(current);
 					current.setReportedReason(reportGenreRepository
 							.listGenreReported(reportType, current.getCommentTrack().getId()).toString());
+				} else if (isSolved) {
+					reportList.add(current);
 				}
 				break;
 			}
@@ -121,14 +123,17 @@ public class ReportController {
 				if (current.getCommentTrack() != null || current.getCommentPlaylist() != null) {
 					current.setReportedReason(reportGenreRepository
 							.listGenreReported(reportType, current.getCommentPlaylist().getId()).toString());
-					reportlLst.add(current);
+					reportList.add(current);
+				} else if (isSolved) {
+					reportList.add(current);
 				}
 				break;
 			}
 			}
 
 		}
-		return new PageImpl<>(reportlLst, getPageRequest(page, pageSize), result.getTotalElements());
+		System.out.println(reportList.size() + " " + result.getTotalElements());
+		return new PageImpl<>(reportList, pageRequest, result.getTotalElements());
 	}
 
 	// ▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬
@@ -223,7 +228,7 @@ public class ReportController {
 		switch (reportGroup.getType().getId()) {
 		// Delete Track
 		case 1001: {
-			message = trackController.deleteTrack(reportGroupId, reason, staff);
+			message = trackController.deleteTrack(reportGroup.getTarget(), reason, staff);
 			break;
 		}
 		// Delete Track Comment

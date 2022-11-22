@@ -19,6 +19,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.application.entities.copmskeys.PlaylistTrackListCompkey;
+import com.application.entities.models.MoodPlaylistModel;
 import com.application.entities.models.PlayTrackStatusModel;
 import com.application.entities.models.PlaylistModel;
 import com.application.entities.models.PlaylistTrackListModel;
@@ -28,6 +29,7 @@ import com.application.entities.submittionforms.PlaylistForm;
 import com.application.entities.submittionforms.PlaylistOutput;
 import com.application.exceptons.ExceptionFoundation;
 import com.application.exceptons.ExceptionResponseModel.EXCEPTION_CODES;
+import com.application.repositories.MoodPlaylistRepository;
 import com.application.repositories.PlayTrackStatusRepository;
 import com.application.repositories.PlaylistRepository;
 import com.application.repositories.PlaylistTrackListRepository;
@@ -50,6 +52,9 @@ public class PlaylistController {
 	private TracksRepository tracksRepository;
 
 	@Autowired
+	private MoodPlaylistRepository moodPlaylistRepository;
+
+	@Autowired
 	private TrackController trackController;
 	@Autowired
 	private GeneralFunctionController generalFunctionController;
@@ -70,8 +75,103 @@ public class PlaylistController {
 	public String defaultPlaylistImage;
 
 	// ▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬
-	// DB-V5 OK!
+	// DB-V5.1 OK!
+	// EditMyPlaylist
+	public PlaylistModel editPlaylist(PlaylistForm form, MultipartFile image, HttpServletRequest request) {
+		// General
+		UserAccountModel owner = generalFunctionController.getUserAccount(request);
+		PlaylistModel target = playlistRepository.findById(form.getId())
+				.orElseThrow(() -> new ExceptionFoundation(EXCEPTION_CODES.BROWSE_NO_RECORD_EXISTS,
+						HttpStatus.NOT_FOUND,
+						"[ BROWSE_NO_RECORD_EXISTS ] The playlist with the ID " + form.getId() + " does not exist."));
+		generalFunctionController.checkOwnerShipForRecord(owner.getAccountId(),
+				target.getUserAccountModel().getAccountId());
+
+		// Check each playlist field.
+		if (form.getPlaylistName() != "" && validatorServices.validatePlaylistName(form.getPlaylistName())) {
+			target.setPlaylistName(form.getPlaylistName());
+		}
+		if (form.getPlaylistDesc() != "") {
+			target.setPlaylistDesc(form.getPlaylistDesc());
+		}
+
+		// Edit playlist mood
+		if (form.getMoods() != null) {
+			moodController.purgeMoodPlaylist(target.getId());
+			moodController.addMoodPlaylist(target.getId(), form.getMoods());
+		}
+
+		// Edit playlist genre
+		if (form.getGenres() != null) {
+			genreController.purgeGenrePlaylist(target.getId());
+			genreController.addGenrePlaylist(target.getId(), form.getGenres());
+		}
+
+		// Update image if available.
+		if (image != null && !image.isEmpty()) {
+			if (fileLinkRelController.isExistsInRecord(target.getThumbnail())
+					&& !target.getThumbnail().equals(defaultPlaylistImage)) {
+				fileLinkRelController.deleteTargetFileByName(target.getThumbnail());
+			}
+			playlistRepository.updatePlaylistThumbnail(form.getId(),
+					fileLinkRelController.insertNewTrackObjectLinkRel(image, 301, target.getId()));
+		}
+		target = playlistRepository.save(target);
+		target = playlistRepository.findById(target.getId()).orElse(target);
+		return target;
+	}
+
+	// ▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬
+	// DB-V5.1 OK!
+	// EditMyPlaylist
+	public PlaylistModel editMyPlaylist(PlaylistForm form, MultipartFile image, HttpServletRequest request) {
+		// General
+		UserAccountModel createdBy = generalFunctionController.getUserAccount(request);
+		PlaylistModel target = playlistRepository.findById(form.getId())
+				.orElseThrow(() -> new ExceptionFoundation(EXCEPTION_CODES.BROWSE_NO_RECORD_EXISTS,
+						HttpStatus.NOT_FOUND,
+						"[ BROWSE_NO_RECORD_EXISTS ] The playlist with the ID " + form.getId() + " does not exist."));
+		generalFunctionController.checkOwnerShipForRecord(createdBy.getAccountId(),
+				target.getUserAccountModel().getAccountId());
+
+		// Check each playlist field.
+		if (form.getPlaylistName() != "" && validatorServices.validatePlaylistName(form.getPlaylistName())) {
+			target.setPlaylistName(form.getPlaylistName());
+		}
+		if (form.getPlaylistDesc() != "") {
+			target.setPlaylistDesc(form.getPlaylistDesc());
+		}
+
+		// Edit playlist mood
+		if (form.getMoods() != null) {
+			moodController.purgeMoodPlaylist(target.getId());
+			target.setMoods(moodController.addMoodPlaylist(target.getId(), form.getMoods()));
+		}
+
+		// Edit playlist genre
+		if (form.getGenres() != null) {
+			genreController.purgeGenrePlaylist(target.getId());
+			target.setGenres(genreController.addGenrePlaylist(target.getId(), form.getGenres()));
+		}
+
+		// Update image if available.
+		if (image != null && !image.isEmpty()) {
+			if (fileLinkRelController.isExistsInRecord(target.getThumbnail())
+					&& !target.getThumbnail().equals(defaultPlaylistImage)) {
+				fileLinkRelController.deleteTargetFileByName(target.getThumbnail());
+			}
+			playlistRepository.updatePlaylistThumbnail(form.getId(),
+					fileLinkRelController.insertNewTrackObjectLinkRel(image, 301, target.getId()));
+		}
+		target = playlistRepository.save(target);
+		target = playlistRepository.findById(target.getId()).orElse(target);
+		return target;
+	}
+
+	// ▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬
+	// DB-V6 OK!
 	// ListAllPlaylist
+	// EXCEPTION | 40001 | BROWSE_NO_RECORD_EXISTS
 	public Page<PlaylistModel> listAllPlaylist(int page, int pageSize, String searchContent) {
 		if (page < 0) {
 			page = 0;
@@ -92,6 +192,7 @@ public class PlaylistController {
 	// ▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬
 	// DB-V5 OK!
 	// ListLatestPlaylist
+	// EXCEPTION | 40001 | BROWSE_NO_RECORD_EXISTS
 	public List<PlaylistModel> listLatestPlaylist(int numberOfPlaylist) {
 		if (numberOfPlaylist > maxPlaylistPerPage) {
 			numberOfPlaylist = maxPlaylistPerPage;
@@ -108,6 +209,7 @@ public class PlaylistController {
 	// ▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬
 	// DB-V5.3 OK!
 	// GetPlaylistByID
+	// EXCEPTION | 40001 | BROWSE_NO_RECORD_EXISTS
 	public PlaylistOutput getPlaylistById(int id, int page, int pageSize, String searchContent,
 			HttpServletRequest request) {
 
@@ -131,7 +233,7 @@ public class PlaylistController {
 					outputTrack.add(current);
 				} else {
 					current.setTrackFile(null);
-					current.setTrackThumbnail("201-TRACK-NOT-AVAILABLE.png");
+					current.setTrackThumbnail(defaultPlaylistImage);
 					current.setTrackName("NOT AVAILABLE");
 					current.setTrackDesc("This track is not available in public.");
 					outputTrack.add(current);
@@ -197,7 +299,7 @@ public class PlaylistController {
 			newPlaylist.setGenres(genreController.addPlaylistGenre(newPlaylist.getId(), form.getGenres()));
 		}
 		if (form.getMoods() != null && !(form.getMoods().size() <= 0)) {
-			newPlaylist.setMoods(moodController.addMoodToPlaylist(newPlaylist.getId(), form.getMoods()));
+			newPlaylist.setMoods(moodController.addMoodPlaylist(newPlaylist.getId(), form.getMoods()));
 		}
 		if (form.isAutoAddMusic()) {
 
@@ -209,37 +311,7 @@ public class PlaylistController {
 			newPlaylist.setThumbnail(playlistThumbnailFileName);
 			playlistRepository.updatePlaylistThumbnail(newPlaylist.getId(), playlistThumbnailFileName);
 		}
-		return newPlaylist;
-	}
-
-	// ▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬
-	// DB-V5.1 OK!
-	// EditMyPlaylist
-	public PlaylistModel editMyPlaylist(PlaylistForm form, MultipartFile image, HttpServletRequest request) {
-		UserAccountModel createdBy = generalFunctionController.getUserAccount(request);
-		PlaylistModel target = playlistRepository.findById(form.getId())
-				.orElseThrow(() -> new ExceptionFoundation(EXCEPTION_CODES.BROWSE_NO_RECORD_EXISTS,
-						HttpStatus.NOT_FOUND,
-						"[ BROWSE_NO_RECORD_EXISTS ] The playlist with the ID " + form.getId() + " does not exist."));
-		generalFunctionController.checkOwnerShipForRecord(createdBy.getAccountId(),
-				target.getUserAccountModel().getAccountId());
-		if (form.getPlaylistName() != "" && validatorServices.validatePlaylistName(form.getPlaylistName())) {
-			target.setPlaylistName(form.getPlaylistName());
-		}
-		if (form.getPlaylistDesc() != "") {
-			target.setPlaylistDesc(form.getPlaylistDesc());
-		}
-		target = playlistRepository.save(target);
-
-		if (image != null) {
-			if (fileLinkRelController.isExistsInRecord(target.getThumbnail())
-					&& !target.getThumbnail().equals(defaultPlaylistImage)) {
-				fileLinkRelController.deleteTargetFileByName(target.getThumbnail());
-			}
-			playlistRepository.updatePlaylistThumbnail(form.getId(),
-					fileLinkRelController.insertNewTrackObjectLinkRel(image, 301, target.getId()));
-		}
-		return target;
+		return playlistRepository.findById(newPlaylist.getId()).orElse(newPlaylist);
 	}
 
 	// ▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬
