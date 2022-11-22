@@ -31,7 +31,6 @@ import com.application.repositories.ReportGroupRepository;
 import com.application.repositories.ReportTypeRepository;
 import com.application.repositories.ReportsRepository;
 import com.application.repositories.TracksRepository;
-import com.application.repositories.UserAccountRepository;
 import com.application.services.GeneralFunctionController;
 
 @Service
@@ -50,8 +49,6 @@ public class ReportController {
 	private CommentPlaylistRepository commentPlaylistRepository;
 	@Autowired
 	private CommentTrackRepository commentTrackRepository;
-	@Autowired
-	private UserAccountRepository userAccountRepository;
 
 	@Autowired
 	private ActionHistoryController actionHistoryController;
@@ -77,27 +74,36 @@ public class ReportController {
 		for (int i = 0; i < result.getContent().size(); i++) {
 			ReportGroupModel current = result.getContent().get(i);
 			current.setNumberOfReport(result.getContent().get(i).getReports().size());
-			current.setReports(null);
-			reportlLst.add(current);
+			//current.setReports(null);
 
 			switch (current.getType().getId()) {
 			case 1001: {
 				TracksModel track = tracksRepository.findById(current.getTarget()).orElse(null);
 				current.setTrack(track);
 				current.setNote(current.getTrack() == null ? "This track is no longer exist. " : "");
+				if (track != null) {
+					reportlLst.add(current);
+				}
 				break;
 			}
 			case 2001: {
 				current.setCommentTrack(commentTrackRepository.findById(current.getTarget()).orElse(null));
 				current.setNote(current.getCommentTrack() == null ? "This comment is no longer exist. " : "");
+				if (current.getCommentTrack() != null || current.getCommentPlaylist() != null) {
+					reportlLst.add(current);
+				}
 				break;
 			}
 			case 2002: {
 				current.setCommentPlaylist(commentPlaylistRepository.findById(current.getTarget()).orElse(null));
 				current.setNote(current.getCommentPlaylist() == null ? "This comment is no longer exist. " : "");
+				if (current.getCommentTrack() != null || current.getCommentPlaylist() != null) {
+					reportlLst.add(current);
+				}
 				break;
 			}
 			}
+
 		}
 		return new PageImpl<>(reportlLst, getPageRequest(page, pageSize), result.getTotalElements());
 	}
