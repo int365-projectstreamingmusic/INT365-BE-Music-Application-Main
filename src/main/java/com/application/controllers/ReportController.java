@@ -93,9 +93,10 @@ public class ReportController {
 				TracksModel track = tracksRepository.findById(current.getTarget()).orElse(null);
 				current.setTrack(track);
 				current.setNote(current.getTrack() == null ? "This track is no longer exist. " : "");
-				current.setReportedReason(
-						reportGenreRepository.listGenreReported(reportType, track.getId()).toString());
+
 				if (track != null) {
+					current.setReportedReason(
+							reportGenreRepository.listGenreReported(reportType, track.getId()).toString());
 					reportlLst.add(current);
 				}
 				break;
@@ -103,19 +104,19 @@ public class ReportController {
 			case 2001: {
 				current.setCommentTrack(commentTrackRepository.findById(current.getTarget()).orElse(null));
 				current.setNote(current.getCommentTrack() == null ? "This comment is no longer exist. " : "");
-				current.setReportedReason(reportGenreRepository
-						.listGenreReported(reportType, current.getCommentTrack().getId()).toString());
 				if (current.getCommentTrack() != null || current.getCommentPlaylist() != null) {
 					reportlLst.add(current);
+					current.setReportedReason(reportGenreRepository
+							.listGenreReported(reportType, current.getCommentTrack().getId()).toString());
 				}
 				break;
 			}
 			case 2002: {
 				current.setCommentPlaylist(commentPlaylistRepository.findById(current.getTarget()).orElse(null));
 				current.setNote(current.getCommentPlaylist() == null ? "This comment is no longer exist. " : "");
-				current.setReportedReason(reportGenreRepository
-						.listGenreReported(reportType, current.getCommentPlaylist().getId()).toString());
 				if (current.getCommentTrack() != null || current.getCommentPlaylist() != null) {
+					current.setReportedReason(reportGenreRepository
+							.listGenreReported(reportType, current.getCommentPlaylist().getId()).toString());
 					reportlLst.add(current);
 				}
 				break;
