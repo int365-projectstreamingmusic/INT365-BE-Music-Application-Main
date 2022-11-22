@@ -56,6 +56,10 @@ public class ReportController {
 
 	@Autowired
 	private ActionHistoryController actionHistoryController;
+	@Autowired
+	private TrackController trackController;
+	@Autowired
+	private CommentsController commentsController;
 
 	@Autowired
 	private GeneralFunctionController generalFunctionController;
@@ -205,26 +209,45 @@ public class ReportController {
 	// NOTE | Keeps history when resolve status is changed.
 	// NOTE | Once resolved, there will be no turning back.
 	// EXCEPTION | 40001 | BROWSE_NO_RECORD_EXISTS
-	public boolean markResolved(int reportGroupId, HttpServletRequest request) {
+	public String markResolved(int reportGroupId, String reason, HttpServletRequest request) {
 		UserAccountModel staff = generalFunctionController.getUserAccount(request);
 		ReportGroupModel reportGroup = reportGroupRepository.findById(reportGroupId)
 				.orElseThrow(() -> new ExceptionFoundation(EXCEPTION_CODES.BROWSE_NO_RECORD_EXISTS,
 						HttpStatus.NOT_FOUND, "[ BROWSE_NO_RECORD_EXISTS ]"));
 		if (reportGroup.isSolved()) {
-			reportGroupRepository.updateIsSolved(reportGroupId, false);
-			// Save history
-			actionHistoryController.addNewRecord(new ActionForm(staff, reportGroup.getId(), 502,
-					"Staff or admin ID " + staff.getAccountId() + " or known as \"" + staff.getUsername()
-							+ "\"removed solved status from report group ID " + reportGroup.getId() + "."));
-			return false;
-		} else {
-			reportGroupRepository.updateIsSolved(reportGroupId, true);
-			// Save history
-			actionHistoryController.addNewRecord(new ActionForm(staff, reportGroup.getId(), 501,
-					"Staff or admin ID " + staff.getAccountId() + " or known as \"" + staff.getUsername()
-							+ "\" marked report group id [ " + reportGroup.getId() + " ] as solved."));
-			return true;
+			throw new ExceptionFoundation(EXCEPTION_CODES.REPORT_INVALID_STATUS, HttpStatus.I_AM_A_TEAPOT,
+					"[ REPORT_INVALID_STATUS ] This report has beel solved. An action can't be undone.");
 		}
+
+		String message = "";
+		switch (reportGroup.getType().getId()) {
+		// Delete Track
+		case 1001: {
+			message = trackController.deleteTrack(reportGroupId, reason, staff);
+			break;
+		}
+		// Delete Track Comment
+		case 2001: {
+			message = commentsController.deleteComment(reportGroup.getTarget(), reportGroup.getType().getId(), reason,
+					staff);
+			break;
+		}
+		// Delete Playlist Comment
+		case 2002: {
+			message = commentsController.deleteComment(reportGroup.getTarget(), reportGroup.getType().getId(), reason,
+					staff);
+			break;
+		}
+		}
+
+		reportGroupRepository.updateIsSolved(reportGroupId,
+				new Timestamp(Calendar.getInstance().getTimeInMillis()).toString(), true);
+		// Save history
+		actionHistoryController.addNewRecord(new ActionForm(staff, reportGroup.getId(), 501,
+				staff.getUsername() + " marked report group id [ " + reportGroup.getId()
+						+ " ] as solved and the target is deleted."
+						+ (reason.length() <= 0 ? "" : " Reason : " + reason)));
+		return message;
 	}
 
 	// ▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬

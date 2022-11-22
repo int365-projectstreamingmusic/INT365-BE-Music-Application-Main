@@ -142,10 +142,11 @@ public class A4ManagementApis {
 	// DB-V6 OK!
 	// REPORT : Solve Report
 	@PutMapping("report/solve")
-	public ResponseEntity<String> solveReport(@RequestParam(required = true) int id, HttpServletRequest request) {
+	public ResponseEntity<String> solveReport(@RequestParam(required = true) int id,
+			@RequestParam(defaultValue = "") String reason, HttpServletRequest request) {
 		URI uri = URI
 				.create(ServletUriComponentsBuilder.fromCurrentContextPath().path(mapping + "report/solve").toString());
-		return ResponseEntity.created(uri).body("Is solved, now : " + reportController.markResolved(id, request));
+		return ResponseEntity.created(uri).body(reportController.markResolved(id, reason, request));
 	}
 
 	// ▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬

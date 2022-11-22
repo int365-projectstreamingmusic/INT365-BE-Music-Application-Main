@@ -30,8 +30,8 @@ public class FileLinkRelController {
 		FileLinkRefModel newFileRecord = new FileLinkRefModel();
 
 		newFileRecord.setFileType(fileTypeRepository.findById(typeId)
-				.orElseThrow(() -> new ExceptionFoundation(EXCEPTION_CODES.SEARCH_NOT_FOUND, HttpStatus.NOT_FOUND,
-						"[ FileLinkRelController ] A file type with this ID does not exists.")));
+				.orElseThrow(() -> new ExceptionFoundation(EXCEPTION_CODES.FILE_INVALID_TYPE, HttpStatus.I_AM_A_TEAPOT,
+						"[ FILE_INVALID_TYPE ] A file type with this ID does not exists.")));
 		newFileRecord.setFileId(minioStorageService.uploadImageToStorage(multipartFile, typeId + "-",
 				newFileRecord.getFileType().getPathRel()));
 		newFileRecord.setTargetRef(recordRel);
@@ -40,8 +40,24 @@ public class FileLinkRelController {
 	}
 
 	// ▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬
+	// DB-V6 OK!
+	// Upload track to storage
+	public String uploadNewTrack(MultipartFile trackFile, int trackId) {
+		String fileName = minioStorageService.uploadTrackToStorage(trackFile, "tracks/musics/");
+		FileLinkRefModel newFile = new FileLinkRefModel();
+		newFile.setFileType(fileTypeRepository.findById(1001)
+				.orElseThrow(() -> new ExceptionFoundation(EXCEPTION_CODES.FILE_INVALID_TYPE, HttpStatus.I_AM_A_TEAPOT,
+						"[ FILE_INVALID_TYPE ] A file type with this ID does not exists.")));
+		newFile.setFileId(fileName);
+		newFile.setTargetRef(trackId);
+		fileLinkRefRepository.save(newFile);
+		return fileName;
+	}
+	
+
+	// ▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬
 	// DB-V5 OK!
-	// Delete track image.
+	// Delete file by its name.
 	public void deleteTargetFileByName(String fileName) {
 		FileLinkRefModel target = fileLinkRefRepository.findById(fileName).orElseThrow(() -> new ExceptionFoundation(
 				EXCEPTION_CODES.SEARCH_NOT_FOUND, HttpStatus.NOT_FOUND,
@@ -49,6 +65,13 @@ public class FileLinkRelController {
 		String destination = target.getFileType().getPathRel() + fileName;
 		minioStorageService.DeleteObjectFromMinIoByPathAndName(destination);
 		fileLinkRefRepository.delete(target);
+	}
+
+	// ▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬
+	// DB-V6 OK!
+	// Upload track to storage
+	public String deleteTrack(String fileName) {
+		return "";
 	}
 
 	// ▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬
