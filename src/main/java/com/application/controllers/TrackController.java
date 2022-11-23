@@ -288,7 +288,7 @@ public class TrackController {
 			}
 			String trackThumbnailFileName = fileLinkRelController.insertNewTrackObjectLinkRel(image, 201,
 					target.getId());
-			target.setTrackThumbnail(trackThumbnailFileName);
+			tracksRepository.updateTrackThumbnail(target.getId(), trackThumbnailFileName);
 		}
 		tracksRepository.save(target);
 		return tracksRepository.findById(target.getId()).orElse(null);
