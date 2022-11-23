@@ -181,8 +181,8 @@ public class TrackStatisticController {
 			int totalCount = 0;
 			for (int i = 0; i <= numberOfWeek; i++) {
 				Random random = new Random();
-				int randomizedNumberOfview = (int) random.nextInt(9950) + 10;
-				int randomizedNumberOfFavorite = (int) random.nextInt(150) + 10;
+				int randomizedNumberOfview = (int) random.nextInt(90) + 10;
+				int randomizedNumberOfFavorite = (int) random.nextInt(10) + 10;
 
 				long currentMili = today.getTime() + (TIME_DIF_DAY * -i);
 				Date currentDate = new Date(currentMili);
