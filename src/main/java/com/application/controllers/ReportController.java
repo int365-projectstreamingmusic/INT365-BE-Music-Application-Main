@@ -96,36 +96,31 @@ public class ReportController {
 				TracksModel track = tracksRepository.findById(current.getTarget()).orElse(null);
 				current.setTrack(track);
 				current.setNote(current.getTrack() == null ? "This track is no longer exist. " : "");
+				reportList.add(current);
 				if (track != null) {
 					current.setReportedReason(
 							reportGenreRepository.listGenreReported(reportType, track.getId()).toString());
-					reportList.add(current);
-				} else if (isSolved) {
-					reportList.add(current);
+
 				}
 				break;
 			}
 			case 2001: {
 				current.setCommentTrack(commentTrackRepository.findById(current.getTarget()).orElse(null));
 				current.setNote(current.getCommentTrack() == null ? "This comment is no longer exist. " : "");
+				reportList.add(current);
 				if (current.getCommentTrack() != null || current.getCommentPlaylist() != null) {
-					reportList.add(current);
 					current.setReportedReason(reportGenreRepository
 							.listGenreReported(reportType, current.getCommentTrack().getId()).toString());
-				} else if (isSolved) {
-					reportList.add(current);
 				}
 				break;
 			}
 			case 2002: {
 				current.setCommentPlaylist(commentPlaylistRepository.findById(current.getTarget()).orElse(null));
 				current.setNote(current.getCommentPlaylist() == null ? "This comment is no longer exist. " : "");
+				reportList.add(current);
 				if (current.getCommentTrack() != null || current.getCommentPlaylist() != null) {
 					current.setReportedReason(reportGenreRepository
 							.listGenreReported(reportType, current.getCommentPlaylist().getId()).toString());
-					reportList.add(current);
-				} else if (isSolved) {
-					reportList.add(current);
 				}
 				break;
 			}
@@ -225,24 +220,28 @@ public class ReportController {
 		}
 
 		String message = "";
-		switch (reportGroup.getType().getId()) {
-		// Delete Track
-		case 1001: {
-			message = trackController.deleteTrack(reportGroup.getTarget(), reason, staff);
-			break;
-		}
-		// Delete Track Comment
-		case 2001: {
-			message = commentsController.deleteComment(reportGroup.getTarget(), reportGroup.getType().getId(), reason,
-					staff);
-			break;
-		}
-		// Delete Playlist Comment
-		case 2002: {
-			message = commentsController.deleteComment(reportGroup.getTarget(), reportGroup.getType().getId(), reason,
-					staff);
-			break;
-		}
+		try {
+			switch (reportGroup.getType().getId()) {
+			// Delete Track
+			case 1001: {
+				message = trackController.deleteTrack(reportGroup.getTarget(), reason, staff);
+				break;
+			}
+			// Delete Track Comment
+			case 2001: {
+				message = commentsController.deleteComment(reportGroup.getTarget(), reportGroup.getType().getId(),
+						reason, staff);
+				break;
+			}
+			// Delete Playlist Comment
+			case 2002: {
+				message = commentsController.deleteComment(reportGroup.getTarget(), reportGroup.getType().getId(),
+						reason, staff);
+				break;
+			}
+			}
+		} catch (Exception exc) {
+			message = "Resolved with a target track or comment is already long gone.";
 		}
 
 		reportGroupRepository.updateIsSolved(reportGroupId,

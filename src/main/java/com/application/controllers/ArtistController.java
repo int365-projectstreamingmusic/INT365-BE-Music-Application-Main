@@ -288,4 +288,35 @@ public class ArtistController {
 		}
 	}
 
+	// TEMP
+	// ▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬
+	// DB-V6 OK!
+	// Rename artist
+	public ArtistsModel changeArtists(int currentArtistId, int trackId, String newName, UserAccountModel owner) {
+		if (artistRepository.existsByArtistName(newName) == 1) {
+			artistTracksRepository.deleteById(new ArtistTrackCompKey(trackId, currentArtistId));
+			ArtistsModel target = artistRepository.getArtistByName(newName);
+			artistTracksRepository.insertArtistTrack(trackId, target.getArtistId(), "");
+			return target;
+		} else {
+			return expressArtistTrack(currentArtistId, trackId, newName, owner);
+		}
+
+	}
+
+	// TEMP
+	// ▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬
+	// DB-V6 OK!
+	// Express Artists
+	public ArtistsModel expressArtistTrack(int currentArtistId, int trackId, String newName, UserAccountModel owner) {
+		ArtistsModel newArtist = new ArtistsModel();
+		newArtist.setArtistBio("");
+		newArtist.setArtistName(newName);
+		newArtist.setAddedBy(owner.getAccountId());
+		newArtist = artistRepository.save(newArtist);
+		artistTracksRepository.deleteById(new ArtistTrackCompKey(trackId, currentArtistId));
+		artistTracksRepository.insertArtistTrack(trackId, newArtist.getArtistId(), "");
+		return newArtist;
+	}
+
 }

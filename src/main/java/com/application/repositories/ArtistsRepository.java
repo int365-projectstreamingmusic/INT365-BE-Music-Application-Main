@@ -47,4 +47,12 @@ public interface ArtistsRepository extends JpaRepository<ArtistsModel, Integer> 
 	@Query(nativeQuery = true, value = "UPDATE artists SET artist_name = :newName, artist_bio = :newBio WHERE artist_id = :artistId")
 	void updateArtistDetail(int artistId, String newName, String newBio);
 
+	@Modifying
+	@Transactional
+	@Query(nativeQuery = true, value = "UPDATE artists SER artist_name = :newName WHERE artist_id = :artistId")
+	void updateArtistName(int artistId, String newName);
+
+	@Query(nativeQuery = true, value = "SELECT EXISTS(SELECT * FROM artists WHERE artist_name = :name)")
+	int existsByArtistName(String name);
+
 }
