@@ -257,6 +257,18 @@ public class TrackController {
 			target.setTrackDesc(form.getTrackDesc());
 		}
 
+		// Check artists and rename them
+		if (form.getArtist() != null && form.getArtist().length() > 0
+				&& !form.getArtist().equals(target.getArtistTracks().get(0).getArtistsModel().getArtistName())) {
+			int currentArtistId = target.getArtistTracks().get(0).getArtistsModel().getArtistId();
+			if (target.getArtistTracks().size() > 0) {
+				artistController.changeArtists(currentArtistId, target.getId(), form.getArtist(), requestedBy);
+			} else {
+				artistController.expressArtistTrack(currentArtistId, target.getId(), form.getArtist(), requestedBy);
+			}
+
+		}
+
 		// Check and add genre.
 		if (form.getGenreList() != null) {
 			genreController.purgeGenreTrack(target.getId());
